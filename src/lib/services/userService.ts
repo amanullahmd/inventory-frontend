@@ -47,20 +47,6 @@ export class UserService {
   }
 
   /**
-   * Add dummy data for testing
-   * Requirements: 5.1, 5.5
-   */
-  static async addDummyData(): Promise<{ itemsCreated: number; message: string }> {
-    try {
-      const response = await apiClient.post<{ itemsCreated: number; message: string }>('/users/dummy-data', {});
-      return response.data;
-    } catch (error) {
-      const apiError = error as ApiError;
-      throw new Error(apiError.message || 'Failed to add dummy data');
-    }
-  }
-
-  /**
    * Get all users (admin only)
    * Requirements: 5.2
    */

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import PermissionGuard from '@/components/PermissionGuard'
 import { UserService } from '@/lib/services/userService'
 
 interface UserProfile {
@@ -34,8 +35,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [addingDummyData, setAddingDummyData] = useState(false)
-
   useEffect(() => {
     // Clear any errors on mount
     setError(null)
@@ -134,23 +133,6 @@ export default function SettingsPage() {
       setError(errorMsg)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleAddDummyData = async () => {
-    setAddingDummyData(true)
-    setError(null)
-    setSuccess(null)
-
-    try {
-      const result = await UserService.addDummyData()
-      setSuccess(`${result.message} (${result.itemsCreated} items created)`)
-    } catch (err) {
-      console.error('Error adding dummy data:', err)
-      const errorMsg = err instanceof Error ? err.message : 'Failed to add dummy data. Please try again.'
-      setError(errorMsg)
-    } finally {
-      setAddingDummyData(false)
     }
   }
 
@@ -274,27 +256,9 @@ export default function SettingsPage() {
           <div className="rounded-xl border border-border bg-card p-6 shadow-md">
             <h2 className="text-2xl font-bold text-foreground mb-6">⚡ Quick actions</h2>
             
-            <button
-              onClick={handleAddDummyData}
-              disabled={addingDummyData}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-base font-semibold text-foreground shadow-sm hover:bg-accent hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {addingDummyData ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Adding Data...
-                </>
-              ) : (
-                <>📊 Add dummy data</>
-              )}
-            </button>
-
-            <div className="rounded-lg border border-border bg-muted/50 p-4 mt-4">
+            <div className="rounded-lg border border-border bg-muted/50 p-4">
               <p className="text-base text-muted-foreground">
-                Add sample inventory data to test the system with realistic data.
+                No quick actions available at this time.
               </p>
             </div>
           </div>
@@ -319,140 +283,142 @@ export default function SettingsPage() {
 
       {/* User Management (Admin Only) */}
       {isAdmin && (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-md">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">👥 User management</h2>
-              <p className="mt-2 text-base text-muted-foreground">Create and remove users.</p>
-            </div>
-            <button
-              onClick={() => setShowUserForm(true)}
-              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
-            >
-              ➕ Add user
-            </button>
-          </div>
-
-          {/* Add User Form */}
-          {showUserForm ? (
-            <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+        <PermissionGuard permission="create_user">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-md">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">👥 User management</h2>
+                <p className="mt-2 text-base text-muted-foreground">Create and remove users.</p>
+              </div>
               <button
-                aria-label="Close"
-                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-                onClick={() => setShowUserForm(false)}
-              />
-              <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-2xl font-bold text-foreground">Create user</h3>
-                    <p className="mt-2 text-base text-muted-foreground">Add a user with branch assignment.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowUserForm(false)}
-                    className="rounded-md border border-border bg-background px-3 py-2 text-base text-foreground hover:bg-accent transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
+                onClick={() => setShowUserForm(true)}
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
+              >
+                ➕ Add user
+              </button>
+            </div>
 
-                <form onSubmit={handleAddUser} className="mt-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={newUser.name}
-                      onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                      className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={newUser.email}
-                      onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                      className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Branch Name"
-                      value={newUser.branchName}
-                      onChange={(e) => setNewUser({...newUser, branchName: e.target.value})}
-                      className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <select
-                      value={newUser.role}
-                      onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-                      className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="ROLE_USER">User</option>
-                      <option value="ROLE_ADMIN">Admin</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            {/* Add User Form */}
+            {showUserForm ? (
+              <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+                <button
+                  aria-label="Close"
+                  className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                  onClick={() => setShowUserForm(false)}
+                />
+                <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground">Create user</h3>
+                      <p className="mt-2 text-base text-muted-foreground">Add a user with branch assignment.</p>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setShowUserForm(false)}
-                      className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-3 text-base font-semibold text-foreground shadow-sm hover:bg-accent transition-colors"
+                      className="rounded-md border border-border bg-background px-3 py-2 text-base text-foreground hover:bg-accent transition-colors"
                     >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
-                    >
-                      Create user
+                      Close
                     </button>
                   </div>
-                </form>
-              </div>
-            </div>
-          ) : null}
 
-          {/* Users Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Name</th>
-                  <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Email</th>
-                  <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Branch</th>
-                  <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Role</th>
-                  <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-card divide-y divide-border">
-                {users.length === 0 ? (
+                  <form onSubmit={handleAddUser} className="mt-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        value={newUser.name}
+                        onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                        className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                        className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Branch Name"
+                        value={newUser.branchName}
+                        onChange={(e) => setNewUser({...newUser, branchName: e.target.value})}
+                        className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <select
+                        value={newUser.role}
+                        onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                        className="rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="ROLE_USER">User</option>
+                        <option value="ROLE_ADMIN">Admin</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowUserForm(false)}
+                        className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-3 text-base font-semibold text-foreground shadow-sm hover:bg-accent transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
+                      >
+                        Create user
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Users Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted/50">
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
-                      No users yet. Create one to get started.
-                    </td>
+                    <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Name</th>
+                    <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Email</th>
+                    <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Branch</th>
+                    <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Role</th>
+                    <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Actions</th>
                   </tr>
-                ) : (
-                  users.map(user => (
-                    <tr key={user.userId} className="hover:bg-accent/40 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-base font-semibold text-foreground">{user.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{user.email}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{user.branchName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-chart-1/10 text-chart-1">
-                          {user.role?.replace('ROLE_', '') || 'User'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base">
-                        <button
-                          onClick={() => handleDeleteUser(user.userId)}
-                          className="inline-flex items-center rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-2 text-base font-semibold text-destructive hover:bg-destructive/15 transition-colors"
-                        >
-                          Delete
-                        </button>
+                </thead>
+                <tbody className="bg-card divide-y divide-border">
+                  {users.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                        No users yet. Create one to get started.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    users.map(user => (
+                      <tr key={user.userId} className="hover:bg-accent/40 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-base font-semibold text-foreground">{user.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{user.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{user.branchName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-chart-1/10 text-chart-1">
+                            {user.role?.replace('ROLE_', '') || 'User'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-base">
+                          <button
+                            onClick={() => handleDeleteUser(user.userId)}
+                            className="inline-flex items-center rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-2 text-base font-semibold text-destructive hover:bg-destructive/15 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </PermissionGuard>
       )}
     </div>
   )

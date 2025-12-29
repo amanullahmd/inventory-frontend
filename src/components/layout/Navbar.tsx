@@ -3,12 +3,14 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { usePermissions } from '@/hooks/usePermissions'
+import PermissionGuard from '@/components/PermissionGuard'
 
 export default function Navbar() {
   const { data: session } = useSession()
+  const { isAdmin } = usePermissions()
   const [isOpen, setIsOpen] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
-  const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
 
   useEffect(() => {
     const stored = window.localStorage.getItem('theme')
@@ -81,7 +83,7 @@ export default function Navbar() {
             <Link href="/stock-movements" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Movements
             </Link>
-            {isAdmin && (
+            {isAdmin() && (
               <Link href="/users" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
                 Users
               </Link>
@@ -171,7 +173,7 @@ export default function Navbar() {
               <Link href="/stock-movements" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Movements
               </Link>
-              {isAdmin && (
+              {isAdmin() && (
                 <Link href="/users" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                   Users
                 </Link>

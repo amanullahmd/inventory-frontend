@@ -1,0 +1,65 @@
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\__tests__\integration\pdf-export.integration.test.tsx[24m[0m
+[0m  [2m17:15[22m  [33mwarning[39m  'rerender' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\app\page.tsx[24m[0m
+[0m   [2m58:5[22m   [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Business\FinkLab.de\inventory_management system\frontend\src\app\page.tsx:58:5[0m
+[0m  56 |     const outOfStockItems = DUMMY_ITEMS.filter(item => item.currentStock === 0).length[0m
+[0m  57 |[0m
+[0m> 58 |     setStats({[0m
+[0m     |     ^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  59 |       totalItems,[0m
+[0m  60 |       totalValue,[0m
+[0m  61 |       lowStockItems,  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m   [2m97:31[22m  [31merror[39m  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m295:95[22m  [31merror[39m  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\app\settings\page.tsx[24m[0m
+[0m  [2m32:38[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m56:14[22m  [33mwarning[39m  'err' is defined but never used           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m72:14[22m  [33mwarning[39m  'err' is defined but never used           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\app\stock-in\page.tsx[24m[0m
+[0m  [2m22:31[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\app\stock-out\page.tsx[24m[0m
+[0m  [2m22:31[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\app\users\page.tsx[24m[0m
+[0m  [2m103:31[22m  [31merror[39m  Unexpected any. Specify a different type                                                                                                               [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m112:11[22m  [31merror[39m  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  [2m@next/next/no-html-link-for-pages[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\components\auth\LoginForm.tsx[24m[0m
+[0m  [2m37:18[22m  [33mwarning[39m  'err' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\components\layout\Navbar.tsx[24m[0m
+[0m  [2m10:31[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\lib\auth\config.ts[24m[0m
+[0m  [2m78:20[22m  [33mwarning[39m  'apiError' is defined but never used      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m94:38[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m95:32[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\lib\services\pdfExportService.test.ts[24m[0m
+[0m  [2m1:10[22m  [33mwarning[39m  'PDFExportService' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\lib\services\pdfExportService.ts[24m[0m
+[0m  [2m150:13[22m  [33mwarning[39m  'startY' is assigned a value but never used     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m161:27[22m  [31merror[39m    Unexpected any. Specify a different type        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m201:46[22m  [31merror[39m    Unexpected any. Specify a different type        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m205:11[22m  [33mwarning[39m  'pageCount' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m205:31[22m  [31merror[39m    Unexpected any. Specify a different type        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Business\FinkLab.de\inventory_management system\frontend\src\proxy.ts[24m[0m
+[0m  [2m27:37[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[31m[1m✖ 23 problems (15 errors, 8 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

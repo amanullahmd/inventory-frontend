@@ -12,14 +12,6 @@ import { ItemService } from '@/lib/services/itemService'
 import { StockService } from '@/lib/services/stockService'
 import { Item } from '@/lib/types'
 
-const DUMMY_ITEMS: Item[] = [
-  { id: '1', name: 'Laptop Pro 15"', sku: 'LP-001', unitCost: 2499.99, currentStock: 45, createdAt: '2024-01-15' },
-  { id: '2', name: 'Wireless Mouse', sku: 'WM-002', unitCost: 99.99, currentStock: 156, createdAt: '2024-01-20' },
-  { id: '3', name: 'USB-C Cable', sku: 'UC-003', unitCost: 12.99, currentStock: 8, createdAt: '2024-01-23' },
-  { id: '4', name: 'Monitor 27"', sku: 'MN-004', unitCost: 799.99, currentStock: 0, createdAt: '2024-01-26' },
-  { id: '5', name: 'Mechanical Keyboard', sku: 'MK-005', unitCost: 149.99, currentStock: 32, createdAt: '2024-01-30' },
-]
-
 export default function StockInPage() {
   const { data: session } = useSession()
   const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
@@ -39,10 +31,25 @@ export default function StockInPage() {
   ])
 
   useEffect(() => {
-    // Initialize with dummy items on mount
-    setItems(DUMMY_ITEMS)
-    setLoading(false)
-  }, [])
+    // Fetch items from backend on component mount
+    const fetchItems = async () => {
+      try {
+        setLoading(true)
+        const backendItems = await ItemService.getItems()
+        setItems(backendItems)
+      } catch (err) {
+        console.error('Failed to fetch items:', err)
+        setError('Failed to load items from server')
+        setItems([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (status === 'authenticated') {
+      fetchItems()
+    }
+  }, [status])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

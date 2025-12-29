@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import PermissionGuard from '@/components/PermissionGuard'
 import { apiClient } from '@/lib/api/client'
 
 interface User {
@@ -17,7 +18,7 @@ interface User {
   createdAt: string
 }
 
-// Fallback dummy data (only used if API fails)
+// Fallback dummy data (only used if API fails - test data only)
 const DUMMY_USERS = [
   { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', joinDate: '2024-01-15' },
   { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Manager', status: 'active', joinDate: '2024-02-20' },
@@ -173,12 +174,14 @@ export default function UsersPage() {
           <h1 className="text-4xl font-semibold tracking-tight text-foreground">Users</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage system users and their roles</p>
         </div>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
-        >
-          Create user
-        </button>
+        <PermissionGuard permission="create_user">
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
+          >
+            Create user
+          </button>
+        </PermissionGuard>
       </div>
 
       {/* Stats Cards */}
@@ -203,13 +206,14 @@ export default function UsersPage() {
 
       {/* Create User Form */}
       {showCreateForm ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-          <button
-            aria-label="Close"
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={() => setShowCreateForm(false)}
-          />
-          <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
+        <PermissionGuard permission="create_user">
+          <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+            <button
+              aria-label="Close"
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => setShowCreateForm(false)}
+            />
+            <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Create user</h2>
@@ -287,6 +291,7 @@ export default function UsersPage() {
             </form>
           </div>
         </div>
+        </PermissionGuard>
       ) : null}
 
       {/* Messages */}
