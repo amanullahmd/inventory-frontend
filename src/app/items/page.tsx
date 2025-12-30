@@ -25,6 +25,10 @@ interface Category {
 interface ItemWithCategory extends Item {
   categoryId: string
   categoryName: string
+  unit?: string
+  createdBy?: string
+  createdAt: string
+  updatedAt?: string | null
 }
 
 export default function ItemsPage() {
@@ -47,6 +51,7 @@ export default function ItemsPage() {
     description: '',
     minimumStock: '',
     maximumStock: '',
+    unit: '',
   })
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [exportLoading, setExportLoading] = useState(false)
@@ -120,6 +125,7 @@ export default function ItemsPage() {
         description: itemForm.description || undefined,
         minimumStock: itemForm.minimumStock ? parseInt(itemForm.minimumStock) : undefined,
         maximumStock: itemForm.maximumStock ? parseInt(itemForm.maximumStock) : undefined,
+        unit: itemForm.unit || undefined,
       })
 
       const categoryName = categories.find(c => c.id === itemForm.categoryId)?.name || 'Uncategorized'
@@ -140,6 +146,7 @@ export default function ItemsPage() {
         description: '',
         minimumStock: '',
         maximumStock: '',
+        unit: '',
       })
       setShowItemForm(false)
     } catch (err) {
@@ -396,6 +403,7 @@ export default function ItemsPage() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Item Name</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">SKU</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unit</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unit Price</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Stock</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Total Value</th>
@@ -409,6 +417,7 @@ export default function ItemsPage() {
                           <td className="px-6 py-4">
                             <span className="inline-flex rounded-md bg-muted/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.sku}</span>
                           </td>
+                          <td className="px-6 py-4 text-sm text-foreground">{item.unit || '-'}</td>
                           <td className="px-6 py-4 text-sm font-semibold text-foreground">${item.unitCost.toFixed(2)}</td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
@@ -563,6 +572,17 @@ export default function ItemsPage() {
                       value={itemForm.maximumStock}
                       onChange={(e) => setItemForm({ ...itemForm, maximumStock: e.target.value })}
                       placeholder="0"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Unit</label>
+                    <input
+                      type="text"
+                      value={itemForm.unit}
+                      onChange={(e) => setItemForm({ ...itemForm, unit: e.target.value })}
+                      placeholder="e.g., pcs, kg, liters"
                       className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
                     />
                   </div>

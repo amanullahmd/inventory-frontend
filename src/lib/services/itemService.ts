@@ -56,6 +56,7 @@ export class ItemService {
         minimumStock: item.minimumStock ? parseInt(String(item.minimumStock)) : undefined,
         maximumStock: item.maximumStock ? parseInt(String(item.maximumStock)) : undefined,
         reorderLevel: item.reorderLevel ? parseInt(String(item.reorderLevel)) : undefined,
+        unit: (item as any).unit || undefined,
       };
       
       const response = await apiClient.post<BackendItemStockResponse>('/items', payload);

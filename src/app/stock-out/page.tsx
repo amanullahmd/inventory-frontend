@@ -17,6 +17,8 @@ export default function StockOutPage() {
   const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
   const [items, setItems] = useState<Item[]>([])
   const [selectedItem, setSelectedItem] = useState('')
+  const [selectedBatch, setSelectedBatch] = useState('')
+  const [selectedWarehouse, setSelectedWarehouse] = useState('Main Warehouse')
   const [quantity, setQuantity] = useState('')
   const [reason, setReason] = useState('TRANSFERRED')
   const [customReason, setCustomReason] = useState('')
@@ -28,10 +30,16 @@ export default function StockOutPage() {
   const [exportLoading, setExportLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selectedDateRange, setSelectedDateRange] = useState<{ start: Date; end: Date } | null>(null)
-  const [recentTransactions, setRecentTransactions] = useState([
-    { id: 1, item: 'Laptop Pro 15"', quantity: 5, reason: 'sale', branch: 'Main Branch', date: '2024-12-13', user: 'Alice Brown' },
-    { id: 2, item: 'Wireless Mouse', quantity: 20, reason: 'damaged', branch: 'Branch B', date: '2024-12-12', user: 'Charlie Davis' },
-    { id: 3, item: 'USB-C Cable', quantity: 15, reason: 'return', branch: 'Branch C', date: '2024-12-11', user: 'Eve Wilson' },
+  const [batches, setBatches] = useState<any[]>([])
+  const [warehouses, setWarehouses] = useState<any[]>([
+    { id: '1', name: 'Main Warehouse' },
+    { id: '2', name: 'Branch A Warehouse' },
+    { id: '3', name: 'Branch B Warehouse' },
+  ])
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([
+    { id: 1, item: 'Laptop Pro 15"', quantity: 5, reason: 'sale', branch: 'Main Branch', date: '2024-12-13', user: 'Alice Brown', warehouse: 'Main Warehouse', batch: 'BATCH-001' },
+    { id: 2, item: 'Wireless Mouse', quantity: 20, reason: 'damaged', branch: 'Branch B', date: '2024-12-12', user: 'Charlie Davis', warehouse: 'Branch B Warehouse', batch: 'BATCH-002' },
+    { id: 3, item: 'USB-C Cable', quantity: 15, reason: 'return', branch: 'Branch C', date: '2024-12-11', user: 'Eve Wilson', warehouse: 'Branch C Warehouse', batch: 'BATCH-003' },
   ])
 
   useEffect(() => {
@@ -256,6 +264,45 @@ export default function StockOutPage() {
                 </select>
               </div>
 
+              {/* Warehouse Selection */}
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-2">
+                  Warehouse *
+                </label>
+                <select
+                  value={selectedWarehouse}
+                  onChange={(e) => setSelectedWarehouse(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                  required
+                >
+                  {warehouses.map(warehouse => (
+                    <option key={warehouse.id} value={warehouse.name}>
+                      {warehouse.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Batch Selection */}
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-2">
+                  Batch (Optional)
+                </label>
+                <select
+                  value={selectedBatch}
+                  onChange={(e) => setSelectedBatch(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                  disabled={!selectedItem}
+                >
+                  <option value="">Select a batch...</option>
+                  {batches.map(batch => (
+                    <option key={batch.id} value={batch.id}>
+                      {batch.batchNumber} (Exp: {batch.expiryDate})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Quantity */}
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-2">
@@ -402,6 +449,8 @@ export default function StockOutPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">Item</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">Quantity</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">Warehouse</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">Batch</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">Reason</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">Branch</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">Date</th>
@@ -417,6 +466,8 @@ export default function StockOutPage() {
                       -{tx.quantity}
                     </span>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{(tx as any).warehouse || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{(tx as any).batch || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-muted text-muted-foreground capitalize">
                       {tx.reason}

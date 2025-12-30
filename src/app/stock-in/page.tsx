@@ -17,6 +17,8 @@ export default function StockInPage() {
   const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
   const [items, setItems] = useState<Item[]>([])
   const [selectedItem, setSelectedItem] = useState('')
+  const [selectedBatch, setSelectedBatch] = useState('')
+  const [selectedWarehouse, setSelectedWarehouse] = useState('')
   const [quantity, setQuantity] = useState('')
   const [notes, setNotes] = useState('')
   const [success, setSuccess] = useState<string | null>(null)
@@ -24,10 +26,16 @@ export default function StockInPage() {
   const [exportLoading, setExportLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selectedDateRange, setSelectedDateRange] = useState<{ start: Date; end: Date } | null>(null)
+  const [batches, setBatches] = useState<any[]>([])
+  const [warehouses, setWarehouses] = useState<any[]>([
+    { id: '1', name: 'Main Warehouse' },
+    { id: '2', name: 'Branch A Warehouse' },
+    { id: '3', name: 'Branch B Warehouse' },
+  ])
   const [recentTransactions, setRecentTransactions] = useState([
-    { id: 1, item: 'Laptop Pro 15"', quantity: 10, date: '2024-12-13', user: 'John Doe' },
-    { id: 2, item: 'Wireless Mouse', quantity: 50, date: '2024-12-12', user: 'Jane Smith' },
-    { id: 3, item: 'USB-C Cable', quantity: 100, date: '2024-12-11', user: 'Bob Johnson' },
+    { id: 1, item: 'Laptop Pro 15"', quantity: 10, date: '2024-12-13', user: 'John Doe', warehouse: 'Main Warehouse', batch: 'BATCH-001' },
+    { id: 2, item: 'Wireless Mouse', quantity: 50, date: '2024-12-12', user: 'Jane Smith', warehouse: 'Branch A Warehouse', batch: 'BATCH-002' },
+    { id: 3, item: 'USB-C Cable', quantity: 100, date: '2024-12-11', user: 'Bob Johnson', warehouse: 'Main Warehouse', batch: 'BATCH-003' },
   ])
 
   useEffect(() => {
@@ -54,7 +62,7 @@ export default function StockInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!selectedItem || !quantity) {
+    if (!selectedItem || !quantity || !selectedWarehouse) {
       setError('Please fill in all required fields')
       return
     }
@@ -70,7 +78,9 @@ export default function StockInPage() {
       await StockService.recordStockIn({
         itemId: String(selectedItem),
         quantity: parseInt(quantity),
-        note: notes
+        note: notes,
+        batchId: selectedBatch || undefined,
+        warehouseId: selectedWarehouse,
       })
 
       const newTransaction = {
@@ -79,11 +89,15 @@ export default function StockInPage() {
         quantity: parseInt(quantity),
         date: new Date().toISOString().split('T')[0],
         user: session?.user?.name || 'Unknown',
+        warehouse: warehouses.find(w => w.id === selectedWarehouse)?.name || 'Unknown',
+        batch: selectedBatch || 'N/A',
       }
 
       setRecentTransactions([newTransaction, ...recentTransactions])
       setSuccess(`Successfully added ${quantity} units of ${item.name}`)
       setSelectedItem('')
+      setSelectedBatch('')
+      setSelectedWarehouse('')
       setQuantity('')
       setNotes('')
     } catch (err) {
@@ -230,6 +244,46 @@ export default function StockInPage() {
                 </select>
               </div>
 
+              {/* Warehouse Selection */}
+              <div>
+                <label className="block text-base font-semibold text-foreground mb-3">
+                  Warehouse *
+                </label>
+                <select
+                  value={selectedWarehouse}
+                  onChange={(e) => setSelectedWarehouse(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                  required
+                >
+                  <option value="">Select a warehouse...</option>
+                  {warehouses.map(warehouse => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Batch Selection */}
+              <div>
+                <label className="block text-base font-semibold text-foreground mb-3">
+                  Batch (Optional)
+                </label>
+                <select
+                  value={selectedBatch}
+                  onChange={(e) => setSelectedBatch(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                  disabled={!selectedItem}
+                >
+                  <option value="">Select a batch...</option>
+                  {batches.map(batch => (
+                    <option key={batch.id} value={batch.id}>
+                      {batch.batchNumber} (Exp: {batch.expiryDate})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Quantity */}
               <div>
                 <label className="block text-base font-semibold text-foreground mb-3">
@@ -299,6 +353,8 @@ export default function StockInPage() {
               <tr>
                 <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Item</th>
                 <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Quantity</th>
+                <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Warehouse</th>
+                <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Batch</th>
                 <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">Date</th>
                 <th className="px-6 py-4 text-left text-base font-semibold text-muted-foreground">User</th>
               </tr>
@@ -312,6 +368,8 @@ export default function StockInPage() {
                       +{tx.quantity}
                     </span>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{(tx as any).warehouse || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{(tx as any).batch || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{tx.date}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{tx.user}</td>
                 </tr>

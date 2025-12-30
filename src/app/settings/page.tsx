@@ -13,7 +13,11 @@ interface UserProfile {
   name: string
   email: string
   branchName: string
+  phone?: string
+  address?: string
   role?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 interface User extends UserProfile {
@@ -28,6 +32,8 @@ export default function SettingsPage() {
     name: '',
     email: '',
     branchName: '',
+    phone: '',
+    address: '',
   })
   const [users, setUsers] = useState<User[]>([])
   const [showUserForm, setShowUserForm] = useState(false)
@@ -45,6 +51,10 @@ export default function SettingsPage() {
         name: session.user.name || '',
         email: session.user.email || '',
         branchName: (session.user as any)?.branchName || 'Main Branch',
+        phone: (session.user as any)?.phone || '',
+        address: (session.user as any)?.address || '',
+        createdAt: (session.user as any)?.createdAt,
+        updatedAt: (session.user as any)?.updatedAt,
       })
     }
   }, [session?.user?.email])
@@ -229,6 +239,32 @@ export default function SettingsPage() {
                 />
               </div>
 
+              {/* Phone */}
+              <div>
+                <label className="block text-base font-semibold text-foreground mb-3">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={profile.phone || ''}
+                  onChange={handleProfileChange}
+                  placeholder="Enter your phone number"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="block text-base font-semibold text-foreground mb-3">Address</label>
+                <textarea
+                  name="address"
+                  value={profile.address || ''}
+                  onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
+                  placeholder="Enter your address"
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+              </div>
+
               {/* Save Button */}
               <button
                 type="submit"
@@ -274,7 +310,11 @@ export default function SettingsPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Member since</p>
-                <p className="text-lg font-semibold text-foreground mt-1">2024</p>
+                <p className="text-lg font-semibold text-foreground mt-1">{profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '2024'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground">Last updated</p>
+                <p className="text-lg font-semibold text-foreground mt-1">{profile.updatedAt ? new Date(profile.updatedAt).toLocaleDateString() : 'N/A'}</p>
               </div>
             </div>
           </div>

@@ -16,16 +16,20 @@ interface User {
   role: string
   enabled: boolean
   createdAt: string
+  lastLogin?: string
+  phone?: string
+  address?: string
+  branchName?: string
 }
 
 // Fallback dummy data (only used if API fails - test data only)
 const DUMMY_USERS = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', joinDate: '2024-01-15' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Manager', status: 'active', joinDate: '2024-02-20' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'active', joinDate: '2024-03-10' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Manager', status: 'inactive', joinDate: '2024-01-05' },
-  { id: 5, name: 'Charlie Davis', email: 'charlie@example.com', role: 'User', status: 'active', joinDate: '2024-04-01' },
-  { id: 6, name: 'Eve Wilson', email: 'eve@example.com', role: 'User', status: 'active', joinDate: '2024-05-12' },
+  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', joinDate: '2024-01-15', lastLogin: '2024-12-28', phone: '555-0001', address: '123 Main St', branch: 'HQ' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Manager', status: 'active', joinDate: '2024-02-20', lastLogin: '2024-12-27', phone: '555-0002', address: '456 Oak Ave', branch: 'Branch A' },
+  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'active', joinDate: '2024-03-10', lastLogin: '2024-12-26', phone: '555-0003', address: '789 Pine Rd', branch: 'Branch B' },
+  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Manager', status: 'inactive', joinDate: '2024-01-05', lastLogin: '2024-12-01', phone: '555-0004', address: '321 Elm St', branch: 'Branch C' },
+  { id: 5, name: 'Charlie Davis', email: 'charlie@example.com', role: 'User', status: 'active', joinDate: '2024-04-01', lastLogin: '2024-12-25', phone: '555-0005', address: '654 Maple Dr', branch: 'Branch A' },
+  { id: 6, name: 'Eve Wilson', email: 'eve@example.com', role: 'User', status: 'active', joinDate: '2024-05-12', lastLogin: '2024-12-24', phone: '555-0006', address: '987 Cedar Ln', branch: 'Branch B' },
 ]
 
 export default function UsersPage() {
@@ -54,6 +58,10 @@ export default function UsersPage() {
           role: user.role,
           status: user.enabled ? 'active' : 'inactive',
           joinDate: new Date(user.createdAt).toLocaleDateString(),
+          lastLogin: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never',
+          phone: user.phone || '-',
+          address: user.address || '-',
+          branch: user.branchName || '-',
         }))
         setUsers(transformedUsers)
         setError(null)
@@ -349,7 +357,8 @@ export default function UsersPage() {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Email</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Role</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Join Date</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Last Login</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Branch</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -386,6 +395,8 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.joinDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{(user as any).lastLogin || 'Never'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{(user as any).branch || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                     <button
                       onClick={() => handleToggleStatus(user.id)}

@@ -46,6 +46,7 @@ export interface CreateItemRequest {
   minimumStock?: number;
   maximumStock?: number;
   reorderLevel?: number;
+  unit?: string;
 }
 
 export interface StockInRequest {
@@ -53,6 +54,8 @@ export interface StockInRequest {
   quantity: number;
   note?: string;
   branch?: string;
+  batchId?: string;
+  warehouseId?: string;
 }
 
 export interface StockOutRequest {
@@ -62,6 +65,8 @@ export interface StockOutRequest {
   branch?: string;
   reason?: string;
   recipient?: string;
+  batchId?: string;
+  warehouseId?: string;
 }
 
 export interface CreateUserRequest {
