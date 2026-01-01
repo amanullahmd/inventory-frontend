@@ -21,28 +21,16 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL,
-      timeout: 10000,
+      timeout: 20000,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    // Request interceptor to add JWT token
+    // Request interceptor: attach token if already configured via setAuthToken
     this.client.interceptors.request.use(
-      async (config) => {
-        try {
-          const session = await getSession();
-          if (session?.accessToken) {
-            config.headers.Authorization = `Bearer ${session.accessToken}`;
-          }
-        } catch (error) {
-          console.warn('Failed to get session for API request:', error);
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
+      (config) => config,
+      (error) => Promise.reject(error)
     );
 
     // Response interceptor for error handling

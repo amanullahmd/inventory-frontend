@@ -10,6 +10,8 @@ interface BackendItemStockResponse {
   createdAt: string;
   totalStockIn?: number;
   totalStockOut?: number;
+  categoryId?: number;
+  categoryName?: string;
 }
 
 export class ItemService {
@@ -56,7 +58,6 @@ export class ItemService {
         minimumStock: item.minimumStock ? parseInt(String(item.minimumStock)) : undefined,
         maximumStock: item.maximumStock ? parseInt(String(item.maximumStock)) : undefined,
         reorderLevel: item.reorderLevel ? parseInt(String(item.reorderLevel)) : undefined,
-        unit: (item as any).unit || undefined,
       };
       
       const response = await apiClient.post<BackendItemStockResponse>('/items', payload);
@@ -64,6 +65,31 @@ export class ItemService {
     } catch (error) {
       const apiError = error as ApiError;
       throw new Error(apiError.message || 'Failed to create item');
+    }
+  }
+
+  /**
+   * Update an existing inventory item
+   * Requirements: allow correcting wrong info
+   */
+  static async updateItem(itemId: number, item: CreateItemRequest): Promise<Item> {
+    try {
+      const payload = {
+        name: item.name,
+        sku: item.sku,
+        unitPrice: typeof item.unitCost === 'string' ? parseFloat(item.unitCost) : item.unitCost,
+        categoryId: item.categoryId,
+        description: item.description,
+        minimumStock: item.minimumStock ? parseInt(String(item.minimumStock)) : undefined,
+        maximumStock: item.maximumStock ? parseInt(String(item.maximumStock)) : undefined,
+        reorderLevel: item.reorderLevel ? parseInt(String(item.reorderLevel)) : undefined,
+      } as any
+
+      const response = await apiClient.put<BackendItemStockResponse>(`/items/${itemId}`, payload)
+      return ItemService.toItem(response.data)
+    } catch (error) {
+      const apiError = error as ApiError
+      throw new Error(apiError.message || 'Failed to update item')
     }
   }
 

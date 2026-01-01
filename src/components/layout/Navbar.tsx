@@ -45,37 +45,15 @@ export default function Navbar() {
             <Link href="/items" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Items
             </Link>
-            <PermissionGuard permission="create_category">
-              <div className="relative group">
-                <button className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors flex items-center gap-1">
-                  Categories
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </button>
-                <div className="absolute left-0 mt-0 w-48 bg-card border border-border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <Link href="/categories" className="block px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-t-md">
-                    📁 Manage Categories
-                  </Link>
-                  <div className="border-t border-border"></div>
-                  <Link href="/items?category=laptops" className="block px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-                    💻 Laptops
-                  </Link>
-                  <Link href="/items?category=peripherals" className="block px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-                    🖱️ Peripherals
-                  </Link>
-                  <Link href="/items?category=monitors" className="block px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-                    🖥️ Monitors
-                  </Link>
-                  <Link href="/items?category=audio" className="block px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-                    🎤 Audio
-                  </Link>
-                  <Link href="/items?category=accessories" className="block px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-b-md">
-                    🎁 Accessories
-                  </Link>
-                </div>
-              </div>
-            </PermissionGuard>
+            <Link href="/suppliers" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Suppliers
+            </Link>
+            <Link href="/warehouses" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Warehouses
+            </Link>
+            <Link href="/categories" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Categories
+            </Link>
             <Link href="/stock-in" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Stock In
             </Link>
@@ -84,6 +62,15 @@ export default function Navbar() {
             </Link>
             <Link href="/stock-movements" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Movements
+            </Link>
+            <Link href="/transfers" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Transfers
+            </Link>
+            <Link href="/orders/purchase" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Purchase Orders
+            </Link>
+            <Link href="/orders/sales" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Sales Orders
             </Link>
             {isAdmin() && (
               <Link href="/users" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
@@ -145,29 +132,15 @@ export default function Navbar() {
               <Link href="/items" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Items
               </Link>
-              <PermissionGuard permission="create_category">
-                <div className="rounded-md border border-border bg-background/50 p-2">
-                  <div className="px-2 py-2 text-sm font-semibold text-foreground">📁 Categories</div>
-                  <Link href="/categories" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-md">
-                    Manage Categories
-                  </Link>
-                  <Link href="/items?category=laptops" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-md">
-                    💻 Laptops
-                  </Link>
-                  <Link href="/items?category=peripherals" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-md">
-                    🖱️ Peripherals
-                  </Link>
-                  <Link href="/items?category=monitors" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-md">
-                    🖥️ Monitors
-                  </Link>
-                  <Link href="/items?category=audio" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-md">
-                    🎤 Audio
-                  </Link>
-                  <Link href="/items?category=accessories" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors rounded-md">
-                    🎁 Accessories
-                  </Link>
-                </div>
-              </PermissionGuard>
+              <Link href="/suppliers" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Suppliers
+              </Link>
+              <Link href="/warehouses" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Warehouses
+              </Link>
+              <Link href="/categories" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Categories
+              </Link>
               <Link href="/stock-in" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Stock In
               </Link>
@@ -176,6 +149,15 @@ export default function Navbar() {
               </Link>
               <Link href="/stock-movements" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Movements
+              </Link>
+              <Link href="/transfers" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Transfers
+              </Link>
+              <Link href="/orders/purchase" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Purchase Orders
+              </Link>
+              <Link href="/orders/sales" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Sales Orders
               </Link>
               {isAdmin() && (
                 <Link href="/users" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>

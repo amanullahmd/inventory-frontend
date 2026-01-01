@@ -19,8 +19,8 @@ async function refreshAccessToken(refreshToken: string) {
     const data = await res.json()
     return data
   } catch (error) {
-    console.error('Token refresh error:', error)
-    throw error
+    // Silently fail and let client-side handle auth state
+    return { accessToken: undefined, refreshToken: undefined }
   }
 }
 
@@ -89,19 +89,17 @@ export const authConfig: NextAuthConfig = {
 
       // Token is expired or about to expire, refresh it
       if (token.refreshToken) {
-        try {
-          const refreshedData = await refreshAccessToken(token.refreshToken as string)
+        const refreshedData = await refreshAccessToken(token.refreshToken as string)
+        if (refreshedData && (refreshedData as any).accessToken) {
           return {
             ...token,
-            accessToken: refreshedData.accessToken,
-            refreshToken: refreshedData.refreshToken || token.refreshToken,
+            accessToken: (refreshedData as any).accessToken,
+            refreshToken: (refreshedData as any).refreshToken || token.refreshToken,
             accessTokenExpires: Date.now() + 15 * 60 * 1000,
           }
-        } catch (error) {
-          console.error('Failed to refresh token:', error)
-          // Return token as is, let API client handle 401/403 errors
-          return token
         }
+        // Keep existing token if refresh failed
+        return token
       }
 
       return token

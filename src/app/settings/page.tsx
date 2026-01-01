@@ -10,7 +10,8 @@ import { UserService } from '@/lib/services/userService'
 
 interface UserProfile {
   userId?: number
-  name: string
+  firstName: string
+  lastName: string
   email: string
   branchName: string
   phone?: string
@@ -29,7 +30,8 @@ export default function SettingsPage() {
   const { data: session, status } = useSession()
   const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
   const [profile, setProfile] = useState<UserProfile>({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     branchName: '',
     phone: '',
@@ -42,22 +44,39 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
-    // Clear any errors on mount
     setError(null)
-    
-    if (session?.user) {
-      // Initialize profile from session data
-      setProfile({
-        name: session.user.name || '',
-        email: session.user.email || '',
-        branchName: (session.user as any)?.branchName || 'Main Branch',
-        phone: (session.user as any)?.phone || '',
-        address: (session.user as any)?.address || '',
-        createdAt: (session.user as any)?.createdAt,
-        updatedAt: (session.user as any)?.updatedAt,
-      })
+    const init = async () => {
+      try {
+        const p = await UserService.getCurrentUserProfile()
+        const name = (p as any).name || ''
+        const parts = name.trim().split(/\s+/)
+        const first = parts[0] || ''
+        const last = parts.slice(1).join(' ') || ''
+        setProfile({
+          firstName: first,
+          lastName: last,
+          email: p.email || session?.user?.email || '',
+          branchName: p.branchName || 'Main Branch',
+          phone: '',
+          address: '',
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+        })
+      } catch {
+        // Fallback to session
+        const name = session?.user?.name || ''
+        const parts = name.trim().split(/\s+/)
+        setProfile(prev => ({
+          ...prev,
+          firstName: parts[0] || '',
+          lastName: parts.slice(1).join(' ') || '',
+          email: session?.user?.email || '',
+          branchName: 'Main Branch',
+        }))
+      }
     }
-  }, [session?.user?.email])
+    if (status === 'authenticated') init()
+  }, [status])
 
   // Clear error on component mount and suppress unhandled errors
   useEffect(() => {
@@ -74,7 +93,7 @@ export default function SettingsPage() {
     return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection)
   }, [])
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setProfile(prev => ({
       ...prev,
@@ -89,7 +108,12 @@ export default function SettingsPage() {
     setSuccess(null)
 
     try {
-      await UserService.updateUserProfile(profile)
+      const fullName = `${profile.firstName.trim()}${profile.lastName.trim() ? ' ' + profile.lastName.trim() : ''}`
+      await UserService.updateUserProfile({
+        name: fullName,
+        email: profile.email,
+        branchName: profile.branchName,
+      })
       setSuccess('Profile updated successfully!')
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to update profile. Please try again.'
@@ -110,9 +134,11 @@ export default function SettingsPage() {
     try {
       setLoading(true)
       // Call API to create user
+      const parts = newUser.name.trim().split(/\s+/)
       const createdUser: User = {
         userId: Math.floor(Math.random() * 10000),
-        name: newUser.name,
+        firstName: parts[0] || '',
+        lastName: parts.slice(1).join(' ') || '',
         email: newUser.email,
         branchName: newUser.branchName,
         role: newUser.role,
@@ -202,13 +228,24 @@ export default function SettingsPage() {
             <form onSubmit={handleSaveProfile} className="space-y-6">
               {/* Name */}
               <div>
-                <label className="block text-base font-semibold text-foreground mb-3">Full Name</label>
+                <label className="block text-base font-semibold text-foreground mb-3">First Name</label>
                 <input
                   type="text"
-                  name="name"
-                  value={profile.name}
+                  name="firstName"
+                  value={profile.firstName}
                   onChange={handleProfileChange}
-                  placeholder="Enter your full name"
+                  placeholder="Enter your first name"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <div>
+                <label className="block text-base font-semibold text-foreground mb-3">Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={profile.lastName}
+                  onChange={handleProfileChange}
+                  placeholder="Enter your last name"
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -287,19 +324,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="space-y-4">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-md">
-            <h2 className="text-2xl font-bold text-foreground mb-6">⚡ Quick actions</h2>
-            
-            <div className="rounded-lg border border-border bg-muted/50 p-4">
-              <p className="text-base text-muted-foreground">
-                No quick actions available at this time.
-              </p>
-            </div>
-          </div>
-
-          {/* Account Info */}
+        <div>
           <div className="rounded-xl border border-border bg-card p-6 shadow-md">
             <h2 className="text-2xl font-bold text-foreground mb-4">ℹ️ Account</h2>
             
@@ -435,7 +460,7 @@ export default function SettingsPage() {
                   ) : (
                     users.map(user => (
                       <tr key={user.userId} className="hover:bg-accent/40 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-base font-semibold text-foreground">{user.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-base font-semibold text-foreground">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{user.email}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">{user.branchName}</td>
                         <td className="px-6 py-4 whitespace-nowrap">

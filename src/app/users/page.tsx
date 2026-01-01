@@ -22,15 +22,7 @@ interface User {
   branchName?: string
 }
 
-// Fallback dummy data (only used if API fails - test data only)
-const DUMMY_USERS = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', joinDate: '2024-01-15', lastLogin: '2024-12-28', phone: '555-0001', address: '123 Main St', branch: 'HQ' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Manager', status: 'active', joinDate: '2024-02-20', lastLogin: '2024-12-27', phone: '555-0002', address: '456 Oak Ave', branch: 'Branch A' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'active', joinDate: '2024-03-10', lastLogin: '2024-12-26', phone: '555-0003', address: '789 Pine Rd', branch: 'Branch B' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Manager', status: 'inactive', joinDate: '2024-01-05', lastLogin: '2024-12-01', phone: '555-0004', address: '321 Elm St', branch: 'Branch C' },
-  { id: 5, name: 'Charlie Davis', email: 'charlie@example.com', role: 'User', status: 'active', joinDate: '2024-04-01', lastLogin: '2024-12-25', phone: '555-0005', address: '654 Maple Dr', branch: 'Branch A' },
-  { id: 6, name: 'Eve Wilson', email: 'eve@example.com', role: 'User', status: 'active', joinDate: '2024-05-12', lastLogin: '2024-12-24', phone: '555-0006', address: '987 Cedar Ln', branch: 'Branch B' },
-]
+
 
 export default function UsersPage() {
   const { data: session, status } = useSession()
@@ -67,9 +59,8 @@ export default function UsersPage() {
         setError(null)
       } catch (err) {
         console.error('Failed to fetch users:', err)
-        // Fallback to dummy data if API fails
-        setUsers(DUMMY_USERS)
-        setError('Failed to load users from server, showing demo data')
+        setUsers([])
+        setError('Failed to load users from server')
       } finally {
         setLoading(false)
       }
@@ -364,7 +355,7 @@ export default function UsersPage() {
             </thead>
             <tbody className="bg-card divide-y divide-border">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-accent/40 transition-colors">
+                <tr key={`${user.id}-${user.email}`} className="hover:bg-accent/40 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted text-sm font-semibold text-foreground">

@@ -8,6 +8,7 @@ import { DateRangePicker } from '@/components/ui/DateRangePicker'
 import { ExportButton } from '@/components/ui/ExportButton'
 import { PDFExportService } from '@/lib/services/pdfExportService'
 import { DateFilterService } from '@/lib/services/dateFilterService'
+import { apiClient } from '@/lib/api/client'
 
 interface ReasonBreakdown {
   reasonType: string
@@ -16,15 +17,7 @@ interface ReasonBreakdown {
   percentage: number
 }
 
-const DUMMY_REASONS: ReasonBreakdown[] = [
-  { reasonType: 'TRANSFERRED', reasonLabel: 'Transferred to branch', count: 45, percentage: 28.5 },
-  { reasonType: 'GIVEN', reasonLabel: 'Given to person', count: 38, percentage: 24.1 },
-  { reasonType: 'DAMAGED', reasonLabel: 'Damaged', count: 32, percentage: 20.3 },
-  { reasonType: 'EXPIRED', reasonLabel: 'Expired', count: 22, percentage: 13.9 },
-  { reasonType: 'LOST', reasonLabel: 'Lost', count: 12, percentage: 7.6 },
-  { reasonType: 'USED', reasonLabel: 'Used', count: 8, percentage: 5.1 },
-  { reasonType: 'OTHER', reasonLabel: 'Other', count: 1, percentage: 0.6 },
-]
+
 
 export default function StockOutReasonsReportPage() {
   const { data: session } = useSession()
@@ -38,10 +31,23 @@ export default function StockOutReasonsReportPage() {
   const [filterId, setFilterId] = useState<string>('')
 
   useEffect(() => {
-    // Initialize with dummy data
-    setReasons(DUMMY_REASONS)
-    setLoading(false)
+    fetchStockOutReasons()
   }, [])
+
+  const fetchStockOutReasons = async () => {
+    try {
+      setLoading(true)
+      const response = await apiClient.get<ReasonBreakdown[]>('/reports/stock-out-reasons')
+      setReasons(response.data)
+      setError(null)
+    } catch (err) {
+      console.error('Failed to fetch stock-out reasons:', err)
+      setError('Failed to load stock-out reasons')
+      setReasons([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleExport = async () => {
     if (reasons.length === 0) {

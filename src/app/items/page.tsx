@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Item, ApiError } from '@/lib/types'
 import { usePermissions } from '@/hooks/usePermissions'
 import PermissionGuard from '@/components/PermissionGuard'
@@ -34,6 +35,7 @@ interface ItemWithCategory extends Item {
 export default function ItemsPage() {
   const { data: session, status } = useSession()
   const { can } = usePermissions()
+  const router = useRouter()
   
   const [items, setItems] = useState<ItemWithCategory[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -51,10 +53,22 @@ export default function ItemsPage() {
     description: '',
     minimumStock: '',
     maximumStock: '',
-    unit: '',
   })
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({
+    name: '',
+    sku: '',
+    unitCost: '',
+    categoryId: '',
+    description: '',
+    minimumStock: '',
+    maximumStock: '',
+  })
   const [exportLoading, setExportLoading] = useState(false)
+  const [creatingCategory, setCreatingCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryDescription, setNewCategoryDescription] = useState('')
 
   const fetchData = useCallback(async () => {
     try {
@@ -66,14 +80,11 @@ export default function ItemsPage() {
         ItemService.getItems(),
       ])
 
-      const mappedItems: ItemWithCategory[] = backendItems.map((item) => {
-        const category = backendCategories.find(c => String(c.id) === String((item as any).categoryId))
-        return {
-          ...item,
-          categoryId: String((item as any).categoryId || ''),
-          categoryName: category?.name || 'Uncategorized',
-        }
-      })
+      const mappedItems: ItemWithCategory[] = (backendItems as any).map((item: any) => ({
+        ...item,
+        categoryId: String(item.categoryId || ''),
+        categoryName: item.categoryName || 'Uncategorized',
+      }))
 
       setItems(mappedItems)
       setCategories(backendCategories.map(cat => ({
@@ -93,6 +104,61 @@ export default function ItemsPage() {
       setLoading(false)
     }
   }, [])
+
+  const refreshCategories = async () => {
+    try {
+      const backendCategories = await CategoryService.getCategories()
+      setCategories(backendCategories.map(cat => ({
+        id: String(cat.id),
+        name: cat.name,
+        description: cat.description,
+        color: cat.color || '#3B82F6',
+        createdAt: cat.createdAt
+      })))
+    } catch (err) {
+      const apiError = err as ApiError
+      setError(apiError.message || 'Failed to fetch categories')
+    }
+  }
+
+  const handleCreateInlineCategory = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!can('create_category')) {
+      setError('You do not have permission to create categories')
+      return
+    }
+    
+    if (!newCategoryName.trim()) {
+      setError('Category name is required')
+      return
+    }
+    try {
+      setSubmittingItem(true)
+      const created = await CategoryService.createCategory({
+        name: newCategoryName.trim(),
+        description: newCategoryDescription.trim(),
+      })
+      const createdMapped: Category = {
+        id: String(created.id),
+        name: created.name,
+        description: created.description,
+        color: created.color || '#3B82F6',
+        createdAt: created.createdAt
+      }
+      setCategories(prev => [createdMapped, ...prev])
+      setItemForm(prev => ({ ...prev, categoryId: String(createdMapped.id) }))
+      setCreatingCategory(false)
+      setNewCategoryName('')
+      setNewCategoryDescription('')
+      setSuccess(`Category "${created.name}" created`)
+    } catch (err) {
+      const apiError = err as ApiError
+      setError(apiError.message || 'Failed to create category')
+    } finally {
+      setSubmittingItem(false)
+    }
+  }
 
   const handleCreateItem = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -125,7 +191,6 @@ export default function ItemsPage() {
         description: itemForm.description || undefined,
         minimumStock: itemForm.minimumStock ? parseInt(itemForm.minimumStock) : undefined,
         maximumStock: itemForm.maximumStock ? parseInt(itemForm.maximumStock) : undefined,
-        unit: itemForm.unit || undefined,
       })
 
       const categoryName = categories.find(c => c.id === itemForm.categoryId)?.name || 'Uncategorized'
@@ -146,12 +211,74 @@ export default function ItemsPage() {
         description: '',
         minimumStock: '',
         maximumStock: '',
-        unit: '',
       })
       setShowItemForm(false)
     } catch (err) {
       const apiError = err as ApiError
       setError(apiError.message || 'Failed to create item')
+    } finally {
+      setSubmittingItem(false)
+    }
+  }
+
+  const openEdit = (item: ItemWithCategory) => {
+    setError(null)
+    setSuccess(null)
+    setEditingItemId(item.id)
+    setEditForm({
+      name: item.name,
+      sku: item.sku,
+      unitCost: String(item.unitCost),
+      categoryId: String(item.categoryId || ''),
+      description: '',
+      minimumStock: '',
+      maximumStock: '',
+    })
+    setShowEditForm(true)
+  }
+
+  const handleUpdateItem = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!can('create_item')) {
+      setError('You do not have permission to edit items')
+      return
+    }
+
+    if (!editingItemId) return
+
+    if (!editForm.name || !editForm.sku || !editForm.unitCost || !editForm.categoryId) {
+      setError('Please fill in all required fields')
+      return
+    }
+
+    try {
+      setSubmittingItem(true)
+      const updated = await ItemService.updateItem(parseInt(editingItemId), {
+        name: editForm.name,
+        sku: editForm.sku,
+        unitCost: parseFloat(editForm.unitCost),
+        categoryId: parseInt(editForm.categoryId),
+        description: editForm.description || undefined,
+        minimumStock: editForm.minimumStock ? parseInt(editForm.minimumStock) : undefined,
+        maximumStock: editForm.maximumStock ? parseInt(editForm.maximumStock) : undefined,
+      } as any)
+
+      const categoryName = categories.find(c => c.id === editForm.categoryId)?.name || 'Uncategorized'
+
+      const updatedWithCategory: ItemWithCategory = {
+        ...updated,
+        categoryId: editForm.categoryId,
+        categoryName,
+      }
+
+      setItems(prev => prev.map(i => i.id === editingItemId ? { ...i, ...updatedWithCategory } : i))
+      setSuccess(`Item "${editForm.name}" updated successfully!`)
+      setShowEditForm(false)
+      setEditingItemId(null)
+    } catch (err) {
+      const apiError = err as ApiError
+      setError(apiError.message || 'Failed to update item')
     } finally {
       setSubmittingItem(false)
     }
@@ -191,8 +318,7 @@ export default function ItemsPage() {
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.sku.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !selectedCategory || item.categoryId === selectedCategory
-    return matchesSearch && matchesCategory
+    return matchesSearch
   })
 
   const totalValue = items.reduce((sum, item) => sum + (item.currentStock * item.unitCost), 0)
@@ -351,23 +477,9 @@ export default function ItemsPage() {
           <div className="lg:col-span-8">
             <div className="rounded-xl border border-border bg-card shadow-md overflow-hidden">
               <div className="border-b border-border bg-muted/30 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-semibold text-foreground">Items</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">{filteredItems.length} items shown</p>
-                  </div>
-                  {selectedCategory && (
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCategory(null)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent transition-colors"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                      Clear filter
-                    </button>
-                  )}
+                <div>
+                  <h2 className="text-2xl font-semibold text-foreground">Items</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{filteredItems.length} items shown</p>
                 </div>
               </div>
               {loading ? (
@@ -403,21 +515,30 @@ export default function ItemsPage() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Item Name</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">SKU</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unit</th>
+                        
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unit Price</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Stock</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Total Value</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
                       {filteredItems.map((item) => (
                         <tr key={item.id} className="hover:bg-muted/30 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium text-foreground">{item.name}</td>
-                          <td className="px-6 py-4 text-sm text-foreground">{item.categoryName}</td>
+                          <td className="px-6 py-4 text-sm text-foreground">
+                            <button
+                              type="button"
+                              onClick={() => router.push(`/categories/${item.categoryId}`)}
+                              className="text-primary hover:text-primary/80 hover:underline transition-colors"
+                            >
+                              {item.categoryName}
+                            </button>
+                          </td>
                           <td className="px-6 py-4">
                             <span className="inline-flex rounded-md bg-muted/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.sku}</span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-foreground">{item.unit || '-'}</td>
+                          
                           <td className="px-6 py-4 text-sm font-semibold text-foreground">${item.unitCost.toFixed(2)}</td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
@@ -431,6 +552,17 @@ export default function ItemsPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm font-semibold text-foreground">${(item.currentStock * item.unitCost).toFixed(2)}</td>
+                          <td className="px-6 py-4 text-sm">
+                            <PermissionGuard permission="create_item">
+                              <button
+                                type="button"
+                                onClick={() => openEdit(item)}
+                                className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground hover:bg-accent"
+                              >
+                                Edit
+                              </button>
+                            </PermissionGuard>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -458,12 +590,8 @@ export default function ItemsPage() {
                       <button
                         key={category.id}
                         type="button"
-                        onClick={() => setSelectedCategory(selectedCategory === category.id ? null : category.id)}
-                        className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
-                          selectedCategory === category.id
-                            ? 'border-primary bg-primary text-primary-foreground shadow-md'
-                            : 'border-border bg-background text-muted-foreground hover:bg-accent hover:border-primary/50'
-                        }`}
+                        onClick={() => router.push(`/categories/${category.id}`)}
+                        className="rounded-full border border-border bg-background text-muted-foreground hover:bg-accent hover:border-primary/50 px-4 py-2 text-sm font-semibold transition-all"
                       >
                         {category.name}
                       </button>
@@ -526,19 +654,72 @@ export default function ItemsPage() {
 
                   <div>
                     <label className="block text-sm font-medium mb-2">Category *</label>
-                    <select
-                      value={itemForm.categoryId}
-                      onChange={(e) => setItemForm({ ...itemForm, categoryId: e.target.value })}
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                      required
-                    >
-                      <option value="">Select a category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex gap-2">
+                      <select
+                        value={itemForm.categoryId}
+                        onChange={(e) => setItemForm({ ...itemForm, categoryId: e.target.value })}
+                        className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                        required
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={refreshCategories}
+                        className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
+                        aria-label="Refresh categories"
+                      >
+                        ↻
+                      </button>
+                      <PermissionGuard permission="create_category">
+                        <button
+                          type="button"
+                          onClick={() => setCreatingCategory((v) => !v)}
+                          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
+                        >
+                          Add
+                        </button>
+                      </PermissionGuard>
+                    </div>
+                    {creatingCategory && (
+                      <form onSubmit={handleCreateInlineCategory} className="mt-2 space-y-2">
+                        <input
+                          type="text"
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                          placeholder="New category name"
+                          className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                        />
+                        <input
+                          type="text"
+                          value={newCategoryDescription}
+                          onChange={(e) => setNewCategoryDescription(e.target.value)}
+                          placeholder="Description (optional)"
+                          className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="submit"
+                            disabled={submittingItem}
+                            className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                          >
+                            {submittingItem ? 'Creating…' : 'Create'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setCreatingCategory(false); setNewCategoryName(''); setNewCategoryDescription('') }}
+                            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
                   </div>
 
                   <div>
@@ -576,16 +757,7 @@ export default function ItemsPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Unit</label>
-                    <input
-                      type="text"
-                      value={itemForm.unit}
-                      onChange={(e) => setItemForm({ ...itemForm, unit: e.target.value })}
-                      placeholder="e.g., pcs, kg, liters"
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                    />
-                  </div>
+                  
                 </div>
 
                 <div>
@@ -613,6 +785,116 @@ export default function ItemsPage() {
                     className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 disabled:opacity-50 transition-all"
                   >
                     {submittingItem ? 'Creating...' : 'Create Item'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Item Form Modal */}
+        {showEditForm && can('create_item') && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+            <button
+              aria-label="Close"
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => setShowEditForm(false)}
+            />
+            <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">Edit Item</h3>
+                  <p className="mt-2 text-base text-muted-foreground">Correct item details</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEditForm(false)}
+                  className="rounded-md border border-border bg-background px-3 py-2 text-base text-foreground hover:bg-accent transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateItem} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Item Name *</label>
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">SKU *</label>
+                    <input
+                      type="text"
+                      value={editForm.sku}
+                      onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })}
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Category *</label>
+                    <select
+                      value={editForm.categoryId}
+                      onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      required
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Unit Cost *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editForm.unitCost}
+                      onChange={(e) => setEditForm({ ...editForm, unitCost: e.target.value })}
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      required
+                    />
+                  </div>
+
+                  
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Description</label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditForm(false)}
+                    className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-3 text-base font-semibold text-foreground shadow-sm hover:bg-accent transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingItem}
+                    className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 disabled:opacity-50 transition-all"
+                  >
+                    {submittingItem ? 'Updating...' : 'Update Item'}
                   </button>
                 </div>
               </form>

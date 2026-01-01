@@ -8,6 +8,7 @@ import { DateRangePicker } from '@/components/ui/DateRangePicker'
 import { ExportButton } from '@/components/ui/ExportButton'
 import { PDFExportService } from '@/lib/services/pdfExportService'
 import { DateFilterService } from '@/lib/services/dateFilterService'
+import { apiClient } from '@/lib/api/client'
 
 interface StockMovement {
   id: string
@@ -25,83 +26,7 @@ interface StockMovement {
   createdAt: string
 }
 
-const DUMMY_MOVEMENTS: StockMovement[] = [
-  {
-    id: '1',
-    itemName: 'Laptop Pro 15"',
-    itemSku: 'LP-001',
-    movementType: 'OUT',
-    quantity: 5,
-    previousStock: 50,
-    newStock: 45,
-    reason: 'TRANSFERRED',
-    recipient: 'Branch A',
-    notes: 'Transfer to branch A',
-    userName: 'Alice Brown',
-    userEmail: 'alice@example.com',
-    createdAt: '2024-12-13T10:30:00'
-  },
-  {
-    id: '2',
-    itemName: 'Wireless Mouse',
-    itemSku: 'WM-002',
-    movementType: 'OUT',
-    quantity: 20,
-    previousStock: 176,
-    newStock: 156,
-    reason: 'DAMAGED',
-    recipient: 'Warehouse',
-    notes: 'Damaged units removed',
-    userName: 'Charlie Davis',
-    userEmail: 'charlie@example.com',
-    createdAt: '2024-12-12T14:15:00'
-  },
-  {
-    id: '3',
-    itemName: 'USB-C Cable',
-    itemSku: 'UC-003',
-    movementType: 'IN',
-    quantity: 100,
-    previousStock: 0,
-    newStock: 100,
-    reason: undefined,
-    recipient: undefined,
-    notes: 'New shipment received',
-    userName: 'Eve Wilson',
-    userEmail: 'eve@example.com',
-    createdAt: '2024-12-11T09:00:00'
-  },
-  {
-    id: '4',
-    itemName: 'Monitor 27"',
-    itemSku: 'MN-004',
-    movementType: 'ADJUSTMENT',
-    quantity: 5,
-    previousStock: 0,
-    newStock: 5,
-    reason: undefined,
-    recipient: undefined,
-    notes: 'Stock count adjustment',
-    userName: 'Bob Smith',
-    userEmail: 'bob@example.com',
-    createdAt: '2024-12-10T11:45:00'
-  },
-  {
-    id: '5',
-    itemName: 'Mechanical Keyboard',
-    itemSku: 'MK-005',
-    movementType: 'OUT',
-    quantity: 8,
-    previousStock: 40,
-    newStock: 32,
-    reason: 'GIVEN',
-    recipient: 'John Doe',
-    notes: 'Given to employee',
-    userName: 'Alice Brown',
-    userEmail: 'alice@example.com',
-    createdAt: '2024-12-09T16:20:00'
-  },
-]
+
 
 export default function StockMovementsPage() {
   const { data: session } = useSession()
@@ -113,15 +38,30 @@ export default function StockMovementsPage() {
   const [exportLoading, setExportLoading] = useState(false)
   const [selectedDateRange, setSelectedDateRange] = useState<{ start: Date; end: Date } | null>(null)
   const [filterType, setFilterType] = useState<'ALL' | 'IN' | 'OUT' | 'ADJUSTMENT'>('ALL')
+  const [filterReason, setFilterReason] = useState<string>('ALL')
   const [sortBy, setSortBy] = useState<'date' | 'type' | 'quantity' | 'user'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   useEffect(() => {
-    // Initialize with dummy movements
-    setMovements(DUMMY_MOVEMENTS)
-    setFilteredMovements(DUMMY_MOVEMENTS)
-    setLoading(false)
+    fetchStockMovements()
   }, [])
+
+  const fetchStockMovements = async () => {
+    try {
+      setLoading(true)
+      const response = await apiClient.get<StockMovement[]>('/reports/stock-movements')
+      setMovements(response.data)
+      setFilteredMovements(response.data)
+      setError(null)
+    } catch (err) {
+      console.error('Failed to fetch stock movements:', err)
+      setError('Failed to load stock movements')
+      setMovements([])
+      setFilteredMovements([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     // Apply filters and sorting
@@ -130,6 +70,11 @@ export default function StockMovementsPage() {
     // Filter by movement type
     if (filterType !== 'ALL') {
       filtered = filtered.filter(m => m.movementType === filterType)
+    }
+
+    // Filter by reason
+    if (filterReason !== 'ALL') {
+      filtered = filtered.filter(m => (m.reason || '').toUpperCase() === filterReason)
     }
 
     // Filter by date range
@@ -286,6 +231,26 @@ export default function StockMovementsPage() {
               <option value="IN">Stock In</option>
               <option value="OUT">Stock Out</option>
               <option value="ADJUSTMENT">Adjustment</option>
+            </select>
+          </div>
+
+          {/* Reason Filter */}
+          <div>
+            <label className="block text-xs font-semibold text-foreground mb-2">
+              Reason
+            </label>
+            <select
+              value={filterReason}
+              onChange={(e) => setFilterReason(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="ALL">All Reasons</option>
+              <option value="TRANSFERRED">Transferred</option>
+              <option value="GIVEN">Given</option>
+              <option value="EXPIRED">Expired</option>
+              <option value="LOST">Lost</option>
+              <option value="USED">Used</option>
+              <option value="DAMAGED">Damaged</option>
             </select>
           </div>
 
