@@ -6,6 +6,8 @@ export interface UserProfile {
   name: string;
   email: string;
   branchName: string;
+  position?: string;
+  grade?: string;
   roles: string[];
   createdAt: string;
   updatedAt: string;
@@ -15,6 +17,8 @@ export interface UpdateProfileRequest {
   name: string;
   email: string;
   branchName: string;
+  position?: string;
+  grade?: string;
 }
 
 export class UserService {

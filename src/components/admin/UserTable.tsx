@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { User, ApiError } from '@/lib/types'
 import { apiClient } from '@/lib/api/client'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { formatDateDMY } from '@/lib/utils/date'
 
 interface UserTableProps {
   onUserCreated?: () => void
@@ -151,7 +152,7 @@ export default function UserTable({ onUserCreated }: UserTableProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {formatDateDMY(user.createdAt)}
                   </td>
                 </tr>
               ))}

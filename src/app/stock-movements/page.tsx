@@ -9,6 +9,7 @@ import { ExportButton } from '@/components/ui/ExportButton'
 import { PDFExportService } from '@/lib/services/pdfExportService'
 import { DateFilterService } from '@/lib/services/dateFilterService'
 import { apiClient } from '@/lib/api/client'
+import { formatDateDMY } from '@/lib/utils/date'
 
 interface StockMovement {
   id: string
@@ -353,7 +354,7 @@ export default function StockMovementsPage() {
                       <div className="text-xs text-muted-foreground">{movement.userEmail}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                      {new Date(movement.createdAt).toLocaleDateString()} {new Date(movement.createdAt).toLocaleTimeString()}
+                      {formatDateDMY(movement.createdAt)}
                     </td>
                   </tr>
                 ))

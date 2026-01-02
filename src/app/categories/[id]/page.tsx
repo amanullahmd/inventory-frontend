@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { formatDateDMY } from '@/lib/utils/date'
 import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
 import { Item, ApiError } from '@/lib/types'
@@ -164,7 +165,7 @@ export default function CategoryDetailPage() {
                 className="w-4 h-4 rounded-full"
                 style={{ backgroundColor: category.color }}
               />
-              <span className="text-sm text-muted-foreground">Created {new Date(category.createdAt).toLocaleDateString()}</span>
+              <span className="text-sm text-muted-foreground">Created {formatDateDMY(category.createdAt)}</span>
             </div>
           </div>
         </div>

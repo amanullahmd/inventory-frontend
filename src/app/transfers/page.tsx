@@ -8,6 +8,7 @@ import SuccessMessage from '@/components/ui/SuccessMessage'
 import { TransferService, StockTransfer, CreateTransferRequest } from '@/lib/services/transferService'
 import { ItemService } from '@/lib/services/itemService'
 import { WarehouseService } from '@/lib/services/warehouseService'
+import { formatDateDMY } from '@/lib/utils/date'
 
 export default function TransfersPage() {
   const { data: session, status } = useSession()
@@ -135,7 +136,7 @@ export default function TransfersPage() {
                     <td className="px-6 py-4 text-sm text-muted-foreground">#{t.toWarehouseId}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{t.quantity}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{t.status}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(t.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateDMY(t.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

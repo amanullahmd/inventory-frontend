@@ -8,6 +8,7 @@ export interface Supplier {
   phone?: string
   address?: string
   contactPerson?: string
+  registrationNumber?: string
   isActive: boolean
   createdAt: string
   updatedAt?: string
@@ -19,6 +20,7 @@ export interface CreateSupplierRequest {
   phone?: string
   address?: string
   contactPerson?: string
+  registrationNumber?: string
 }
 
 export class SupplierService {
@@ -39,6 +41,35 @@ export class SupplierService {
     } catch (error) {
       const apiError = error as ApiError
       throw new Error(apiError.message || 'Failed to create supplier')
+    }
+  }
+
+  static async updateSupplier(id: number, payload: Partial<CreateSupplierRequest> & { name: string; isActive?: boolean }): Promise<Supplier> {
+    try {
+      const res = await apiClient.put<Supplier>(`/suppliers/${id}`, payload)
+      return res.data
+    } catch (error) {
+      const apiError = error as ApiError
+      throw new Error(apiError.message || 'Failed to update supplier')
+    }
+  }
+
+  static async setActive(id: number, active: boolean): Promise<Supplier> {
+    try {
+      const res = await apiClient.patch<Supplier>(`/suppliers/${id}/status?active=${active}`)
+      return res.data
+    } catch (error) {
+      const apiError = error as ApiError
+      throw new Error(apiError.message || 'Failed to update status')
+    }
+  }
+
+  static async deleteSupplier(id: number): Promise<void> {
+    try {
+      await apiClient.delete<void>(`/suppliers/${id}`)
+    } catch (error) {
+      const apiError = error as ApiError
+      throw new Error(apiError.message || 'Failed to delete supplier')
     }
   }
 }

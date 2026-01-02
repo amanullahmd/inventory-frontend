@@ -7,6 +7,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import PermissionGuard from '@/components/PermissionGuard'
 import { UserService } from '@/lib/services/userService'
+import { formatDateDMY } from '@/lib/utils/date'
 
 interface UserProfile {
   userId?: number
@@ -14,8 +15,8 @@ interface UserProfile {
   lastName: string
   email: string
   branchName: string
-  phone?: string
-  address?: string
+  position?: string
+  grade?: string
   role?: string
   createdAt?: string
   updatedAt?: string
@@ -34,8 +35,6 @@ export default function SettingsPage() {
     lastName: '',
     email: '',
     branchName: '',
-    phone: '',
-    address: '',
   })
   const [users, setUsers] = useState<User[]>([])
   const [showUserForm, setShowUserForm] = useState(false)
@@ -57,8 +56,8 @@ export default function SettingsPage() {
           lastName: last,
           email: p.email || session?.user?.email || '',
           branchName: p.branchName || 'Main Branch',
-          phone: '',
-          address: '',
+          position: (p as any).position || '',
+          grade: (p as any).grade || '',
           createdAt: p.createdAt,
           updatedAt: p.updatedAt,
         })
@@ -113,6 +112,8 @@ export default function SettingsPage() {
         name: fullName,
         email: profile.email,
         branchName: profile.branchName,
+        position: profile.position,
+        grade: profile.grade,
       })
       setSuccess('Profile updated successfully!')
     } catch (err) {
@@ -276,31 +277,33 @@ export default function SettingsPage() {
                 />
               </div>
 
-              {/* Phone */}
+              {/* Position */}
               <div>
-                <label className="block text-base font-semibold text-foreground mb-3">Phone Number</label>
+                <label className="block text-base font-semibold text-foreground mb-3">Position</label>
                 <input
-                  type="tel"
-                  name="phone"
-                  value={profile.phone || ''}
+                  type="text"
+                  name="position"
+                  value={profile.position || ''}
                   onChange={handleProfileChange}
-                  placeholder="Enter your phone number"
+                  placeholder="e.g., Director, Assistant Director"
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
 
-              {/* Address */}
+              {/* Grade */}
               <div>
-                <label className="block text-base font-semibold text-foreground mb-3">Address</label>
-                <textarea
-                  name="address"
-                  value={profile.address || ''}
-                  onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Enter your address"
-                  rows={3}
-                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring resize-none"
+                <label className="block text-base font-semibold text-foreground mb-3">Grade</label>
+                <input
+                  type="text"
+                  name="grade"
+                  value={profile.grade || ''}
+                  onChange={handleProfileChange}
+                  placeholder="e.g., 9th Grade, 8th Grade, High"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
+
+              
 
               {/* Save Button */}
               <button
@@ -335,11 +338,11 @@ export default function SettingsPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Member since</p>
-                <p className="text-lg font-semibold text-foreground mt-1">{profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '2024'}</p>
+                <p className="text-lg font-semibold text-foreground mt-1">{profile.createdAt ? formatDateDMY(profile.createdAt) : '2024'}</p>
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Last updated</p>
-                <p className="text-lg font-semibold text-foreground mt-1">{profile.updatedAt ? new Date(profile.updatedAt).toLocaleDateString() : 'N/A'}</p>
+                <p className="text-lg font-semibold text-foreground mt-1">{profile.updatedAt ? formatDateDMY(profile.updatedAt) : 'N/A'}</p>
               </div>
             </div>
           </div>

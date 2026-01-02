@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SuccessMessage } from '@/components/ui/SuccessMessage'
+import { formatDateDMY } from '@/lib/utils/date'
 
 interface Category {
   id: string
@@ -220,7 +221,7 @@ export default function CategoriesPage() {
                 </p>
                 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Created {new Date(category.createdAt).toLocaleDateString()}</span>
+                  <span>Created {formatDateDMY(category.createdAt)}</span>
                   <span className="group-hover:text-primary transition-colors">View →</span>
                 </div>
               </div>

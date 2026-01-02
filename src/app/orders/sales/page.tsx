@@ -7,6 +7,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import { SalesOrderService, SalesOrder, CreateSalesOrderRequest } from '@/lib/services/salesOrderService'
 import { WarehouseService } from '@/lib/services/warehouseService'
+import { formatDateDMY } from '@/lib/utils/date'
 
 export default function SalesOrdersPage() {
   const { data: session, status } = useSession()
@@ -120,7 +121,7 @@ export default function SalesOrdersPage() {
                   <tr key={o.salesOrderId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm text-muted-foreground">#{o.warehouseId}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{o.status}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(o.orderDate).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateDMY(o.orderDate)}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{o.customerName || '—'}</td>
                   </tr>
                 ))}

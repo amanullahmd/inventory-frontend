@@ -7,6 +7,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import PermissionGuard from '@/components/PermissionGuard'
 import { apiClient } from '@/lib/api/client'
+import { formatDateDMY } from '@/lib/utils/date'
 
 interface User {
   userId: number
@@ -49,8 +50,8 @@ export default function UsersPage() {
           email: user.email,
           role: user.role,
           status: user.enabled ? 'active' : 'inactive',
-          joinDate: new Date(user.createdAt).toLocaleDateString(),
-          lastLogin: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never',
+          joinDate: formatDateDMY(user.createdAt),
+          lastLogin: user.lastLogin ? formatDateDMY(user.lastLogin) : 'Never',
           phone: user.phone || '-',
           address: user.address || '-',
           branch: user.branchName || '-',

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import { apiClient } from '@/lib/api/client'
+import { formatDateDMY } from '@/lib/utils/date'
 
 interface AuditLog {
   id: number
@@ -130,7 +131,7 @@ export default function AuditLogPage() {
                 ) : (
                   logs.map(log => (
                     <tr key={log.id} className="hover:bg-accent/40 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{new Date(log.createdAt).toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{formatDateDMY(log.createdAt)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{log.userId ?? '—'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{log.entityType}{log.entityId ? ` #${log.entityId}` : ''}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{log.action}</td>

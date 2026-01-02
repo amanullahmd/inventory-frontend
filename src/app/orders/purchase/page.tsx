@@ -8,6 +8,7 @@ import SuccessMessage from '@/components/ui/SuccessMessage'
 import { PurchaseOrderService, PurchaseOrder, CreatePurchaseOrderRequest } from '@/lib/services/purchaseOrderService'
 import { SupplierService } from '@/lib/services/supplierService'
 import { WarehouseService } from '@/lib/services/warehouseService'
+import { formatDateDMY } from '@/lib/utils/date'
 
 export default function PurchaseOrdersPage() {
   const { data: session, status } = useSession()
@@ -128,7 +129,7 @@ export default function PurchaseOrdersPage() {
                     <td className="px-6 py-4 text-sm text-foreground">#{o.supplierId}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">#{o.warehouseId}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{o.status}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(o.orderDate).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateDMY(o.orderDate)}</td>
                   </tr>
                 ))}
               </tbody>

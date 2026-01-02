@@ -9,6 +9,7 @@ import { ItemService } from '@/lib/services/itemService'
 
 export default function Home() {
   const { data: session } = useSession()
+  const [profileExtra, setProfileExtra] = useState<{ position?: string; grade?: string }>({})
   const [stats, setStats] = useState({
     totalItems: 0,
     totalValue: 0,
@@ -23,6 +24,11 @@ export default function Home() {
       if (!session) return
       setLoading(true)
       try {
+        // fetch user profile extras
+        try {
+          const res = await fetch('/api/users/profile')
+          // but our client uses app router; better use apiClient
+        } catch {}
         const s = await ItemService.getStatistics()
         if (!active) return
         setStats({
@@ -31,6 +37,10 @@ export default function Home() {
           lowStockItems: s.lowStockCount,
           outOfStockItems: s.outOfStockCount,
         })
+        try {
+          const p = await (await import('@/lib/services/userService')).UserService.getCurrentUserProfile()
+          if (active) setProfileExtra({ position: (p as any).position, grade: (p as any).grade })
+        } catch {}
       } catch (error) {
         if (!active) return
         setStats({ totalItems: 0, totalValue: 0, lowStockItems: 0, outOfStockItems: 0 })
@@ -78,6 +88,12 @@ export default function Home() {
           </div>
           <div className="text-base text-muted-foreground bg-card rounded-lg px-4 py-3 border border-border">
             Signed in as <span className="font-semibold text-foreground text-lg">{session.user?.name || 'User'}</span>
+            {profileExtra.position ? (
+              <span className="ml-3 inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm text-foreground">Position: {profileExtra.position}</span>
+            ) : null}
+            {profileExtra.grade ? (
+              <span className="ml-2 inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm text-foreground">Grade: {profileExtra.grade}</span>
+            ) : null}
           </div>
         </div>
 
