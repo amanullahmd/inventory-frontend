@@ -188,7 +188,9 @@ export default function StockOutForm({ onSuccess, onError }: StockOutFormProps) 
                 </div>
                 <div>
                   <span className="text-secondary-600">Unit Cost:</span>
-                  <span className="ml-2 font-medium text-secondary-900">${selectedItem.unitCost.toFixed(2)}</span>
+                  <span className="ml-2 font-medium text-secondary-900">
+                    {selectedItem.unitCost !== undefined ? `$${selectedItem.unitCost.toFixed(2)}` : '—'}
+                  </span>
                 </div>
               </div>
               {selectedItem.currentStock === 0 && (

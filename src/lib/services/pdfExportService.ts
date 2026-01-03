@@ -25,7 +25,7 @@ export interface InventoryItem {
   id: string
   name: string
   sku: string
-  unitCost: number
+  unitCost?: number
   currentStock: number
   categoryId: string
   categoryName: string
@@ -218,9 +218,9 @@ export class PDFExportService {
       const tableData = categoryItems.map(item => [
         item.name,
         item.sku,
-        this.formatCurrency(item.unitCost),
+        this.formatCurrency(item.unitCost ?? 0),
         item.currentStock.toString(),
-        this.formatCurrency(item.currentStock * item.unitCost),
+        this.formatCurrency(item.currentStock * (item.unitCost ?? 0)),
       ])
 
       const startY = yPosition
@@ -300,7 +300,7 @@ export class PDFExportService {
    */
   private static addSummaryStatistics(doc: jsPDF, yPosition: number, items: InventoryItem[]): void {
     const totalItems = items.length
-    const totalValue = items.reduce((sum, item) => sum + item.currentStock * item.unitCost, 0)
+    const totalValue = items.reduce((sum, item) => sum + item.currentStock * (item.unitCost ?? 0), 0)
     const lowStockCount = items.filter(item => item.currentStock < 10).length
     const outOfStockCount = items.filter(item => item.currentStock === 0).length
 

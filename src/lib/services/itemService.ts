@@ -20,9 +20,11 @@ export class ItemService {
       id: String(backendItem.itemId),
       name: backendItem.name,
       sku: backendItem.sku,
-      unitCost: backendItem.unitPrice,
       currentStock: backendItem.currentStock,
       createdAt: backendItem.createdAt,
+      unitCost: backendItem.unitPrice,
+      categoryId: backendItem.categoryId !== undefined && backendItem.categoryId !== null ? String(backendItem.categoryId) : undefined,
+      categoryName: backendItem.categoryName,
     };
   }
 
@@ -48,17 +50,18 @@ export class ItemService {
    */
   static async createItem(item: CreateItemRequest): Promise<Item> {
     try {
-      // Ensure unitCost is a number and convert to backend's unitPrice field
-      const payload = {
+      const payload: any = {
         name: item.name,
         sku: item.sku,
-        unitPrice: typeof item.unitCost === 'string' ? parseFloat(item.unitCost) : item.unitCost,
         categoryId: item.categoryId,
         description: item.description,
         minimumStock: item.minimumStock ? parseInt(String(item.minimumStock)) : undefined,
         maximumStock: item.maximumStock ? parseInt(String(item.maximumStock)) : undefined,
         reorderLevel: item.reorderLevel ? parseInt(String(item.reorderLevel)) : undefined,
       };
+      if (item.unitCost !== undefined && item.unitCost !== null) {
+        payload.unitPrice = typeof item.unitCost === 'string' ? parseFloat(item.unitCost) : item.unitCost;
+      }
       
       const response = await apiClient.post<BackendItemStockResponse>('/items', payload);
       return ItemService.toItem(response.data);
@@ -74,16 +77,18 @@ export class ItemService {
    */
   static async updateItem(itemId: number, item: CreateItemRequest): Promise<Item> {
     try {
-      const payload = {
+      const payload: any = {
         name: item.name,
         sku: item.sku,
-        unitPrice: typeof item.unitCost === 'string' ? parseFloat(item.unitCost) : item.unitCost,
         categoryId: item.categoryId,
         description: item.description,
         minimumStock: item.minimumStock ? parseInt(String(item.minimumStock)) : undefined,
         maximumStock: item.maximumStock ? parseInt(String(item.maximumStock)) : undefined,
         reorderLevel: item.reorderLevel ? parseInt(String(item.reorderLevel)) : undefined,
-      } as any
+      }
+      if (item.unitCost !== undefined && item.unitCost !== null) {
+        payload.unitPrice = typeof item.unitCost === 'string' ? parseFloat(item.unitCost) : item.unitCost
+      }
 
       const response = await apiClient.put<BackendItemStockResponse>(`/items/${itemId}`, payload)
       return ItemService.toItem(response.data)

@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api/client';
-import { StockMovement, StockInRequest, StockOutRequest, ApiError } from '@/lib/types';
+import { StockMovement, StockInRequest, StockOutRequest, ApiError, StockInBatchRequest } from '@/lib/types';
 
 export interface StockMovementResponse extends StockMovement {
   branch?: string;
@@ -32,17 +32,49 @@ export class StockService {
     }
   }
 
+  
   /**
-   * Get stock in transactions
-   * Requirements: 2.2, 2.4
+   * Record a stock-in batch (multiple items under one reference id)
    */
-  static async getStockInTransactions(): Promise<StockMovementResponse[]> {
+  static async recordStockInBatch(payload: StockInBatchRequest): Promise<{ referenceNumber: string; count: number }> {
     try {
-      const response = await apiClient.get<StockMovementResponse[]>('/stock/in');
+      const response = await apiClient.post<{ referenceNumber: string; count: number }>('/stock/in/batch', payload);
       return response.data;
     } catch (error) {
       const apiError = error as ApiError;
-      throw new Error(apiError.message || 'Failed to fetch stock in transactions');
+      throw new Error(apiError.message || 'Failed to record stock in batch');
+    }
+  }
+  
+  /**
+   * Get stock-in items by reference id
+   */
+  static async getStockInByReference(ref: string): Promise<import('@/lib/types').StockInDetail[]> {
+    try {
+      const response = await apiClient.get<import('@/lib/types').StockInDetail[]>(`/stock/in/${ref}`);
+      return response.data;
+    } catch (error) {
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || 'Failed to fetch stock-in details');
+    }
+  }
+  
+  static async deleteStockIn(ref: string): Promise<void> {
+    try {
+      await apiClient.delete<void>(`/stock/in/${ref}`);
+    } catch (error) {
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || 'Failed to delete stock-in');
+    }
+  }
+  
+  static async updateStockIn(ref: string, payload: import('@/lib/types').StockInBatchRequest): Promise<{ referenceNumber: string }> {
+    try {
+      const response = await apiClient.put<{ referenceNumber: string }>(`/stock/in/${ref}`, payload);
+      return response.data;
+    } catch (error) {
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || 'Failed to update stock-in');
     }
   }
 
@@ -64,9 +96,9 @@ export class StockService {
    * Get stock summary for all items
    * Requirements: 2.4
    */
-  static async getStockSummary(): Promise<any[]> {
+  static async getStockInTransactions(): Promise<import('@/lib/types').StockInSummary[]> {
     try {
-      const response = await apiClient.get<any[]>('/stock');
+      const response = await apiClient.get<import('@/lib/types').StockInSummary[]>('/stock/in/grouped');
       return response.data;
     } catch (error) {
       const apiError = error as ApiError;

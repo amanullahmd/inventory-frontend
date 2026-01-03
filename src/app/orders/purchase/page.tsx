@@ -126,8 +126,8 @@ export default function PurchaseOrdersPage() {
                   <tr><td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">No purchase orders found</td></tr>
                 ) : orders.map(o => (
                   <tr key={o.purchaseOrderId} className="hover:bg-accent/40 transition-colors">
-                    <td className="px-6 py-4 text-sm text-foreground">#{o.supplierId}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">#{o.warehouseId}</td>
+                    <td className="px-6 py-4 text-sm text-foreground">{o.supplierName || `#${o.supplierId}`}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{o.warehouseName || `#${o.warehouseId}`}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{o.status}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateDMY(o.orderDate)}</td>
                   </tr>

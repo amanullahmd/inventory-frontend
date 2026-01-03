@@ -12,6 +12,7 @@ import { CategoryService } from '@/lib/services/categoryService'
 
 interface Category {
   id: string
+  code?: string
   name: string
   description: string
   color: string
@@ -64,6 +65,7 @@ export default function CategoryDetailPage() {
 
       const categoryData: Category = {
         id: String(foundCategory.id),
+        code: (foundCategory as any).code,
         name: foundCategory.name,
         description: foundCategory.description,
         color: foundCategory.color || '#3B82F6',
@@ -94,7 +96,7 @@ export default function CategoryDetailPage() {
     item.sku.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const totalValue = items.reduce((sum, item) => sum + (item.currentStock * item.unitCost), 0)
+  const totalValue = items.reduce((sum, item) => sum + (item.currentStock * (item.unitCost ?? 0)), 0)
   const lowStockItems = items.filter(item => item.currentStock < 10).length
   const outOfStockItems = items.filter(item => item.currentStock === 0).length
 
@@ -165,6 +167,7 @@ export default function CategoryDetailPage() {
                 className="w-4 h-4 rounded-full"
                 style={{ backgroundColor: category.color }}
               />
+              {category.code ? <span className="text-sm text-muted-foreground">ID: {category.code}</span> : null}
               <span className="text-sm text-muted-foreground">Created {formatDateDMY(category.createdAt)}</span>
             </div>
           </div>
@@ -269,9 +272,7 @@ export default function CategoryDetailPage() {
                     <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Item Name</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">SKU</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unit</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unit Price</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Stock</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Total Value</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-card">
@@ -282,7 +283,6 @@ export default function CategoryDetailPage() {
                         <span className="inline-flex rounded-md bg-muted/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.sku}</span>
                       </td>
                       <td className="px-6 py-4 text-sm text-foreground">{item.unit || '-'}</td>
-                      <td className="px-6 py-4 text-sm font-semibold text-foreground">${item.unitCost.toFixed(2)}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
                           item.currentStock === 0
@@ -294,7 +294,6 @@ export default function CategoryDetailPage() {
                           {item.currentStock}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-foreground">${(item.currentStock * item.unitCost).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>

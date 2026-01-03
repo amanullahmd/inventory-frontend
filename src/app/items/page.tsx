@@ -48,7 +48,6 @@ export default function ItemsPage() {
   const [itemForm, setItemForm] = useState({
     name: '',
     sku: '',
-    unitCost: '',
     categoryId: '',
     description: '',
     minimumStock: '',
@@ -59,7 +58,6 @@ export default function ItemsPage() {
   const [editForm, setEditForm] = useState({
     name: '',
     sku: '',
-    unitCost: '',
     categoryId: '',
     description: '',
     minimumStock: '',
@@ -168,7 +166,7 @@ export default function ItemsPage() {
       return
     }
 
-    if (!itemForm.name || !itemForm.sku || !itemForm.unitCost || !itemForm.categoryId) {
+    if (!itemForm.name || !itemForm.sku || !itemForm.categoryId) {
       setError('Please fill in all required fields')
       return
     }
@@ -186,7 +184,6 @@ export default function ItemsPage() {
       const newItem = await ItemService.createItem({
         name: itemForm.name,
         sku: itemForm.sku,
-        unitCost: parseFloat(itemForm.unitCost),
         categoryId: parseInt(itemForm.categoryId),
         description: itemForm.description || undefined,
         minimumStock: itemForm.minimumStock ? parseInt(itemForm.minimumStock) : undefined,
@@ -206,7 +203,6 @@ export default function ItemsPage() {
       setItemForm({
         name: '',
         sku: '',
-        unitCost: '',
         categoryId: '',
         description: '',
         minimumStock: '',
@@ -228,7 +224,6 @@ export default function ItemsPage() {
     setEditForm({
       name: item.name,
       sku: item.sku,
-      unitCost: String(item.unitCost),
       categoryId: String(item.categoryId || ''),
       description: '',
       minimumStock: '',
@@ -247,7 +242,7 @@ export default function ItemsPage() {
 
     if (!editingItemId) return
 
-    if (!editForm.name || !editForm.sku || !editForm.unitCost || !editForm.categoryId) {
+    if (!editForm.name || !editForm.sku || !editForm.categoryId) {
       setError('Please fill in all required fields')
       return
     }
@@ -257,7 +252,6 @@ export default function ItemsPage() {
       const updated = await ItemService.updateItem(parseInt(editingItemId), {
         name: editForm.name,
         sku: editForm.sku,
-        unitCost: parseFloat(editForm.unitCost),
         categoryId: parseInt(editForm.categoryId),
         description: editForm.description || undefined,
         minimumStock: editForm.minimumStock ? parseInt(editForm.minimumStock) : undefined,
@@ -321,7 +315,6 @@ export default function ItemsPage() {
     return matchesSearch
   })
 
-  const totalValue = items.reduce((sum, item) => sum + (item.currentStock * item.unitCost), 0)
   const lowStockItems = items.filter(item => item.currentStock < 10).length
   const outOfStockItems = items.filter(item => item.currentStock === 0).length
 
@@ -409,19 +402,7 @@ export default function ItemsPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">${totalValue.toFixed(2)}</p>
-              </div>
-              <div className="rounded-lg bg-chart-1/10 p-3">
-                <svg className="h-6 w-6 text-chart-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          
 
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
@@ -516,9 +497,7 @@ export default function ItemsPage() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">SKU</th>
                         
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unit Price</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Stock</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Total Value</th>
+                        
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
@@ -539,19 +518,7 @@ export default function ItemsPage() {
                             <span className="inline-flex rounded-md bg-muted/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.sku}</span>
                           </td>
                           
-                          <td className="px-6 py-4 text-sm font-semibold text-foreground">${item.unitCost.toFixed(2)}</td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
-                              item.currentStock === 0
-                                ? 'border-destructive/30 bg-destructive/10 text-destructive'
-                                : item.currentStock < 10
-                                ? 'border-chart-3/30 bg-chart-3/10 text-chart-3'
-                                : 'border-chart-2/30 bg-chart-2/10 text-chart-2'
-                            }`}>
-                              {item.currentStock}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-foreground">${(item.currentStock * item.unitCost).toFixed(2)}</td>
+                          
                           <td className="px-6 py-4 text-sm">
                             <PermissionGuard permission="create_item">
                               <button
@@ -722,18 +689,7 @@ export default function ItemsPage() {
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Unit Cost *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={itemForm.unitCost}
-                      onChange={(e) => setItemForm({ ...itemForm, unitCost: e.target.value })}
-                      placeholder="0.00"
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                      required
-                    />
-                  </div>
+                  
 
                   <div>
                     <label className="block text-sm font-medium mb-2">Min Stock Level</label>
@@ -856,17 +812,7 @@ export default function ItemsPage() {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Unit Cost *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={editForm.unitCost}
-                      onChange={(e) => setEditForm({ ...editForm, unitCost: e.target.value })}
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                      required
-                    />
-                  </div>
+                  
 
                   
                 </div>

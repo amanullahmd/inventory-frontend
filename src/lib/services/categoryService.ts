@@ -3,6 +3,7 @@ import { ApiError } from '@/lib/types';
 
 export interface Category {
   id: number;
+  code?: string;
   name: string;
   description: string;
   color: string;
@@ -12,6 +13,7 @@ export interface Category {
 
 interface BackendCategory {
   categoryId: number;
+  categoryCode?: string;
   name: string;
   description: string;
   color: string;
@@ -22,12 +24,14 @@ interface BackendCategory {
 export interface CreateCategoryRequest {
   name: string;
   description: string;
+  code?: string;
 }
 
 export class CategoryService {
   private static toCategory(category: BackendCategory): Category {
     return {
       id: category.categoryId,
+      code: category.categoryCode,
       name: category.name,
       description: category.description,
       color: category.color,

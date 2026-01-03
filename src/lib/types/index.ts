@@ -4,9 +4,11 @@ export interface Item {
   id: string;
   name: string;
   sku: string;
-  unitCost: number;
+  unitCost?: number;
   currentStock: number;
   createdAt: string;
+  categoryId?: string;
+  categoryName?: string;
 }
 
 export interface StockMovement {
@@ -16,6 +18,9 @@ export interface StockMovement {
   quantity: number;
   note?: string;
   branch?: string;
+  referenceNumber?: string;
+  supplierId?: string;
+  warehouseId?: string;
   createdAt: string;
 }
 
@@ -40,8 +45,8 @@ export interface UserSession {
 export interface CreateItemRequest {
   name: string;
   sku: string;
-  unitCost: number;
-  categoryId?: number;
+  unitCost?: number;
+  categoryId: number;
   description?: string;
   minimumStock?: number;
   maximumStock?: number;
@@ -56,6 +61,29 @@ export interface StockInRequest {
   branch?: string;
   batchId?: string;
   warehouseId?: string;
+}
+ 
+export interface StockInBatchRequest {
+  supplierId: number;
+  warehouseId: number;
+  notes?: string;
+  referenceNumber?: string;
+  items: Array<{ itemId: number; quantity: number }>;
+}
+
+export interface StockInDetail {
+  itemId: number;
+  sku: string;
+  name: string;
+  quantity: number;
+  createdAt: string;
+}
+
+export interface StockInSummary {
+  referenceNumber: string;
+  count: number;
+  createdBy?: string;
+  createdAt: string;
 }
 
 export interface StockOutRequest {

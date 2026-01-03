@@ -16,6 +16,7 @@ import { formatDateDMY } from '@/lib/utils/date'
 
 interface Category {
   id: string
+  code?: string
   name: string
   description: string
   color: string
@@ -34,7 +35,12 @@ export default function CategoriesPage() {
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [code, setCode] = useState('')
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [editCategory, setEditCategory] = useState<Category | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editCode, setEditCode] = useState('')
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -56,6 +62,7 @@ export default function CategoriesPage() {
         const itemCount = backendItems.filter(item => String((item as any).categoryId) === String(cat.id)).length
         return {
           id: String(cat.id),
+          code: (cat as any).code,
           name: cat.name,
           description: cat.description,
           color: cat.color || '#3B82F6',
@@ -74,21 +81,56 @@ export default function CategoriesPage() {
       setLoading(false)
     }
   }
+  
+  const openEdit = (cat: Category) => {
+    setEditCategory(cat)
+    setEditName(cat.name)
+    setEditDescription(cat.description || '')
+    setEditCode(cat.code || '')
+    setShowCreate(false)
+  }
+  
+  const saveEdit = async () => {
+    if (!editCategory) return
+    if (!editCode.trim()) { setError('Category ID is required'); return }
+    if (!editName.trim()) { setError('Name is required'); return }
+    try {
+      setCreating(true)
+      setError(null)
+      const updated = await CategoryService.updateCategory(Number(editCategory.id), { name: editName.trim(), description: editDescription.trim(), code: editCode.trim() })
+      setSuccessMsg('Category updated successfully')
+      setEditCategory(null)
+      setEditName('')
+      setEditDescription('')
+      setEditCode('')
+      await fetchCategories()
+    } catch (err) {
+      const apiError = err as ApiError
+      setError(apiError.message || 'Failed to update category')
+    } finally {
+      setCreating(false)
+    }
+  }
 
   const handleCreate = async () => {
     try {
       setCreating(true)
       setError(null)
       setSuccessMsg(null)
+      if (!code.trim()) {
+        setError('Category ID is required')
+        return
+      }
       if (!name.trim()) {
         setError('Name is required')
         return
       }
-      await CategoryService.createCategory({ name: name.trim(), description: description.trim() })
+      await CategoryService.createCategory({ name: name.trim(), description: description.trim(), code: code.trim() || undefined })
       setSuccessMsg('Category created successfully')
       setShowCreate(false)
       setName('')
       setDescription('')
+      setCode('')
       await fetchCategories()
     } catch (err) {
       const apiError = err as ApiError
@@ -159,6 +201,10 @@ export default function CategoriesPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
+                <Label htmlFor="category-code">Category ID</Label>
+                <Input id="category-code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Required unique code (e.g., CAT-ELC)" />
+              </div>
+              <div>
                 <Label htmlFor="category-name">Name</Label>
                 <Input id="category-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Electronics" />
               </div>
@@ -170,6 +216,34 @@ export default function CategoriesPage() {
             <div className="mt-6 flex items-center gap-3">
               <Button onClick={handleCreate} disabled={creating}>{creating ? 'Creating...' : 'Create'}</Button>
               <Button variant="outline" onClick={() => setShowCreate(false)} disabled={creating}>Cancel</Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Edit Form */}
+        {editCategory && (
+          <div className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Edit Category</h3>
+              <button className="text-muted-foreground hover:text-foreground" onClick={() => setEditCategory(null)}>Close</button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-category-code">Category ID</Label>
+                <Input id="edit-category-code" value={editCode} onChange={(e) => setEditCode(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="edit-category-name">Name</Label>
+                <Input id="edit-category-name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="edit-category-description">Description</Label>
+                <Input id="edit-category-description" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
+              </div>
+            </div>
+            <div className="mt-6 flex items-center gap-3">
+              <Button onClick={saveEdit} disabled={creating}>{creating ? 'Saving...' : 'Save'}</Button>
+              <Button variant="outline" onClick={() => setEditCategory(null)} disabled={creating}>Cancel</Button>
             </div>
           </div>
         )}
@@ -207,9 +281,14 @@ export default function CategoriesPage() {
                   >
                     {category.name.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                    {category.itemCount} items
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {category.code ? (
+                      <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">ID: {category.code}</span>
+                    ) : null}
+                    <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                      {category.itemCount} items
+                    </span>
+                  </div>
                 </div>
                 
                 <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
@@ -222,7 +301,9 @@ export default function CategoriesPage() {
                 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Created {formatDateDMY(category.createdAt)}</span>
-                  <span className="group-hover:text-primary transition-colors">View →</span>
+                  <span className="group-hover:text-primary transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); openEdit(category) }} className="rounded-md border border-border px-2 py-1 text-xs">Edit</button>
+                  </span>
                 </div>
               </div>
             ))}

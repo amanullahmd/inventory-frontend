@@ -19,8 +19,9 @@ class ApiClient {
   private maxRetries = 3;
 
   constructor() {
+    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL,
+      baseURL: base,
       timeout: 20000,
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ class ApiClient {
             const session = await getSession();
             if (session?.refreshToken) {
               // Attempt to refresh the token
-              const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
+              const refreshRes = await fetch(`${base}/auth/refresh`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ refreshToken: session.refreshToken })
