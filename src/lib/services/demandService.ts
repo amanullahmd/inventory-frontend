@@ -4,6 +4,8 @@ import { ApiError } from '@/lib/types'
 export interface Demand {
   demandId: number
   demandCode: string
+  employeeId?: number
+  employeeCode?: string
   demanderName: string
   position?: string
   grade?: string
@@ -18,32 +20,26 @@ export interface Demand {
   requestedByName?: string
   createdAt: string
   updatedAt?: string
-  items?: Array<{ demandItemId: number; itemId: number; sku: string; name: string; quantity: number; unit?: string }>
+  items?: Array<{ demandItemId: number; itemId: number; sku: string; name: string; units: number }>
 }
 
 export interface CreateDemandRequest {
-  demanderName: string
-  position?: string
-  grade?: string
-  itemId: number
+  employeeId?: number
+  itemId?: number
   unit?: string
-  warehouseId?: number
   status?: string
   note?: string
-  items?: Array<{ itemId: number; quantity: number; unit?: string }>
+  items?: Array<{ itemId: number; units: number }>
 }
  
 export interface UpdateDemandRequest {
   demandCode?: string
-  demanderName?: string
-  position?: string
-  grade?: string
+  employeeId?: number
   itemId?: number
   unit?: string
-  warehouseId?: number
   status?: string
   note?: string
-  items?: Array<{ itemId: number; quantity: number; unit?: string }>
+  items?: Array<{ itemId: number; units: number }>
 }
 
 export class DemandService {

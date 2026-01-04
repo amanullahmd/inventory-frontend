@@ -49,7 +49,7 @@ export default function Navbar() {
               Suppliers
             </Link>
             <Link href="/warehouses" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-              Warehouses
+              Branches
             </Link>
             <Link href="/categories" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Categories
@@ -74,6 +74,9 @@ export default function Navbar() {
             </Link>
             <Link href="/demand" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Demand
+            </Link>
+            <Link href="/employees" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Employees
             </Link>
             {isAdmin() && (
               <Link href="/users" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
@@ -139,7 +142,7 @@ export default function Navbar() {
                 Suppliers
               </Link>
               <Link href="/warehouses" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
-                Warehouses
+                Branches
               </Link>
               <Link href="/categories" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Categories
@@ -164,6 +167,9 @@ export default function Navbar() {
               </Link>
               <Link href="/demand" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Demand
+              </Link>
+              <Link href="/employees" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Employees
               </Link>
               {isAdmin() && (
                 <Link href="/users" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>

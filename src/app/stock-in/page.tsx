@@ -177,7 +177,7 @@ export default function StockInPage() {
               {/* Warehouse */}
               <div>
                 <label className="block text-base font-semibold text-foreground mb-3">
-                  Warehouse *
+                  Branch *
                 </label>
                 <select
                   value={selectedWarehouse}
@@ -185,7 +185,7 @@ export default function StockInPage() {
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
                   required
                 >
-                  <option value="">Select a warehouse...</option>
+                  <option value="">Select a branch...</option>
                   {warehouses.map(w => (<option key={w.warehouseId || w.id} value={w.warehouseId || w.id}>{w.name}</option>))}
                 </select>
               </div>

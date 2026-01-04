@@ -26,6 +26,8 @@ export default function PurchaseOrdersPage() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const STATUSES = ['DRAFT','APPROVED','PARTIAL_RECEIVED','RECEIVED','CLOSED','CANCELLED']
   const [formStatus, setFormStatus] = useState<string>('DRAFT')
+  const [rangeStart, setRangeStart] = useState<string>('')
+  const [rangeEnd, setRangeEnd] = useState<string>('')
 
   const fetchAll = async () => {
     try {
@@ -50,6 +52,31 @@ export default function PurchaseOrdersPage() {
   }
 
   useEffect(() => { if (status === 'authenticated') fetchAll() }, [status])
+
+  const sumForDate = (predicate: (d: Date) => boolean) =>
+    orders.reduce((acc, o) => {
+      const d = new Date(o.orderDate)
+      return predicate(d) ? acc + (Number(o.totalAmount ?? 0) || 0) : acc
+    }, 0)
+  const todayTotal = sumForDate(d => {
+    const now = new Date()
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+  })
+  const monthTotal = sumForDate(d => {
+    const now = new Date()
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+  })
+  const yearTotal = sumForDate(d => d.getFullYear() === new Date().getFullYear())
+  const filtered = orders.filter(o => {
+    if (!rangeStart && !rangeEnd) return true
+    const d = new Date(o.orderDate)
+    const s = rangeStart ? new Date(rangeStart) : null
+    const e = rangeEnd ? new Date(rangeEnd) : null
+    if (s && d < s) return false
+    if (e) { const ed = new Date(e); ed.setHours(23,59,59,999); if (d > ed) return false }
+    return true
+  })
+  const rangeTotal = filtered.reduce((acc, o) => acc + (Number(o.totalAmount ?? 0) || 0), 0)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,6 +150,38 @@ export default function PurchaseOrdersPage() {
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchAll} />}
 
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="text-sm font-semibold text-muted-foreground">Today</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">${todayTotal.toFixed(2)}</div>
+            <div className="mt-1 text-xs text-muted-foreground">Total value today</div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="text-sm font-semibold text-muted-foreground">This Month</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">${monthTotal.toFixed(2)}</div>
+            <div className="mt-1 text-xs text-muted-foreground">Total value this month</div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="text-sm font-semibold text-muted-foreground">This Year</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">${yearTotal.toFixed(2)}</div>
+            <div className="mt-1 text-xs text-muted-foreground">Total value this year</div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="text-sm font-semibold text-muted-foreground">Selected Range</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">${rangeTotal.toFixed(2)}</div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs mb-1">Start</label>
+                <input type="date" value={rangeStart} onChange={e=>setRangeStart(e.target.value)} className="w-full rounded-md border border-border bg-background px-2 py-1" />
+              </div>
+              <div>
+                <label className="block text-xs mb-1">End</label>
+                <input type="date" value={rangeEnd} onChange={e=>setRangeEnd(e.target.value)} className="w-full rounded-md border border-border bg-background px-2 py-1" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {showForm && (
           <form onSubmit={submit} className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -133,9 +192,9 @@ export default function PurchaseOrdersPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Warehouse</label>
+              <label className="block text-sm font-medium mb-2">Branch</label>
               <select className="w-full rounded-lg border border-border px-3 py-2" value={form.warehouseId} onChange={e => setForm({ ...form, warehouseId: parseInt(e.target.value) })}>
-                <option value={0}>Select warehouse</option>
+                <option value={0}>Select branch</option>
                 {warehouses.map((w: any) => (<option key={w.warehouseId} value={w.warehouseId}>{w.name}</option>))}
               </select>
             </div>
@@ -192,16 +251,16 @@ export default function PurchaseOrdersPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">PO ID</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Supplier</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Warehouse</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Branch</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Order Date</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Total</th>
                 </tr>
               </thead>
               <tbody className="bg-card divide-y divide-border">
-                {orders.length === 0 ? (
+                {filtered.length === 0 ? (
                   <tr><td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">No purchase orders found</td></tr>
-                ) : orders.map(o => (
+                ) : filtered.map(o => (
                   <tr key={o.purchaseOrderId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
                       <button

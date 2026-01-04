@@ -137,11 +137,7 @@ export default function Home() {
                 <div className="mt-3 text-5xl font-bold text-foreground">{stats.totalItems}</div>
                 <div className="mt-2 text-sm text-muted-foreground">Items in inventory</div>
               </div>
-              <div className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow">
-                <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Total Value</div>
-                <div className="mt-3 text-5xl font-bold text-foreground">${stats.totalValue.toFixed(2)}</div>
-                <div className="mt-2 text-sm text-muted-foreground">Inventory value</div>
-              </div>
+              
               <div className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Low Stock</div>
                 <div className="mt-3 text-5xl font-bold text-yellow-600">{stats.lowStockItems}</div>

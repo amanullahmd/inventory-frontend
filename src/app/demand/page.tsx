@@ -7,34 +7,34 @@ import ErrorMessage from '@/components/ui/ErrorMessage'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import { DemandService, Demand, CreateDemandRequest, UpdateDemandRequest } from '@/lib/services/demandService'
 import { ItemService } from '@/lib/services/itemService'
-import { WarehouseService } from '@/lib/services/warehouseService'
+import { EmployeeService } from '@/lib/services/employeeService'
 
 export default function DemandPage() {
   const { data: session, status } = useSession()
   const [demands, setDemands] = useState<Demand[]>([])
   const [items, setItems] = useState<any[]>([])
-  const [warehouses, setWarehouses] = useState<any[]>([])
+  const [employees, setEmployees] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [form, setForm] = useState<CreateDemandRequest>({ demanderName: '', position: '', grade: '', itemId: 0, unit: '', warehouseId: undefined, status: 'DRAFT', note: '' })
+  const [form, setForm] = useState<CreateDemandRequest>({ employeeId: undefined, unit: '', status: 'DRAFT', note: '' })
   const [editingId, setEditingId] = useState<number | null>(null)
   const [demandCode, setDemandCode] = useState<string>('')
   const STATUSES = ['DRAFT','APPROVED','RECEIVED','REJECTED']
-  const [lines, setLines] = useState<Array<{ itemId: string; quantity: string; unit: string }>>([{ itemId: '', quantity: '1', unit: '' }])
+  const [lines, setLines] = useState<Array<{ itemId: string; units: string }>>([{ itemId: '', units: '1' }])
   
   const fetchAll = async () => {
     try {
       setLoading(true)
       setError(null)
-      const [ds, is, ws] = await Promise.all([
+      const [ds, is, es] = await Promise.all([
         DemandService.getDemands().catch(() => []),
         ItemService.getItems().catch(() => []),
-        WarehouseService.getWarehouses().catch(() => []),
+        EmployeeService.getEmployees().catch(() => []),
       ])
       setDemands(ds as any)
       setItems(is as any)
-      setWarehouses(ws as any)
+      setEmployees(es as any)
     } catch (err: any) {
       setError(err.message || 'Failed to load demands')
       setDemands([])
@@ -47,15 +47,15 @@ export default function DemandPage() {
   
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const payloadItems = lines.filter(l => l.itemId && l.quantity).map(l => ({ itemId: parseInt(l.itemId), quantity: parseInt(l.quantity), unit: l.unit }))
-    if (!form.demanderName || payloadItems.length === 0) { setError('Demander name and at least one item are required'); return }
+    const payloadItems = lines.filter(l => l.itemId && l.units).map(l => ({ itemId: parseInt(l.itemId), units: parseInt(l.units) }))
+    if (!form.employeeId || payloadItems.length === 0) { setError('Employee and at least one item are required'); return }
     try {
       setError(null); setSuccess(null)
       const created = await DemandService.createDemand({ ...form, items: payloadItems })
       setDemands([created, ...demands])
       setSuccess('Demand submitted')
-      setForm({ demanderName: '', position: '', grade: '', itemId: 0, unit: '', warehouseId: undefined, status: 'DRAFT', note: '' })
-      setLines([{ itemId: '', quantity: '1', unit: '' }])
+      setForm({ employeeId: undefined, unit: '', status: 'DRAFT', note: '' })
+      setLines([{ itemId: '', units: '1' }])
     } catch (err: any) {
       setError(err.message || 'Failed to submit demand')
     }
@@ -84,17 +84,12 @@ export default function DemandPage() {
               <input className="w-full rounded-lg border border-border px-3 py-2" value={demandCode} onChange={e => setDemandCode(e.target.value)} />
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium mb-2">Demander Name</label>
-            <input className="w-full rounded-lg border border-border px-3 py-2" value={form.demanderName} onChange={e => setForm({ ...form, demanderName: e.target.value })} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Position</label>
-            <input className="w-full rounded-lg border border-border px-3 py-2" value={form.position || ''} onChange={e => setForm({ ...form, position: e.target.value })} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Grade</label>
-            <input className="w-full rounded-lg border border-border px-3 py-2" value={form.grade || ''} onChange={e => setForm({ ...form, grade: e.target.value })} />
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-2">Employee</label>
+            <select className="w-full rounded-lg border border-border px-3 py-2" value={form.employeeId || ''} onChange={e => setForm({ ...form, employeeId: e.target.value ? parseInt(e.target.value) : undefined })}>
+              <option value="">Select employee</option>
+              {employees.map((emp: any) => (<option key={emp.employeeId} value={emp.employeeId}>{emp.employeeCode} - {emp.name}</option>))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Status</label>
@@ -106,25 +101,17 @@ export default function DemandPage() {
             <label className="block text-sm font-medium mb-2">Items</label>
             <div className="space-y-3">
               {lines.map((line, idx) => (
-                <div key={idx} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <select value={line.itemId} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,itemId:e.target.value}:l))} className="w-full rounded-lg border border-border px-3 py-2">
                     <option value="">Choose an item</option>
                     {items.map(it => (<option key={it.id} value={it.id}>{it.name} ({it.sku})</option>))}
                   </select>
-                  <input type="number" min="1" value={line.quantity} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,quantity:e.target.value}:l))} placeholder="Qty" className="w-full rounded-lg border border-border px-3 py-2" />
-                  <input value={line.unit} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,unit:e.target.value}:l))} placeholder="Unit" className="w-full rounded-lg border border-border px-3 py-2" />
+                  <input type="number" min="1" value={line.units} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,units:e.target.value}:l))} placeholder="Unit" className="w-full rounded-lg border border-border px-3 py-2" />
                   <button type="button" onClick={() => setLines(lines.filter((_,i)=>i!==idx))} className="rounded-lg border border-border px-3 py-2">Remove</button>
                 </div>
               ))}
-              <button type="button" onClick={() => setLines([...lines, { itemId: '', quantity: '1', unit: '' }])} className="rounded-lg border border-border px-3 py-2">+ Add Item</button>
+              <button type="button" onClick={() => setLines([...lines, { itemId: '', units: '1' }])} className="rounded-lg border border-border px-3 py-2">+ Add Item</button>
             </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Warehouse</label>
-            <select className="w-full rounded-lg border border-border px-3 py-2" value={form.warehouseId || ''} onChange={e => setForm({ ...form, warehouseId: e.target.value ? parseInt(e.target.value) : undefined })}>
-              <option value="">Select warehouse</option>
-              {warehouses.map((w: any) => (<option key={w.warehouseId} value={w.warehouseId}>{w.name}</option>))}
-            </select>
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-2">Note</label>
@@ -135,20 +122,17 @@ export default function DemandPage() {
               <>
                 <button type="button" onClick={async () => {
                   try {
-                    const payloadItems = lines.filter(l => l.itemId && l.quantity).map(l => ({ itemId: parseInt(l.itemId), quantity: parseInt(l.quantity), unit: l.unit }))
+                    const payloadItems = lines.filter(l => l.itemId && l.units).map(l => ({ itemId: parseInt(l.itemId), units: parseInt(l.units) }))
                     const updated = await DemandService.updateDemand(editingId!, {
                       demandCode,
-                      demanderName: form.demanderName,
-                      position: form.position,
-                      grade: form.grade,
-                      warehouseId: form.warehouseId,
+                      employeeId: form.employeeId,
                       status: form.status,
                       note: form.note,
                       items: payloadItems,
                     } as UpdateDemandRequest)
                     setDemands(demands.map(d => d.demandId === updated.demandId ? updated : d))
                     setSuccess('Demand updated')
-                    setEditingId(null); setDemandCode(''); setForm({ demanderName: '', position: '', grade: '', itemId: 0, unit: '', warehouseId: undefined, status: 'DRAFT', note: '' }); setLines([{ itemId: '', quantity: '1', unit: '' }])
+                    setEditingId(null); setDemandCode(''); setForm({ employeeId: undefined, itemId: 0, unit: '', status: 'DRAFT', note: '' }); setLines([{ itemId: '', units: '1' }])
                   } catch (err: any) {
                     setError(err.message || 'Failed to update demand')
                   }
@@ -158,12 +142,12 @@ export default function DemandPage() {
                     await DemandService.deleteDemand(editingId!)
                     setDemands(demands.filter(d => d.demandId !== editingId))
                     setSuccess('Demand deleted')
-                    setEditingId(null); setDemandCode(''); setForm({ demanderName: '', position: '', grade: '', itemId: 0, unit: '', warehouseId: undefined, status: 'DRAFT', note: '' })
+                    setEditingId(null); setDemandCode(''); setForm({ employeeId: undefined, unit: '', status: 'DRAFT', note: '' })
                   } catch (err: any) {
                     setError(err.message || 'Failed to delete demand')
                   }
                 }} className="rounded-lg border border-border px-4 py-2">Delete</button>
-                <button type="button" onClick={() => { setEditingId(null); setDemandCode(''); setForm({ demanderName: '', position: '', grade: '', itemId: 0, unit: '', warehouseId: undefined, status: 'DRAFT', note: '' }) }} className="rounded-lg border border-border px-4 py-2">Cancel</button>
+                <button type="button" onClick={() => { setEditingId(null); setDemandCode(''); setForm({ employeeId: undefined, unit: '', status: 'DRAFT', note: '' }) }} className="rounded-lg border border-border px-4 py-2">Cancel</button>
               </>
             ) : (
               <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Submit Demand</button>
@@ -177,14 +161,11 @@ export default function DemandPage() {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Demand ID</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Demander</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Position</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Grade</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Employee</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Note</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Item</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Unit</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Warehouse</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Added By</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Created</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Updated</th>
@@ -192,7 +173,7 @@ export default function DemandPage() {
               </thead>
               <tbody className="bg-card divide-y divide-border">
                 {demands.length === 0 ? (
-                  <tr><td colSpan={12} className="px-6 py-8 text-center text-muted-foreground">No demands found</td></tr>
+                  <tr><td colSpan={11} className="px-6 py-8 text-center text-muted-foreground">No demands found</td></tr>
                 ) : demands.map(d => (
                   <tr key={d.demandId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
@@ -202,9 +183,9 @@ export default function DemandPage() {
                           setError(null); setSuccess(null)
                           setEditingId(detail.demandId)
                           setDemandCode(detail.demandCode || `DM-${detail.demandId}`)
-                          setForm({ demanderName: detail.demanderName, position: detail.position, grade: detail.grade, itemId: 0, unit: '', warehouseId: detail.warehouseId, status: detail.status || 'DRAFT', note: detail.note || '' })
-                          const mapped = (detail.items || []).map((it:any)=> ({ itemId: String(it.itemId), quantity: String(it.quantity), unit: it.unit || '' }))
-                          setLines(mapped.length > 0 ? mapped : [{ itemId: String(detail.itemId || ''), quantity: '1', unit: detail.unit || '' }])
+                          setForm({ employeeId: detail.employeeId, unit: '', status: detail.status || 'DRAFT', note: detail.note || '' })
+                          const mapped = (detail.items || []).map((it:any)=> ({ itemId: String(it.itemId), units: String(it.units) }))
+                          setLines(mapped.length > 0 ? mapped : [{ itemId: String(detail.itemId || ''), units: '1' }])
                         } catch (err: any) {
                           setError(err.message || 'Failed to open demand')
                         }
@@ -212,16 +193,13 @@ export default function DemandPage() {
                         {d.demandCode || `DM-${d.demandId}`}
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-sm text-foreground">{d.demanderName}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{d.position || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{d.grade || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-foreground">{d.employeeCode ? `${d.employeeCode} - ${d.demanderName}` : d.demanderName}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.status || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.note || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">
                       {d.items && d.items.length > 0 ? `${d.items[0].name} (${d.items[0].sku})${d.items.length > 1 ? ` +${d.items.length-1} more` : ''}` : `${d.itemName} (${d.sku})`}
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{d.unit || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{d.warehouseName || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{d.items && d.items.length > 0 ? d.items[0].units : '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.requestedByName || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(d.createdAt).toLocaleString()}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.updatedAt ? new Date(d.updatedAt).toLocaleString() : '-'}</td>
