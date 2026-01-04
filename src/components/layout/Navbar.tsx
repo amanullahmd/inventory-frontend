@@ -72,6 +72,9 @@ export default function Navbar() {
             <Link href="/orders/sales" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Sales Orders
             </Link>
+            <Link href="/demand" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              Demand
+            </Link>
             {isAdmin() && (
               <Link href="/users" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
                 Users
@@ -158,6 +161,9 @@ export default function Navbar() {
               </Link>
               <Link href="/orders/sales" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Sales Orders
+              </Link>
+              <Link href="/demand" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
+                Demand
               </Link>
               {isAdmin() && (
                 <Link href="/users" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>

@@ -64,7 +64,7 @@ export interface StockInRequest {
 }
  
 export interface StockInBatchRequest {
-  supplierId: number;
+  supplierId?: number;
   warehouseId: number;
   notes?: string;
   referenceNumber?: string;
@@ -77,6 +77,8 @@ export interface StockInDetail {
   name: string;
   quantity: number;
   createdAt: string;
+  supplierId?: number;
+  warehouseId?: number;
 }
 
 export interface StockInSummary {
@@ -84,6 +86,9 @@ export interface StockInSummary {
   count: number;
   createdBy?: string;
   createdAt: string;
+  updatedAt?: string;
+  supplierName?: string;
+  sourceMode?: 'SUPPLIER' | 'NON_SUPPLIER';
 }
 
 export interface StockOutRequest {
