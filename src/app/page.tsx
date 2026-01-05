@@ -32,10 +32,10 @@ export default function Home() {
         const s = await ItemService.getStatistics()
         if (!active) return
         setStats({
-          totalItems: s.totalItems,
-          totalValue: s.totalValue,
-          lowStockItems: s.lowStockCount,
-          outOfStockItems: s.outOfStockCount,
+          totalItems: Number(s.totalItems ?? 0),
+          totalValue: Number(s.totalValue ?? 0),
+          lowStockItems: Number((s as any).lowStockCount ?? 0),
+          outOfStockItems: Number((s as any).outOfStockCount ?? 0),
         })
         try {
           const p = await (await import('@/lib/services/userService')).UserService.getCurrentUserProfile()
@@ -132,22 +132,19 @@ export default function Home() {
             </>
           ) : (
             <>
-              <div className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow">
+              <Link href="/items?filter=all" className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow block">
                 <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Total Items</div>
-                <div className="mt-3 text-5xl font-bold text-foreground">{stats.totalItems}</div>
                 <div className="mt-2 text-sm text-muted-foreground">Items in inventory</div>
-              </div>
+              </Link>
               
-              <div className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow">
+              <Link href="/items?filter=low_stock" className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow block">
                 <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Low Stock</div>
-                <div className="mt-3 text-5xl font-bold text-yellow-600">{stats.lowStockItems}</div>
                 <div className="mt-2 text-sm text-muted-foreground">Items below threshold</div>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow">
+              </Link>
+              <Link href="/items?filter=out_of_stock" className="rounded-xl border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow block">
                 <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Out of Stock</div>
-                <div className="mt-3 text-5xl font-bold text-red-600">{stats.outOfStockItems}</div>
                 <div className="mt-2 text-sm text-muted-foreground">Items unavailable</div>
-              </div>
+              </Link>
             </>
           )}
         </div>

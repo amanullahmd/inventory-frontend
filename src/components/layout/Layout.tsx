@@ -4,6 +4,7 @@ import { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import Navbar from './Navbar'
 import SessionSync from '@/components/auth/SessionSync'
+import RedirectOnUnauthenticated from '@/components/auth/RedirectOnUnauthenticated'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -15,6 +16,7 @@ export default function Layout({ children, session }: LayoutProps) {
     <SessionProvider session={session}>
       <div className="min-h-screen bg-background text-foreground">
         <SessionSync />
+        <RedirectOnUnauthenticated />
         <Navbar />
         <main className="w-full px-4 py-6 sm:px-6 lg:px-8">
           {children}

@@ -5,6 +5,7 @@ interface BackendItemStockResponse {
   itemId: number;
   name: string;
   sku: string;
+  description?: string;
   unitPrice: number;
   currentStock: number;
   createdAt: string;
@@ -12,6 +13,9 @@ interface BackendItemStockResponse {
   totalStockOut?: number;
   categoryId?: number;
   categoryName?: string;
+  minimumStock?: number;
+  maximumStock?: number;
+  reorderLevel?: number;
 }
 
 export class ItemService {
@@ -20,11 +24,15 @@ export class ItemService {
       id: String(backendItem.itemId),
       name: backendItem.name,
       sku: backendItem.sku,
+      description: backendItem.description,
       currentStock: backendItem.currentStock,
       createdAt: backendItem.createdAt,
       unitCost: backendItem.unitPrice,
       categoryId: backendItem.categoryId !== undefined && backendItem.categoryId !== null ? String(backendItem.categoryId) : undefined,
       categoryName: backendItem.categoryName,
+      minimumStock: backendItem.minimumStock,
+      maximumStock: backendItem.maximumStock,
+      reorderLevel: backendItem.reorderLevel,
     };
   }
 

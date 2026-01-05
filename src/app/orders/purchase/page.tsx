@@ -40,7 +40,7 @@ export default function PurchaseOrdersPage() {
         ItemService.getItems().catch(() => []),
       ])
       setOrders(os as any)
-      setSuppliers(ss as any)
+      setSuppliers(((ss as any[]) || []).filter(s => s.isActive))
       setWarehouses(ws as any)
       setItems(is as any)
     } catch (err: any) {

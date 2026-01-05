@@ -9,6 +9,10 @@ export interface Item {
   createdAt: string;
   categoryId?: string;
   categoryName?: string;
+  description?: string;
+  minimumStock?: number;
+  maximumStock?: number;
+  reorderLevel?: number;
 }
 
 export interface StockMovement {

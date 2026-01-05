@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Item, ApiError } from '@/lib/types'
 import { usePermissions } from '@/hooks/usePermissions'
 import PermissionGuard from '@/components/PermissionGuard'
@@ -225,9 +225,9 @@ export default function ItemsPage() {
       name: item.name,
       sku: item.sku,
       categoryId: String(item.categoryId || ''),
-      description: '',
-      minimumStock: '',
-      maximumStock: '',
+      description: item.description || '',
+      minimumStock: item.minimumStock !== undefined && item.minimumStock !== null ? String(item.minimumStock) : '',
+      maximumStock: item.maximumStock !== undefined && item.maximumStock !== null ? String(item.maximumStock) : '',
     })
     setShowEditForm(true)
   }
@@ -315,8 +315,26 @@ export default function ItemsPage() {
     return matchesSearch
   })
 
-  const lowStockItems = items.filter(item => item.currentStock < 10).length
+  const lowStockItems = items.filter(item => {
+    const min = item.minimumStock ?? 0
+    const threshold = min > 0 ? min : 10
+    return (item.currentStock ?? 0) < threshold
+  }).length
   const outOfStockItems = items.filter(item => item.currentStock === 0).length
+  
+  const searchParams = useSearchParams()
+  const filter = (searchParams?.get('filter') || 'all') as 'all' | 'low_stock' | 'out_of_stock'
+  const filteredByStatus = items.filter(item => {
+    if (filter === 'low_stock') {
+      const min = item.minimumStock ?? 0
+      const threshold = min > 0 ? min : 10
+      return (item.currentStock ?? 0) < threshold
+    }
+    if (filter === 'out_of_stock') {
+      return (item.currentStock ?? 0) === 0
+    }
+    return true
+  })
 
   if (status === 'loading') {
     return (
@@ -502,7 +520,7 @@ export default function ItemsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
-                      {filteredItems.map((item) => (
+                      {(filter === 'all' ? filteredItems : filteredByStatus).map((item) => (
                         <tr key={item.id} className="hover:bg-muted/30 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium text-foreground">{item.name}</td>
                           <td className="px-6 py-4 text-sm text-foreground">
@@ -810,6 +828,28 @@ export default function ItemsPage() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Min Stock Level</label>
+                    <input
+                      type="number"
+                      value={editForm.minimumStock}
+                      onChange={(e) => setEditForm({ ...editForm, minimumStock: e.target.value })}
+                      placeholder="0"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Max Stock Level</label>
+                    <input
+                      type="number"
+                      value={editForm.maximumStock}
+                      onChange={(e) => setEditForm({ ...editForm, maximumStock: e.target.value })}
+                      placeholder="0"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                    />
                   </div>
 
                   
