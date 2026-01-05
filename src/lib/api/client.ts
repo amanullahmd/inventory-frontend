@@ -30,7 +30,19 @@ class ApiClient {
 
     // Request interceptor: attach token if already configured via setAuthToken
     this.client.interceptors.request.use(
-      (config) => config,
+      async (config) => {
+        // If auth header is not set in config and not set in defaults
+        if (!config.headers['Authorization'] && !this.client.defaults.headers.common['Authorization']) {
+            const session = await getSession();
+            if ((session as any)?.accessToken) {
+                const token = (session as any).accessToken;
+                config.headers['Authorization'] = `Bearer ${token}`;
+                // Cache it for future requests
+                this.setAuthToken(token);
+            }
+        }
+        return config;
+      },
       (error) => Promise.reject(error)
     );
 

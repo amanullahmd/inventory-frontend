@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import {
   LayoutDashboard,
   Boxes,
@@ -88,8 +88,8 @@ const groups: NavGroup[] = [
     ],
   },
   {
-    id: 'admin',
-    label: 'Admin',
+    id: 'system',
+    label: 'System',
     icon: <Settings className="h-5 w-5" />,
     items: [
       { href: '/users', label: 'Users', icon: <Users className="h-4 w-4" />, adminOnly: true },
@@ -99,7 +99,9 @@ const groups: NavGroup[] = [
 ]
 
 export default function Sidebar() {
+  const { data: session, status } = useSession()
   const pathname = usePathname()
+  
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
@@ -126,6 +128,15 @@ export default function Sidebar() {
   useEffect(() => {
     window.localStorage.setItem('sidebar-open-groups', JSON.stringify(openGroups))
   }, [openGroups])
+
+  if (status !== 'authenticated') return null
+
+  const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
+  
+  const visibleGroups = groups.map(group => ({
+    ...group,
+    items: group.items.filter(item => !item.adminOnly || isAdmin),
+  })).filter(group => group.items.length > 0)
 
   const toggleGroup = (id: string) => {
     setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }))
@@ -155,7 +166,7 @@ export default function Sidebar() {
         </button>
       </div>
       <nav className="flex-1 overflow-auto py-2">
-        {groups.map(group => (
+        {visibleGroups.map(group => (
           <div key={group.id} className="px-2">
             <button
               type="button"
@@ -242,7 +253,7 @@ export default function Sidebar() {
               </button>
             </div>
             <nav className="flex-1 overflow-auto py-2">
-              {groups.map(group => (
+              {visibleGroups.map(group => (
                 <div key={group.id} className="px-2">
                   <div className="flex items-center gap-3 rounded-md px-2 py-2 text-sm font-semibold text-foreground">
                     <span className="text-muted-foreground">{group.icon}</span>
