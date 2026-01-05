@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard,
   Boxes,
@@ -20,6 +21,7 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
+  LogOut,
 } from 'lucide-react'
 
 type NavItem = {
@@ -140,8 +142,8 @@ export default function Sidebar() {
     >
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary to-primary/60" />
-          {!collapsed && <span className="text-lg font-bold">Inventory</span>}
+          <img src="/idp-logo.svg" alt="IDP" className="h-12 w-12 rounded-md" />
+          {!collapsed && <span className="text-lg font-bold">IDP Inventory</span>}
         </div>
         <button
           type="button"
@@ -191,6 +193,19 @@ export default function Sidebar() {
           </div>
         ))}
       </nav>
+      <div className="border-t border-border px-4 py-3">
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+          className={[
+            'flex w-full items-center gap-2 rounded-md',
+            'border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent',
+          ].join(' ')}
+        >
+          <LogOut className="h-4 w-4" />
+          {!collapsed && <span>Sign out</span>}
+        </button>
+      </div>
     </aside>
   )
 
@@ -214,8 +229,8 @@ export default function Sidebar() {
           <div className="absolute left-0 top-0 h-full w-72 border-r border-border bg-card shadow-xl">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary to-primary/60" />
-                <span className="text-lg font-bold">Inventory</span>
+                <img src="/idp-logo.svg" alt="IDP" className="h-12 w-12 rounded-md" />
+                <span className="text-lg font-bold">IDP Inventory</span>
               </div>
               <button
                 type="button"
@@ -255,6 +270,16 @@ export default function Sidebar() {
                 </div>
               ))}
             </nav>
+            <div className="border-t border-border px-4 py-3">
+              <button
+                type="button"
+                onClick={() => { setMobileOpen(false); signOut({ callbackUrl: '/auth/signin' }) }}
+                className="flex w-full items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign out</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
