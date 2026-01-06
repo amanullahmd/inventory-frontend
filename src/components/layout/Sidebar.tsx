@@ -25,11 +25,13 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 
+import { usePermission } from '@/hooks/usePermission'
+
 type NavItem = {
   href: string
   label: string
   icon: React.ReactNode
-  adminOnly?: boolean
+  permission?: string
 }
 
 type NavGroup = {
@@ -53,10 +55,10 @@ const groups: NavGroup[] = [
     label: 'Management',
     icon: <Boxes className="h-5 w-5" />,
     items: [
-      { href: '/items', label: 'Items', icon: <Package className="h-4 w-4" /> },
+      { href: '/items', label: 'Items', icon: <Package className="h-4 w-4" />, permission: 'ITEM_READ' },
       { href: '/suppliers', label: 'Suppliers', icon: <Users className="h-4 w-4" /> },
       { href: '/warehouses', label: 'Branches', icon: <Building2 className="h-4 w-4" /> },
-      { href: '/categories', label: 'Categories', icon: <Tags className="h-4 w-4" /> },
+      { href: '/categories', label: 'Categories', icon: <Tags className="h-4 w-4" />, permission: 'CATEGORY_MANAGE' },
     ],
   },
   {
@@ -64,9 +66,9 @@ const groups: NavGroup[] = [
     label: 'Operations',
     icon: <ClipboardList className="h-5 w-5" />,
     items: [
-      { href: '/stock-in', label: 'Stock In', icon: <ArrowDownCircle className="h-4 w-4" /> },
-      { href: '/stock-out', label: 'Stock Out', icon: <ArrowUpCircle className="h-4 w-4" /> },
-      { href: '/stock-movements', label: 'Movements', icon: <Shuffle className="h-4 w-4" /> },
+      { href: '/stock-in', label: 'Stock In', icon: <ArrowDownCircle className="h-4 w-4" />, permission: 'STOCK_IN' },
+      { href: '/stock-out', label: 'Stock Out', icon: <ArrowUpCircle className="h-4 w-4" />, permission: 'STOCK_OUT' },
+      { href: '/stock-movements', label: 'Movements', icon: <Shuffle className="h-4 w-4" />, permission: 'STOCK_READ' },
       { href: '/transfers', label: 'Transfers', icon: <Shuffle className="h-4 w-4" /> },
     ],
   },
@@ -75,8 +77,8 @@ const groups: NavGroup[] = [
     label: 'Orders',
     icon: <ShoppingCart className="h-5 w-5" />,
     items: [
-      { href: '/orders/purchase', label: 'Purchase Orders', icon: <ShoppingCart className="h-4 w-4" /> },
-      { href: '/orders/sales', label: 'Sales Orders', icon: <Receipt className="h-4 w-4" /> },
+      { href: '/orders/purchase', label: 'Purchase Orders', icon: <ShoppingCart className="h-4 w-4" />, permission: 'ORDER_READ' },
+      { href: '/orders/sales', label: 'Sales Orders', icon: <Receipt className="h-4 w-4" />, permission: 'ORDER_READ' },
     ],
   },
   {
@@ -93,15 +95,17 @@ const groups: NavGroup[] = [
     label: 'System',
     icon: <Settings className="h-5 w-5" />,
     items: [
-      { href: '/users', label: 'Users', icon: <Users className="h-4 w-4" />, adminOnly: true },
-      { href: '/grades', label: 'Grades', icon: <ShieldCheck className="h-4 w-4" /> },
-      { href: '/settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
+      { href: '/users', label: 'Users', icon: <Users className="h-4 w-4" />, permission: 'USER_READ' },
+      { href: '/grades', label: 'Grades', icon: <ShieldCheck className="h-4 w-4" />, permission: 'GRADE_MANAGE' },
+      { href: '/settings/roles', label: 'Roles', icon: <ShieldCheck className="h-4 w-4" />, permission: 'ROLE_MANAGE' },
+      { href: '/settings', label: 'Settings', icon: <Settings className="h-4 w-4" />, permission: 'SETTINGS_MANAGE' },
     ],
   },
 ]
 
 export default function Sidebar() {
   const { data: session, status } = useSession()
+  const { hasPermission } = usePermission()
   const pathname = usePathname()
   
   const [collapsed, setCollapsed] = useState(false)
@@ -133,12 +137,13 @@ export default function Sidebar() {
 
   if (status !== 'authenticated') return null
 
-  const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
-  
   const visibleGroups = groups.map(group => ({
     ...group,
-    items: group.items.filter(item => !item.adminOnly || isAdmin),
+    items: group.items.filter(item => !item.permission || hasPermission(item.permission)),
   })).filter(group => group.items.length > 0)
+
+  // DEBUG: Log permissions to console
+  console.log('Current Permissions:', (session as any)?.permissions);
 
   const toggleGroup = (id: string) => {
     setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }))

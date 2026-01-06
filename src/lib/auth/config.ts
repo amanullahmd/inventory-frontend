@@ -48,16 +48,20 @@ export const authConfig: NextAuthConfig = {
           const data = await res.json()
 
           if (res.ok && data.accessToken) {
-            return {
-              id: data.id?.toString() || '1',
-              name: data.email,
-              email: data.email,
-              roles: data.roles || ['ROLE_USER'],
-              accessToken: data.accessToken,
-              refreshToken: data.refreshToken,
-              passwordChangeRequired: data.passwordChangeRequired || false,
-            } as User & { accessToken: string; refreshToken: string; roles: string[]; passwordChangeRequired: boolean }
-          }
+    // Parse JWT to get permissions
+    const jwtPayload = JSON.parse(atob(data.accessToken.split('.')[1]));
+    
+    return {
+      id: data.id?.toString() || '1',
+      name: data.email,
+      email: data.email,
+      roles: data.roles || ['Standard User'],
+      permissions: jwtPayload.permissions || [],
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      passwordChangeRequired: data.passwordChangeRequired || false,
+    } as User & { accessToken: string; refreshToken: string; roles: string[]; permissions: string[]; passwordChangeRequired: boolean }
+  }
 
           return null
         } catch (e) {
@@ -74,6 +78,7 @@ export const authConfig: NextAuthConfig = {
         token.accessToken = (user as any).accessToken
         token.refreshToken = (user as any).refreshToken
         token.roles = (user as any).roles
+        token.permissions = (user as any).permissions
         token.id = user.id
         token.passwordChangeRequired = (user as any).passwordChangeRequired || false
         // Set token expiration time (15 minutes from now)
@@ -91,9 +96,13 @@ export const authConfig: NextAuthConfig = {
       if (token.refreshToken) {
         const refreshedData = await refreshAccessToken(token.refreshToken as string)
         if (refreshedData && (refreshedData as any).accessToken) {
+          // Parse new access token to get updated permissions
+          const jwtPayload = JSON.parse(atob((refreshedData as any).accessToken.split('.')[1]));
+          
           return {
             ...token,
             accessToken: (refreshedData as any).accessToken,
+            permissions: jwtPayload.permissions || token.permissions,
             refreshToken: (refreshedData as any).refreshToken || token.refreshToken,
             accessTokenExpires: Date.now() + 15 * 60 * 1000,
           }
@@ -108,6 +117,7 @@ export const authConfig: NextAuthConfig = {
       session.accessToken = token.accessToken as string
       session.refreshToken = token.refreshToken as string
       session.roles = token.roles as string[]
+      session.permissions = token.permissions as string[]
       session.passwordChangeRequired = token.passwordChangeRequired as boolean
       if (session.user) {
         session.user.id = token.id as string

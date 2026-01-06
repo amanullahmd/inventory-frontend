@@ -5,6 +5,7 @@ declare module "next-auth" {
     accessToken?: string
     refreshToken?: string
     roles?: string[]
+    permissions?: string[]
     passwordChangeRequired?: boolean
     user?: DefaultSession["user"] & {
       id?: string
@@ -15,6 +16,7 @@ declare module "next-auth" {
     accessToken?: string
     refreshToken?: string
     roles?: string[]
+    permissions?: string[]
     passwordChangeRequired?: boolean
   }
 }
@@ -24,6 +26,7 @@ declare module "@auth/core/jwt" {
     accessToken?: string
     refreshToken?: string
     roles?: string[]
+    permissions?: string[]
     id?: string
     passwordChangeRequired?: boolean
   }

@@ -6,9 +6,10 @@ import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import PermissionGuard from '@/components/PermissionGuard'
+import { roleService } from '@/lib/services/roleService'
 import { apiClient } from '@/lib/api/client'
 import { formatDateDMY } from '@/lib/utils/date'
-import { Grade } from '@/types/user'
+import { Grade, Role } from '@/types/user'
 
 interface User {
   userId: number
@@ -24,29 +25,32 @@ interface User {
   branchName?: string
 }
 
-
-
 export default function UsersPage() {
   const { data: session, status } = useSession()
   // Admin-only page
   const [users, setUsers] = useState<any[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [formData, setFormData] = useState<{ name: string; email: string; password: string; role: string; gradeId: string | number }>({ name: '', email: '', password: '', role: 'User', gradeId: '' })
+  const [formData, setFormData] = useState<{ name: string; email: string; password: string; role: string; gradeId: string | number }>({ name: '', email: '', password: '', role: '', gradeId: '' })
 
   // Fetch users from backend on component mount
   useEffect(() => {
-    const fetchUsers = async () => {
+    const loadData = async () => {
       try {
         setLoading(true)
-        const response = await apiClient.get<User[]>('/users')
+        const [usersRes, rolesRes] = await Promise.all([
+          apiClient.get<User[]>('/users'),
+          roleService.getAll()
+        ])
+        
         // Transform backend user data to display format
-        const transformedUsers = response.data.map(user => ({
+        const transformedUsers = usersRes.data.map(user => ({
           id: user.userId,
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
@@ -59,18 +63,24 @@ export default function UsersPage() {
           branch: user.branchName || '-',
         }))
         setUsers(transformedUsers)
+        setRoles(rolesRes)
+        
+        if (rolesRes.length > 0) {
+           setFormData(prev => ({ ...prev, role: rolesRes[0].name }))
+        }
+        
         setError(null)
       } catch (err) {
-        console.error('Failed to fetch users:', err)
+        console.error('Failed to fetch data:', err)
         setUsers([])
-        setError('Failed to load users from server')
+        setError('Failed to load data from server')
       } finally {
         setLoading(false)
       }
     }
 
     if (status === 'authenticated') {
-      fetchUsers()
+      loadData()
     }
   }, [status])
 
@@ -269,9 +279,9 @@ export default function UsersPage() {
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="User">User</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Admin">Admin</option>
+                    {roles.map(role => (
+                        <option key={role.id} value={role.name}>{role.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
