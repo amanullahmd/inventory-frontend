@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Menu,
   LogOut,
+  ShieldCheck,
 } from 'lucide-react'
 
 type NavItem = {
@@ -93,6 +94,7 @@ const groups: NavGroup[] = [
     icon: <Settings className="h-5 w-5" />,
     items: [
       { href: '/users', label: 'Users', icon: <Users className="h-4 w-4" />, adminOnly: true },
+      { href: '/grades', label: 'Grades', icon: <ShieldCheck className="h-4 w-4" /> },
       { href: '/settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
     ],
   },

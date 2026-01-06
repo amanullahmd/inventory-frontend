@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import PermissionGuard from '@/components/PermissionGuard'
 import { apiClient } from '@/lib/api/client'
 import { formatDateDMY } from '@/lib/utils/date'
+import { Grade } from '@/types/user'
 
 interface User {
   userId: number
@@ -29,13 +30,14 @@ export default function UsersPage() {
   const { data: session, status } = useSession()
   // Admin-only page
   const [users, setUsers] = useState<any[]>([])
+  const [grades, setGrades] = useState<Grade[]>([])
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'User' })
+  const [formData, setFormData] = useState<{ name: string; email: string; password: string; role: string; gradeId: string | number }>({ name: '', email: '', password: '', role: 'User', gradeId: '' })
 
   // Fetch users from backend on component mount
   useEffect(() => {
@@ -119,8 +121,8 @@ export default function UsersPage() {
 
     setUsers([newUser, ...users])
     setSuccess(`User ${formData.name} created successfully!`)
-    setFormData({ name: '', email: '', password: '', role: 'User' })
-    setShowCreateForm(false)
+      setFormData({ name: '', email: '', password: '', role: 'User', gradeId: '' })
+      setShowCreateForm(false)
   }
 
   const activeUsers = users.filter(u => u.status === 'active').length
@@ -270,6 +272,21 @@ export default function UsersPage() {
                     <option value="User">User</option>
                     <option value="Manager">Manager</option>
                     <option value="Admin">Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Grade</label>
+                  <select
+                    value={formData.gradeId}
+                    onChange={(e) => setFormData({...formData, gradeId: e.target.value})}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="">Select Grade</option>
+                    {grades.map(grade => (
+                        <option key={grade.id} value={grade.id}>
+                            Grade {grade.gradeNumber} - {grade.description}
+                        </option>
+                    ))}
                   </select>
                 </div>
               </div>
