@@ -27,9 +27,10 @@ export default function UserForm({ onUserCreated }: UserFormProps) {
   const validateForm = (): boolean => {
     const errors: {[key: string]: string} = {}
     
-    if (!formData.username.trim()) {
+    const username = formData.username || ''
+    if (!username.trim()) {
       errors.username = 'Username is required'
-    } else if (formData.username.length < 3) {
+    } else if (username.length < 3) {
       errors.username = 'Username must be at least 3 characters'
     }
     

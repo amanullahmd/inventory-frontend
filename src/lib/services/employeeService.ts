@@ -14,6 +14,9 @@ export interface Employee {
   address?: string
   servicePeriod?: string
   nidNumber?: string
+  dateOfBirth?: string
+  gender?: string
+  nationality?: string
   createdAt: string
   updatedAt?: string
 }
@@ -28,6 +31,9 @@ export interface CreateEmployeeRequest {
   address?: string
   servicePeriod?: string
   nidNumber?: string
+  dateOfBirth?: string
+  gender?: string
+  nationality?: string
 }
 
 export interface UpdateEmployeeRequest extends Partial<CreateEmployeeRequest> {

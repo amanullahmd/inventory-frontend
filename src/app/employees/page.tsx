@@ -16,7 +16,10 @@ export default function EmployeesPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [form, setForm] = useState<CreateEmployeeRequest>({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '' })
+  const [form, setForm] = useState<CreateEmployeeRequest>({ 
+    name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '',
+    dateOfBirth: '', gender: '', nationality: '' 
+  })
   const [employeeCode, setEmployeeCode] = useState<string>('')
   
   const fetchAll = async () => {
@@ -46,12 +49,12 @@ export default function EmployeesPage() {
         const updated = await EmployeeService.updateEmployee(editingId, { ...form, employeeCode } as UpdateEmployeeRequest)
         setEmployees(employees.map(emp => emp.employeeId === updated.employeeId ? updated : emp))
         setSuccess('Employee updated')
-        setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '' })
+        setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' })
       } else {
         const created = await EmployeeService.createEmployee(form)
         setEmployees([created, ...employees])
         setSuccess('Employee created')
-        setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '' })
+        setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' })
       }
     } catch (err: any) {
       setError(err.message || 'Failed to submit')
@@ -108,6 +111,23 @@ export default function EmployeesPage() {
             <label className="block text-sm font-medium mb-2">Email</label>
             <input className="w-full rounded-lg border border-border px-3 py-2" value={form.email || ''} onChange={e => setForm({ ...form, email: e.target.value })} />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Date of Birth</label>
+            <input type="date" className="w-full rounded-lg border border-border px-3 py-2" value={form.dateOfBirth || ''} onChange={e => setForm({ ...form, dateOfBirth: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Gender</label>
+            <select className="w-full rounded-lg border border-border px-3 py-2" value={form.gender || ''} onChange={e => setForm({ ...form, gender: e.target.value })}>
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Nationality</label>
+            <input className="w-full rounded-lg border border-border px-3 py-2" value={form.nationality || ''} onChange={e => setForm({ ...form, nationality: e.target.value })} />
+          </div>
           <div className="md:col-span-3">
             <label className="block text-sm font-medium mb-2">Address</label>
             <input className="w-full rounded-lg border border-border px-3 py-2" value={form.address || ''} onChange={e => setForm({ ...form, address: e.target.value })} />
@@ -129,12 +149,12 @@ export default function EmployeesPage() {
                     await EmployeeService.deleteEmployee(editingId!)
                     setEmployees(employees.filter(emp => emp.employeeId !== editingId))
                     setSuccess('Employee deleted')
-                    setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '' })
+                    setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' })
                   } catch (err: any) {
                     setError(err.message || 'Failed to delete')
                   }
                 }} className="rounded-lg border border-border px-4 py-2">Delete</button>
-                <button type="button" onClick={() => { setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '' }) }} className="rounded-lg border border-border px-4 py-2">Cancel</button>
+                <button type="button" onClick={() => { setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' }) }} className="rounded-lg border border-border px-4 py-2">Cancel</button>
               </>
             ) : (
               <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Create Employee</button>
@@ -154,14 +174,15 @@ export default function EmployeesPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Branch</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Mobile</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Email</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Service Period</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">DOB</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Gender</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">NID</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Created</th>
                 </tr>
               </thead>
               <tbody className="bg-card divide-y divide-border">
                 {employees.length === 0 ? (
-                  <tr><td colSpan={10} className="px-6 py-8 text-center text-muted-foreground">No employees</td></tr>
+                  <tr><td colSpan={11} className="px-6 py-8 text-center text-muted-foreground">No employees</td></tr>
                 ) : employees.map(emp => (
                   <tr key={emp.employeeId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
@@ -178,7 +199,10 @@ export default function EmployeesPage() {
                             email: detail.email,
                             address: detail.address,
                             servicePeriod: detail.servicePeriod,
-                            nidNumber: detail.nidNumber
+                            nidNumber: detail.nidNumber,
+                            dateOfBirth: detail.dateOfBirth,
+                            gender: detail.gender,
+                            nationality: detail.nationality
                           })
                         } catch (err: any) {
                           setError(err.message || 'Failed to open employee')
@@ -191,7 +215,8 @@ export default function EmployeesPage() {
                     <td className="px-6 py-4 text-sm text-muted-foreground">{emp.branchName || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{emp.mobileNumber || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{emp.email || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{emp.servicePeriod || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{emp.dateOfBirth || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{emp.gender || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{emp.nidNumber || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(emp.createdAt).toLocaleString()}</td>
                   </tr>

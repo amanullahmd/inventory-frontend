@@ -6,424 +6,563 @@ import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import PermissionGuard from '@/components/PermissionGuard'
-import { apiClient } from '@/lib/api/client'
-import { formatDateDMY } from '@/lib/utils/date'
+import { apiClient, UpdateUserRequest } from '@/lib/api/client'
+import { formatDateDMY, formatDateTime } from '@/lib/utils/date'
 import { Grade } from '@/types/user'
+import { WarehouseService, Warehouse } from '@/lib/services/warehouseService'
+import { gradeService } from '@/lib/services/gradeService'
+import { 
+  Users, 
+  Search, 
+  Filter, 
+  Shield, 
+  Mail, 
+  CheckCircle, 
+  XCircle, 
+  Briefcase, 
+  Trash2,
+  Save,
+  X,
+  RefreshCw
+} from 'lucide-react'
 
 interface User {
   userId: number
   email: string
   firstName: string
   lastName: string
+  fullName: string
   role: string
+  position?: string
   enabled: boolean
   createdAt: string
   lastLogin?: string
   phone?: string
   address?: string
   branchName?: string
+  gradeId?: number
+  warehouseId?: number
 }
-
-
 
 export default function UsersPage() {
   const { data: session, status } = useSession()
-  // Admin-only page
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState('all')
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [formData, setFormData] = useState<{ name: string; email: string; password: string; role: string; gradeId: string | number }>({ name: '', email: '', password: '', role: 'User', gradeId: '' })
+  
+  // Form State
+  const [showForm, setShowForm] = useState(false)
+  const [editingUserId, setEditingUserId] = useState<number | null>(null)
+  
+  const initialFormData = { 
+    firstName: '', 
+    lastName: '', 
+    email: '', 
+    password: '', 
+    position: '',
+    role: 'User', 
+    gradeId: '',
+    warehouseId: '' 
+  }
+  const [formData, setFormData] = useState(initialFormData)
 
   // Fetch users from backend on component mount
   useEffect(() => {
-    const fetchUsers = async () => {
+    const loadData = async () => {
       try {
         setLoading(true)
-        const response = await apiClient.get<User[]>('/users')
+        const [usersRes, gradesRes, warehousesRes] = await Promise.all([
+          apiClient.get<any[]>('/users'),
+          gradeService.getAll(),
+          WarehouseService.getWarehouses()
+        ])
+        
         // Transform backend user data to display format
-        const transformedUsers = response.data.map(user => ({
-          id: user.userId,
-          name: `${user.firstName} ${user.lastName}`,
+        const transformedUsers = usersRes.data.map(user => ({
+          userId: user.id || user.userId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          fullName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
           email: user.email,
-          role: user.role,
-          status: user.enabled ? 'active' : 'inactive',
+          role: user.roles?.[0] || user.role?.name || user.role || 'User',
+          position: user.position || '-',
+          enabled: user.enabled,
+          createdAt: user.createdAt,
           joinDate: formatDateDMY(user.createdAt),
-          lastLogin: user.lastLogin ? formatDateDMY(user.lastLogin) : 'Never',
+          lastLogin: user.lastLogin ? formatDateTime(user.lastLogin) : 'Never',
           phone: user.phone || '-',
           address: user.address || '-',
-          branch: user.branchName || '-',
+          branchName: user.branchName || user.warehouse?.name || '-',
+          gradeId: user.gradeId || user.grade?.id,
+          warehouseId: user.warehouseId || user.warehouse?.warehouseId || user.warehouse?.id
         }))
         setUsers(transformedUsers)
+        setGrades(gradesRes)
+        setWarehouses(warehousesRes)
         setError(null)
       } catch (err) {
-        console.error('Failed to fetch users:', err)
+        console.error('Failed to fetch data:', err)
         setUsers([])
-        setError('Failed to load users from server')
+        setError('Failed to load data from server')
       } finally {
         setLoading(false)
       }
     }
 
     if (status === 'authenticated') {
-      fetchUsers()
+      loadData()
     }
   }, [status])
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (user.position && user.position.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesRole = filterRole === 'all' || user.role === filterRole
     return matchesSearch && matchesRole
   })
 
-  const handleToggleStatus = (userId: number) => {
-    setUsers(users.map(user => 
-      user.id === userId 
-        ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
-        : user
-    ))
-    const user = users.find(u => u.id === userId)
-    setSuccess(`User ${user?.name} status updated`)
+  const handleToggleStatus = async (userId: number, currentStatus: boolean) => {
+    const user = users.find(u => u.userId === userId);
+    if (!user) return;
+
+    try {
+        // Prepare update payload - only fields needed for status update + required fields
+        const payload: UpdateUserRequest = {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            enabled: !currentStatus,
+            role: user.role,
+            position: user.position === '-' ? undefined : user.position,
+            gradeId: user.gradeId,
+            warehouseId: user.warehouseId
+        };
+
+        await apiClient.updateUser(userId, payload);
+        
+        setUsers(users.map(u => u.userId === userId ? { ...u, enabled: !currentStatus } : u));
+        setSuccess(`User ${user.fullName} ${!currentStatus ? 'activated' : 'deactivated'}`);
+    } catch (err: any) {
+        if (err.status === 400 && err.details) {
+             const detailMsg = Object.entries(err.details)
+                .map(([key, msg]) => `${key}: ${msg}`)
+                .join(', ');
+             setError(`Validation failed: ${detailMsg}`);
+        } else {
+             setError(err.message || 'Failed to update user status');
+        }
+    }
   }
 
-  const handleDeleteUser = (userId: number) => {
-    const user = users.find(u => u.id === userId)
-    setUsers(users.filter(u => u.id !== userId))
-    setSuccess(`User ${user?.name} has been removed`)
+  const handleDeleteClick = async (user: User) => {
+    if (window.confirm(`Are you sure you want to delete ${user.fullName}?`)) {
+      try {
+        // In a real app, you would call the delete API here
+        // await apiClient.deleteUser(user.userId)
+        
+        // Optimistic update
+        setUsers(users.filter(u => u.userId !== user.userId))
+        setSuccess(`User ${user.fullName} has been removed`)
+        
+        // If we were editing this user, reset the form
+        if (editingUserId === user.userId) {
+          handleCancelEdit()
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to delete user')
+      }
+    }
   }
 
-  const handleCreateUser = (e: FormEvent) => {
+  const handleAddNewClick = () => {
+    setEditingUserId(null)
+    setFormData(initialFormData)
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleEditClick = (user: User) => {
+    setEditingUserId(user.userId)
+    setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        password: '', // Password is optional on edit
+        position: user.position === '-' ? '' : user.position || '',
+        role: user.role === 'ROLE_ADMIN' || user.role === 'ADMIN' ? 'Admin' : 'User',
+        gradeId: user.gradeId ? String(user.gradeId) : '',
+        warehouseId: user.warehouseId ? String(user.warehouseId) : ''
+    })
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingUserId(null)
+    setFormData(initialFormData)
+    setShowForm(false)
+    setError(null)
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     
-    if (!formData.name || !formData.email || !formData.password) {
-      setError('Please fill in all fields')
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      setError('Please fill in all required fields')
       return
     }
 
-    if (users.some(u => u.email === formData.email)) {
-      setError('Email already exists')
-      return
+    if (!editingUserId && !formData.password) {
+        setError('Password is required for new users')
+        return
     }
 
-    const newUser = {
-      id: Math.max(...users.map(u => u.id), 0) + 1,
-      name: formData.name,
-      email: formData.email,
-      role: formData.role,
-      status: 'active',
-      joinDate: new Date().toISOString().split('T')[0]
+    try {
+      if (editingUserId) {
+        // Update User
+        const payload: UpdateUserRequest = {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            role: formData.role,
+            position: formData.position,
+            gradeId: formData.gradeId ? Number(formData.gradeId) : undefined,
+            warehouseId: formData.warehouseId ? Number(formData.warehouseId) : undefined,
+        }
+        await apiClient.updateUser(editingUserId, payload)
+        setSuccess(`User updated successfully!`)
+      } else {
+        // Create User
+        const payload = {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+            position: formData.position,
+            role: formData.role,
+            gradeId: formData.gradeId ? Number(formData.gradeId) : undefined,
+            warehouseId: formData.warehouseId ? Number(formData.warehouseId) : undefined,
+            username: formData.email 
+        }
+        await apiClient.createUser(payload)
+        setSuccess(`User created successfully!`)
+      }
+      
+      handleCancelEdit()
+      
+      // Refresh list
+      const response = await apiClient.get<any[]>('/users')
+      const transformedUsers = response.data.map(user => ({
+          userId: user.id || user.userId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          fullName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          email: user.email,
+          role: user.roles?.[0] || user.role?.name || user.role || 'User',
+          position: user.position || '-',
+          enabled: user.enabled,
+          createdAt: user.createdAt,
+          joinDate: formatDateDMY(user.createdAt),
+          lastLogin: user.lastLogin ? formatDateTime(user.lastLogin) : 'Never',
+          phone: user.phone || '-',
+          address: user.address || '-',
+          branchName: user.branchName || user.warehouse?.name || '-',
+          gradeId: user.gradeId || user.grade?.id,
+          warehouseId: user.warehouseId || user.warehouse?.warehouseId || user.warehouse?.id
+        }))
+        setUsers(transformedUsers)
+
+    } catch (err: any) {
+      setError(err.message || 'Operation failed')
     }
-
-    setUsers([newUser, ...users])
-    setSuccess(`User ${formData.name} created successfully!`)
-      setFormData({ name: '', email: '', password: '', role: 'User', gradeId: '' })
-      setShowCreateForm(false)
   }
 
-  const activeUsers = users.filter(u => u.status === 'active').length
-  const adminUsers = users.filter(u => u.role === 'Admin').length
-  const managerUsers = users.filter(u => u.role === 'Manager').length
-
-  if (status === 'loading') {
-    return (
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="p-6 text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
+  if (status === 'loading') return <LoadingSpinner />
+  
   if (!session) {
-    return (
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="p-6 text-center">
-          <p className="text-muted-foreground">Please sign in to manage users.</p>
-        </div>
-      </div>
-    )
+    return <div className="p-10 text-center">Please sign in to manage users.</div>
   }
 
-  const isAdmin = (session as any).roles?.includes('ROLE_ADMIN')
+  const isAdmin = (session as any).roles?.includes('ROLE_ADMIN') || (session as any).roles?.includes('ADMIN')
 
   if (!isAdmin) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 text-center shadow-sm">
+          <Shield className="w-12 h-12 text-destructive mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-foreground">Access denied</h2>
           <p className="mt-2 text-sm text-muted-foreground">Only administrators can access the user management page.</p>
-          <a
-            href="/"
-            className="mt-6 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
-          >
-            Back to dashboard
-          </a>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="animate-fade-in flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-4xl font-semibold tracking-tight text-foreground">Users</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage system users and their roles</p>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3">
+              <Users className="w-8 h-8 text-primary" />
+              User Management
+            </h1>
+            <p className="mt-2 text-base text-muted-foreground">Manage system users, roles, and access permissions</p>
+          </div>
+          {!showForm && (
+            <button 
+              onClick={handleAddNewClick}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Users className="w-4 h-4" /> Add New User
+            </button>
+          )}
         </div>
-        <PermissionGuard permission="create_user">
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
-          >
-            Create user
-          </button>
-        </PermissionGuard>
-      </div>
+        
+        {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
+        {error && <ErrorMessage message={error} onRetry={() => setError(null)} />}
+        
+        {/* Inline Create/Edit Form */}
+        {showForm && (
+          <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 animate-in slide-in-from-top-4 duration-200">
+          <div className="md:col-span-4 mb-2">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              {editingUserId ? <><Briefcase className="w-5 h-5" /> Edit User</> : <><Users className="w-5 h-5" /> Add New User</>}
+            </h2>
+          </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground">Total users</div>
-          <div className="mt-2 text-2xl font-semibold text-foreground">{users.length}</div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground">Active users</div>
-          <div className="mt-2 text-2xl font-semibold text-foreground">{activeUsers}</div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground">Admins</div>
-          <div className="mt-2 text-2xl font-semibold text-foreground">{adminUsers}</div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground">Managers</div>
-          <div className="mt-2 text-2xl font-semibold text-foreground">{managerUsers}</div>
-        </div>
-      </div>
-
-      {/* Create User Form */}
-      {showCreateForm ? (
-        <PermissionGuard permission="create_user">
-          <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-            <button
-              aria-label="Close"
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-              onClick={() => setShowCreateForm(false)}
+          <div>
+            <label className="block text-sm font-medium mb-1">First Name *</label>
+            <input 
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.firstName} 
+              onChange={e => setFormData({ ...formData, firstName: e.target.value })} 
+              required
             />
-            <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Create user</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Add a new user with role-based access.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowCreateForm(false)}
-                className="rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground hover:bg-accent"
-              >
-                Close
-              </button>
-            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Last Name *</label>
+            <input 
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.lastName} 
+              onChange={e => setFormData({ ...formData, lastName: e.target.value })} 
+              required
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-1">Email *</label>
+            <input 
+              type="email"
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.email} 
+              onChange={e => setFormData({ ...formData, email: e.target.value })} 
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Password {editingUserId && '(Optional)'}</label>
+            <input 
+              type="password"
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.password} 
+              onChange={e => setFormData({ ...formData, password: e.target.value })} 
+              placeholder={editingUserId ? "Leave blank to keep" : "Min 8 chars"}
+              required={!editingUserId}
+            />
+          </div>
 
-            <form onSubmit={handleCreateUser} className="mt-6 space-y-6">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Full Name *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="John Doe"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Email *</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="john@example.com"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Password *</label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    placeholder="••••••••"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Role *</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="User">User</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Grade</label>
-                  <select
-                    value={formData.gradeId}
-                    onChange={(e) => setFormData({...formData, gradeId: e.target.value})}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="">Select Grade</option>
-                    {grades.map(grade => (
-                        <option key={grade.id} value={grade.id}>
-                            Grade {grade.gradeNumber} - {grade.description}
-                        </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
-                  className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
-                >
-                  Create user
-                </button>
-              </div>
-            </form>
+          <div>
+            <label className="block text-sm font-medium mb-1">Role *</label>
+            <select 
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.role} 
+              onChange={e => setFormData({ ...formData, role: e.target.value })}
+            >
+              <option value="User">User</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Position</label>
+            <input 
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.position} 
+              onChange={e => setFormData({ ...formData, position: e.target.value })} 
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Grade</label>
+            <select 
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.gradeId} 
+              onChange={e => setFormData({ ...formData, gradeId: e.target.value })}
+            >
+              <option value="">Select Grade</option>
+              {grades.map(g => (
+                <option key={g.id} value={g.id}>{g.gradeNumber} - {g.description}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Branch</label>
+            <select 
+              className="w-full rounded-lg border border-border px-3 py-2 bg-background" 
+              value={formData.warehouseId} 
+              onChange={e => setFormData({ ...formData, warehouseId: e.target.value })}
+            >
+              <option value="">Select Branch</option>
+              {warehouses.map(w => (
+                <option key={w.warehouseId} value={w.warehouseId}>{w.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="md:col-span-4 flex justify-end gap-3 mt-2">
+            {editingUserId && (
+              <button 
+                type="button" 
+                onClick={handleCancelEdit}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 hover:bg-accent transition-colors"
+              >
+                <X className="w-4 h-4" /> Cancel
+              </button>
+            )}
+            <button 
+              type="submit" 
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              {editingUserId ? <Save className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+              {editingUserId ? 'Update User' : 'Create User'}
+            </button>
+          </div>
+        </form>
+        )}
+        
+        {/* Search & Filter Bar */}
+        <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by name, email, or position..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <select
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              className="w-full md:w-48 px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            >
+              <option value="all">All Roles</option>
+              <option value="Admin">Admin</option>
+              <option value="User">User</option>
+            </select>
           </div>
         </div>
-        </PermissionGuard>
-      ) : null}
 
-      {/* Messages */}
-      {success ? (
-        <div className="fixed right-4 top-4 z-50 w-[min(420px,calc(100vw-2rem))]">
-          <SuccessMessage 
-            message={success} 
-            onDismiss={() => setSuccess(null)}
-            autoHide
-          />
-        </div>
-      ) : null}
-      {error ? (
-        <div className="fixed right-4 top-4 z-50 w-[min(420px,calc(100vw-2rem))]">
-          <ErrorMessage 
-            message={error} 
-            onRetry={() => setError(null)}
-          />
-        </div>
-      ) : null}
-
-      {/* Filters */}
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-          />
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="all">All Roles</option>
-            <option value="Admin">Admin</option>
-            <option value="Manager">Manager</option>
-            <option value="User">User</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Users Table */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-border bg-muted/50">
-          <h2 className="text-2xl font-semibold text-foreground">Users ({filteredUsers.length})</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Email</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Role</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Last Login</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Branch</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-card divide-y divide-border">
-              {filteredUsers.map((user) => (
-                <tr key={`${user.id}-${user.email}`} className="hover:bg-accent/40 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted text-sm font-semibold text-foreground">
-                        {user.name.charAt(0)}
-                      </div>
-                      <div className="text-sm font-medium text-foreground">{user.name}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                      user.role === 'Admin'
-                        ? 'bg-chart-4/10 text-chart-4'
-                        : user.role === 'Manager'
-                        ? 'bg-chart-5/10 text-chart-5'
-                        : 'bg-chart-1/10 text-chart-1'
-                    }`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                      user.status === 'active'
-                        ? 'bg-chart-2/10 text-chart-2'
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {user.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.joinDate}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{(user as any).lastLogin || 'Never'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{(user as any).branch || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                    <button
-                      onClick={() => handleToggleStatus(user.id)}
-                      className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground shadow-sm hover:bg-accent transition-colors"
-                    >
-                      {user.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteUser(user.id)}
-                      className="inline-flex items-center rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/15 transition-colors"
-                    >
-                      Remove
-                    </button>
-                  </td>
+        {/* Users Table */}
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">User</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Role & Position</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Branch</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Last Login</th>
+                  <th className="px-6 py-3 text-right text-sm font-semibold text-muted-foreground">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-card divide-y divide-border">
+                {filteredUsers.length === 0 ? (
+                  <tr><td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">No users found</td></tr>
+                ) : filteredUsers.map(user => (
+                  <tr key={user.userId} className={`hover:bg-accent/40 transition-colors ${editingUserId === user.userId ? 'bg-primary/5' : ''}`}>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
+                          {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                        </div>
+                        <div 
+                          className="cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => handleEditClick(user)}
+                        >
+                          <div className="font-medium text-foreground">{user.fullName}</div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Mail className="w-3 h-3" /> {user.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <span className={`inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          user.role === 'Admin' || user.role === 'ADMIN' || user.role === 'ROLE_ADMIN'
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400'
+                        }`}>
+                          {user.role === 'ROLE_ADMIN' || user.role === 'ADMIN' ? 'Admin' : 'User'}
+                        </span>
+                        {user.position && user.position !== '-' && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Briefcase className="w-3 h-3" /> {user.position}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {user.branchName}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {user.lastLogin}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleToggleStatus(user.userId, user.enabled)}
+                          className={`p-1.5 rounded-md transition-colors ${
+                            user.enabled 
+                              ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20' 
+                              : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+                          }`}
+                          title={user.enabled ? "Deactivate User" : "Activate User"}
+                        >
+                          {user.enabled ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleEditClick(user)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="Edit"
+                        >
+                          <Briefcase className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(user)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

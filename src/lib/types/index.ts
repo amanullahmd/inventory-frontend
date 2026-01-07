@@ -107,9 +107,15 @@ export interface StockOutRequest {
 }
 
 export interface CreateUserRequest {
-  username: string;
+  username?: string; // Optional if using email as username
   email: string;
   password: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  gradeId?: number;
+  warehouseId?: number;
+  name?: string; // Backward compatibility
 }
 
 // API Response types

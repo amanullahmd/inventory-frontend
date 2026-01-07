@@ -10,6 +10,18 @@ import {
   User,
   CreateUserRequest
 } from '@/lib/types';
+
+export interface UpdateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role?: string;
+  position?: string;
+  gradeId?: number;
+  warehouseId?: number;
+  enabled?: boolean;
+}
+
 import { getSession, signOut } from 'next-auth/react';
 
 
@@ -258,7 +270,12 @@ class ApiClient {
   }
 
   async createUser(user: CreateUserRequest): Promise<User> {
-    const response = await this.post<User>('/users', user);
+    const response = await this.post<User>('/auth/register', user);
+    return response.data;
+  }
+
+  async updateUser(userId: number, data: UpdateUserRequest): Promise<User> {
+    const response = await this.put<User>(`/users/${userId}`, data);
     return response.data;
   }
 }
