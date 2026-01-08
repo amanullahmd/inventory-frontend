@@ -17,8 +17,6 @@ import {
   Filter, 
   Shield, 
   Mail, 
-  CheckCircle, 
-  XCircle, 
   Briefcase, 
   Trash2,
   Save,
@@ -126,39 +124,6 @@ export default function UsersPage() {
     const matchesRole = filterRole === 'all' || user.role === filterRole
     return matchesSearch && matchesRole
   })
-
-  const handleToggleStatus = async (userId: number, currentStatus: boolean) => {
-    const user = users.find(u => u.userId === userId);
-    if (!user) return;
-
-    try {
-        // Prepare update payload - only fields needed for status update + required fields
-        const payload: UpdateUserRequest = {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            enabled: !currentStatus,
-            role: user.role,
-            position: user.position === '-' ? undefined : user.position,
-            gradeId: user.gradeId,
-            warehouseId: user.warehouseId
-        };
-
-        await apiClient.updateUser(userId, payload);
-        
-        setUsers(users.map(u => u.userId === userId ? { ...u, enabled: !currentStatus } : u));
-        setSuccess(`User ${user.fullName} ${!currentStatus ? 'activated' : 'deactivated'}`);
-    } catch (err: any) {
-        if (err.status === 400 && err.details) {
-             const detailMsg = Object.entries(err.details)
-                .map(([key, msg]) => `${key}: ${msg}`)
-                .join(', ');
-             setError(`Validation failed: ${detailMsg}`);
-        } else {
-             setError(err.message || 'Failed to update user status');
-        }
-    }
-  }
 
   const handleDeleteClick = async (user: User) => {
     if (window.confirm(`Are you sure you want to delete ${user.fullName}?`)) {
@@ -531,17 +496,6 @@ export default function UsersPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleToggleStatus(user.userId, user.enabled)}
-                          className={`p-1.5 rounded-md transition-colors ${
-                            user.enabled 
-                              ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20' 
-                              : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
-                          }`}
-                          title={user.enabled ? "Deactivate User" : "Activate User"}
-                        >
-                          {user.enabled ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                        </button>
                         <button
                           onClick={() => handleEditClick(user)}
                           className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
