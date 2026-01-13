@@ -13,6 +13,7 @@ export interface SalesOrder {
   notes?: string
   createdBy: number
   createdAt: string
+  updatedAt: string
 }
 
 export interface SalesOrderItem {

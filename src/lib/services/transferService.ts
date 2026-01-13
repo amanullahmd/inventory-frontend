@@ -12,6 +12,7 @@ export interface StockTransfer {
   notes?: string
   createdBy: number
   createdAt: string
+  updatedAt: string
 }
 
 export interface CreateTransferRequest {
