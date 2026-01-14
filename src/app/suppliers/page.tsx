@@ -85,21 +85,21 @@ export default function SuppliersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-down">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Suppliers</h1>
-            <p className="mt-2 text-base text-muted-foreground">Manage supplier master data</p>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Suppliers</h1>
+            <p className="mt-2 text-muted-foreground">Manage supplier master data</p>
           </div>
-          <button onClick={() => { setEditSupplier(null); setStatusActive(true); setShowForm(true) }} className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">+ New Supplier</button>
+          <button onClick={() => { setEditSupplier(null); setStatusActive(true); setShowForm(true) }} className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all">+ New Supplier</button>
         </div>
 
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchSuppliers} />}
 
         {showForm && (
-          <form onSubmit={editSupplier ? saveEdit : submit} className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={editSupplier ? saveEdit : submit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
             <div>
               <label className="block text-sm font-medium mb-2">Name</label>
               <input className="w-full rounded-lg border border-border px-3 py-2" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
@@ -135,12 +135,12 @@ export default function SuppliersPage() {
             </div>
             <div className="md:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-border px-4 py-2">Cancel</button>
-              <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">{editSupplier ? 'Save' : 'Create'}</button>
+              <button type="submit" className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all">{editSupplier ? 'Save' : 'Create'}</button>
             </div>
           </form>
         )}
 
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">

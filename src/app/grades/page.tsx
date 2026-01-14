@@ -101,15 +101,16 @@ export default function GradesPage() {
   )
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center animate-slide-down">
         <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Grades</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Grades</h1>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
         >
           <Plus className="h-4 w-4" />
           Add Grade
@@ -119,14 +120,14 @@ export default function GradesPage() {
       {success && <SuccessMessage message={success} onDismiss={() => setSuccess('')} />}
 
       {error && (
-        <div className="bg-red-50 text-red-500 p-4 rounded-lg border border-red-200">
+        <div className="bg-destructive/10 text-destructive p-4 rounded-xl border border-destructive/30 animate-slide-up">
           {error}
         </div>
       )}
 
       {showForm && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card w-full max-w-md border border-border rounded-lg shadow-lg p-6">
+          <div className="bg-card w-full max-w-md border border-border rounded-2xl shadow-xl p-6 animate-scale-in">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">
                 {editingGrade ? 'Edit Grade' : 'New Grade'}
@@ -182,7 +183,7 @@ export default function GradesPage() {
         </div>
       )}
 
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm animate-slide-up">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-muted-foreground">
@@ -221,6 +222,7 @@ export default function GradesPage() {
           </table>
         </div>
       </div>
+    </div>
     </div>
   )
 }

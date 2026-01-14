@@ -132,11 +132,12 @@ export default function StockInPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">📥 Stock In</h1>
-        <p className="text-lg text-muted-foreground mt-2">Add inventory to your items</p>
+      <div className="animate-slide-down">
+        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Stock In</h1>
+        <p className="text-muted-foreground mt-2">Add inventory to your items</p>
       </div>
 
       
@@ -162,8 +163,8 @@ export default function StockInPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form */}
-        <div className="lg:col-span-2">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-md">
+        <div className="lg:col-span-2 animate-slide-up">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm card-hover">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Supplier */}
               <div>
@@ -260,11 +261,13 @@ export default function StockInPage() {
       </div>
 
       {/* Stock In Transactions */}
-      <div className="rounded-xl border border-border bg-card shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-border bg-muted/50">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <div className="px-6 py-5 border-b border-border">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-foreground">📋 Recent stock in transactions</h2>
-            <span className="text-xs text-muted-foreground">By whom and when</span>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Recent Transactions</h2>
+              <p className="text-sm text-muted-foreground mt-1">Stock in history</p>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -320,10 +323,10 @@ export default function StockInPage() {
       {detailsRef && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <button aria-label="Close" className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setDetailsRef(null); setDetails([]); setEditingRef(null) }} />
-          <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
+          <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-xl animate-scale-in">
             <div className="flex items-start justify-between gap-4 mb-4">
               <h3 className="text-xl font-bold text-foreground">Stock In ID: {detailsRef}</h3>
-              <button className="rounded-md border border-border bg-background px-3 py-2" onClick={() => { setDetailsRef(null); setDetails([]); setEditingRef(null) }}>Close</button>
+              <button className="rounded-lg border border-border bg-background px-3 py-2 hover:bg-accent transition-colors" onClick={() => { setDetailsRef(null); setDetails([]); setEditingRef(null) }}>Close</button>
             </div>
             {details.length === 0 ? (
               <p className="text-sm text-muted-foreground">No items</p>
@@ -351,7 +354,7 @@ export default function StockInPage() {
             )}
             <div className="mt-4 flex gap-3">
               <button
-                className="rounded-md bg-primary px-3 py-2 text-primary-foreground"
+                className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:opacity-90 transition-all"
                 onClick={() => {
                   setEditingRef(detailsRef)
                   setEditLines(details.map(d => ({ itemId: String(d.itemId), quantity: String(d.quantity) })))
@@ -362,7 +365,7 @@ export default function StockInPage() {
                 Edit
               </button>
               <button
-                className="rounded-md border border-destructive text-destructive px-3 py-2"
+                className="rounded-lg border border-destructive/30 bg-destructive/10 text-destructive px-4 py-2 hover:bg-destructive/20 transition-colors"
                 onClick={async () => {
                   try {
                     await StockService.deleteStockIn(detailsRef!)
@@ -426,17 +429,17 @@ export default function StockInPage() {
                             <input type="number" min="1" value={line.quantity} onChange={e => setEditLines(editLines.map((l,i)=> i===idx?{...l,quantity:e.target.value}:l))} className="w-full rounded-lg border border-border bg-background px-3 py-2" />
                           </td>
                           <td className="px-4 py-2">
-                            <button type="button" onClick={() => setEditLines(editLines.filter((_,i)=>i!==idx))} className="rounded-md border border-border px-3 py-2">Remove</button>
+                            <button type="button" onClick={() => setEditLines(editLines.filter((_,i)=>i!==idx))} className="rounded-lg border border-border px-3 py-2 hover:bg-accent transition-colors">Remove</button>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <button type="button" onClick={() => setEditLines([...editLines, { itemId: '', quantity: '' }])} className="rounded-md border border-border px-3 py-2">+ Add Item</button>
-                <div className="flex gap-3">
+                <button type="button" onClick={() => setEditLines([...editLines, { itemId: '', quantity: '' }])} className="rounded-lg border border-border px-3 py-2 hover:bg-accent transition-colors">+ Add Item</button>
+                <div className="flex gap-3 mt-3">
                   <button
-                    className="rounded-md bg-primary px-3 py-2 text-primary-foreground"
+                    className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:opacity-90 transition-all"
                     onClick={async () => {
                       if (!selectedWarehouse) { setError('Select warehouse'); return }
                       const payloadItems = editLines.filter(l => l.itemId && l.quantity).map(l => ({ itemId: parseInt(l.itemId), quantity: parseInt(l.quantity) }))
@@ -459,13 +462,14 @@ export default function StockInPage() {
                   >
                     Save
                   </button>
-                  <button className="rounded-md border border-border px-3 py-2" onClick={() => setEditingRef(null)}>Cancel</button>
+                  <button className="rounded-lg border border-border px-4 py-2 hover:bg-accent transition-colors" onClick={() => setEditingRef(null)}>Cancel</button>
                 </div>
               </div>
             )}
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

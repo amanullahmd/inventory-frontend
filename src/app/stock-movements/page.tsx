@@ -181,10 +181,11 @@ export default function StockMovementsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground">Stock movements</h1>
+      <div className="animate-slide-down">
+        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Stock Movements</h1>
         <p className="text-muted-foreground mt-1">View all stock in, out, and adjustment movements</p>
       </div>
 
@@ -208,7 +209,7 @@ export default function StockMovementsPage() {
       ) : null}
 
       {/* Filters and Export */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 animate-slide-up">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Date Range Filter */}
           <div className="lg:col-span-2">
@@ -269,7 +270,7 @@ export default function StockMovementsPage() {
       </div>
 
       {/* Sorting Controls */}
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex flex-wrap gap-4 items-center">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm flex flex-wrap gap-4 items-center animate-slide-up" style={{ animationDelay: '50ms' }}>
         <div>
           <label className="text-sm font-semibold text-muted-foreground mr-2">Sort by:</label>
           <select
@@ -295,7 +296,7 @@ export default function StockMovementsPage() {
       </div>
 
       {/* Movements Table */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '100ms' }}>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted/50">
@@ -371,7 +372,7 @@ export default function StockMovementsPage() {
       </div>
 
       {/* Info Card */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '150ms' }}>
         <h3 className="text-sm font-semibold text-foreground">Movement types</h3>
         <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
           <li><strong>IN:</strong> Inventory received or added</li>
@@ -379,6 +380,7 @@ export default function StockMovementsPage() {
           <li><strong>ADJUSTMENT:</strong> Manual stock count corrections</li>
         </ul>
       </div>
+    </div>
     </div>
   )
 }

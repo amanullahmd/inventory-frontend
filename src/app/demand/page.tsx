@@ -65,19 +65,19 @@ export default function DemandPage() {
   if (!session) { return <div className="p-10 text-center">Please sign in to view demands.</div> }
   
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-down">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Demand</h1>
-            <p className="mt-2 text-base text-muted-foreground">Staff demand form and recent requests</p>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Demand</h1>
+            <p className="mt-2 text-muted-foreground">Staff demand form and recent requests</p>
           </div>
         </div>
         
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchAll} />}
         
-        <form onSubmit={submit} className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
           {editingId && (
             <div>
               <label className="block text-sm font-medium mb-2">Demand ID</label>
@@ -155,7 +155,7 @@ export default function DemandPage() {
           </div>
         </form>
         
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">

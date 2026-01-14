@@ -58,21 +58,21 @@ export default function SalesOrdersPage() {
   if (!session) { return <div className="p-10 text-center">Please sign in to view sales orders.</div> }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-down">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Sales Orders</h1>
-            <p className="mt-2 text-base text-muted-foreground">Manage outgoing orders to customers</p>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Sales Orders</h1>
+            <p className="mt-2 text-muted-foreground">Manage outgoing orders to customers</p>
           </div>
-          <button onClick={() => setShowForm(true)} className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">+ New Sales Order</button>
+          <button onClick={() => setShowForm(true)} className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all">+ New Sales Order</button>
         </div>
 
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchAll} />}
 
         {showForm && (
-          <form onSubmit={submit} className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
             <div>
               <label className="block text-sm font-medium mb-2">Warehouse</label>
               <select className="w-full rounded-lg border border-border px-3 py-2" value={form.warehouseId} onChange={e => setForm({ ...form, warehouseId: parseInt(e.target.value) })}>
@@ -103,7 +103,7 @@ export default function SalesOrdersPage() {
           </form>
         )}
 
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">

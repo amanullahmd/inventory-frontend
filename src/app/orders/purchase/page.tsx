@@ -137,36 +137,36 @@ export default function PurchaseOrdersPage() {
   if (!session) { return <div className="p-10 text-center">Please sign in to view purchase orders.</div> }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-down">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Purchase Orders</h1>
-            <p className="mt-2 text-base text-muted-foreground">Manage incoming orders from suppliers</p>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Purchase Orders</h1>
+            <p className="mt-2 text-muted-foreground">Manage incoming orders from suppliers</p>
           </div>
-          <button onClick={() => { setError(null); setShowForm(true) }} className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">+ New Purchase Order</button>
+          <button onClick={() => { setError(null); setShowForm(true) }} className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all">+ New Purchase Order</button>
         </div>
 
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchAll} />}
 
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">Today</div>
             <div className="mt-2 text-3xl font-bold text-foreground">${todayTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value today</div>
           </div>
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">This Month</div>
             <div className="mt-2 text-3xl font-bold text-foreground">${monthTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value this month</div>
           </div>
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">This Year</div>
             <div className="mt-2 text-3xl font-bold text-foreground">${yearTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value this year</div>
           </div>
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">Selected Range</div>
             <div className="mt-2 text-3xl font-bold text-foreground">${rangeTotal.toFixed(2)}</div>
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -183,7 +183,7 @@ export default function PurchaseOrdersPage() {
         </div>
 
         {showForm && (
-          <form onSubmit={submit} className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
             <div>
               <label className="block text-sm font-medium mb-2">Supplier</label>
               <select className="w-full rounded-lg border border-border px-3 py-2" value={form.supplierId} onChange={e => setForm({ ...form, supplierId: parseInt(e.target.value) })}>
@@ -244,7 +244,7 @@ export default function PurchaseOrdersPage() {
           </form>
         )}
 
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '100ms' }}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">

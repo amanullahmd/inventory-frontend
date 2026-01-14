@@ -116,10 +116,11 @@ export default function StockOutReasonsReportPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground">Stock-out reasons</h1>
+      <div className="animate-slide-down">
+        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Stock-out Reasons</h1>
         <p className="text-muted-foreground mt-1">Analyze why inventory is leaving your warehouse</p>
       </div>
 
@@ -143,7 +144,7 @@ export default function StockOutReasonsReportPage() {
       ) : null}
 
       {/* Filters and Export */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 animate-slide-up">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Date Range Filter */}
           <div className="lg:col-span-2">
@@ -186,28 +187,28 @@ export default function StockOutReasonsReportPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground">Total stock-outs</div>
-          <div className="mt-2 text-2xl font-semibold text-foreground">{totalCount}</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-slide-up" style={{ animationDelay: '50ms' }}>
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
+          <div className="text-sm font-medium text-muted-foreground">Total stock-outs</div>
+          <div className="mt-2 text-3xl font-bold text-foreground">{totalCount}</div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground">Unique reasons</div>
-          <div className="mt-2 text-2xl font-semibold text-foreground">{reasons.length}</div>
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
+          <div className="text-sm font-medium text-muted-foreground">Unique reasons</div>
+          <div className="mt-2 text-3xl font-bold text-foreground">{reasons.length}</div>
         </div>
 
         {topReason && (
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <div className="text-xs font-medium text-muted-foreground">Top reason</div>
-            <div className="mt-2 text-sm font-medium text-foreground">{topReason.reasonLabel}</div>
-            <div className="mt-1 text-xs text-muted-foreground">{topReason.count} occurrences ({topReason.percentage}%)</div>
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
+            <div className="text-sm font-medium text-muted-foreground">Top reason</div>
+            <div className="mt-2 text-lg font-semibold text-foreground">{topReason.reasonLabel}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{topReason.count} occurrences ({topReason.percentage}%)</div>
           </div>
         )}
       </div>
 
       {/* Pie Chart Visualization */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '100ms' }}>
         <h2 className="text-sm font-semibold text-foreground mb-6">Reason distribution</h2>
         
         <div className="flex flex-col lg:flex-row gap-8">
@@ -275,9 +276,9 @@ export default function StockOutReasonsReportPage() {
       </div>
 
       {/* Detailed Table */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-border bg-muted/50">
-          <h2 className="text-2xl font-semibold text-foreground">Detailed breakdown</h2>
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '150ms' }}>
+        <div className="px-6 py-5 border-b border-border">
+          <h2 className="text-xl font-bold text-foreground">Detailed Breakdown</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border">
@@ -324,7 +325,7 @@ export default function StockOutReasonsReportPage() {
       </div>
 
       {/* Info Card */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '200ms' }}>
         <h3 className="text-sm font-semibold text-foreground">Insights</h3>
         <ul className="text-sm text-muted-foreground mt-2 space-y-1">
           <li>• Track the most common reasons for stock-out to identify patterns</li>
@@ -333,6 +334,7 @@ export default function StockOutReasonsReportPage() {
           <li>• Analyze transfers to optimize branch distribution</li>
         </ul>
       </div>
+    </div>
     </div>
   )
 }

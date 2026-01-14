@@ -171,17 +171,17 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="mb-8">
+        <div className="mb-8 animate-slide-down">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground">Categories</h1>
-              <p className="mt-2 text-base text-muted-foreground">Manage and browse inventory categories</p>
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Categories</h1>
+              <p className="mt-2 text-muted-foreground">Manage and browse inventory categories</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={() => setShowCreate(true)} className="h-10 px-4">+ Create Category</Button>
+              <Button onClick={() => setShowCreate(true)} className="h-10 px-4 rounded-xl shadow-md hover:shadow-lg transition-all">+ Create Category</Button>
             </div>
           </div>
         </div>
@@ -194,7 +194,7 @@ export default function CategoriesPage() {
 
         {/* Create Form */}
         {showCreate && (
-          <div className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-foreground">New Category</h3>
               <button className="text-muted-foreground hover:text-foreground" onClick={() => setShowCreate(false)}>Close</button>
@@ -222,7 +222,7 @@ export default function CategoriesPage() {
         
         {/* Edit Form */}
         {editCategory && (
-          <div className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-foreground">Edit Category</h3>
               <button className="text-muted-foreground hover:text-foreground" onClick={() => setEditCategory(null)}>Close</button>
@@ -256,7 +256,7 @@ export default function CategoriesPage() {
 
         {/* Categories Grid */}
         {categories.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-12 text-center shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-sm animate-slide-up">
             <svg className="mx-auto h-12 w-12 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
@@ -267,12 +267,12 @@ export default function CategoriesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-slide-up">
             {categories.map((category) => (
               <div
                 key={category.id}
                 onClick={() => router.push(`/categories/${category.id}`)}
-                className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group"
+                className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group card-hover"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div 

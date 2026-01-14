@@ -194,11 +194,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">⚙️ Settings</h1>
-        <p className="text-lg text-muted-foreground mt-2">Manage your profile and system settings</p>
+      <div className="animate-slide-down">
+        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Settings</h1>
+        <p className="text-muted-foreground mt-2">Manage your profile and system settings</p>
       </div>
 
       {/* Messages */}
@@ -222,9 +223,9 @@ export default function SettingsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Settings */}
-        <div className="lg:col-span-2">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-md">
-            <h2 className="text-2xl font-bold text-foreground mb-6">👤 Profile</h2>
+        <div className="lg:col-span-2 animate-slide-up">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-foreground mb-6">Profile</h2>
             
             <form onSubmit={handleSaveProfile} className="space-y-6">
               {/* Name */}
@@ -327,9 +328,9 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div>
-          <div className="rounded-xl border border-border bg-card p-6 shadow-md">
-            <h2 className="text-2xl font-bold text-foreground mb-4">ℹ️ Account</h2>
+        <div className="animate-slide-up" style={{ animationDelay: '50ms' }}>
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-foreground mb-4">Account Info</h2>
             
             <div className="space-y-4">
               <div>
@@ -352,17 +353,17 @@ export default function SettingsPage() {
       {/* User Management (Admin Only) */}
       {isAdmin && (
         <PermissionGuard permission="create_user">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-md">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '100ms' }}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-foreground">👥 User management</h2>
-                <p className="mt-2 text-base text-muted-foreground">Create and remove users.</p>
+                <h2 className="text-xl font-bold text-foreground">User Management</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Create and remove users.</p>
               </div>
               <button
                 onClick={() => setShowUserForm(true)}
-                className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
+                className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
               >
-                ➕ Add user
+                + Add user
               </button>
             </div>
 
@@ -488,6 +489,7 @@ export default function SettingsPage() {
           </div>
         </PermissionGuard>
       )}
+      </div>
     </div>
   )
 }

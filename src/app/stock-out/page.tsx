@@ -244,11 +244,12 @@ export default function StockOutPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">📤 Stock Out</h1>
-        <p className="text-lg text-muted-foreground mt-2">Manage stock deductions and transfers</p>
+      <div className="animate-slide-down">
+        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Stock Out</h1>
+        <p className="text-muted-foreground mt-2">Manage stock deductions and transfers</p>
       </div>
 
       {/* Messages */}
@@ -272,8 +273,8 @@ export default function StockOutPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form */}
-        <div className="lg:col-span-2">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-md">
+        <div className="lg:col-span-2 animate-slide-up">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm card-hover">
             <form onSubmit={handleSubmit} className="space-y-6">
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -399,10 +400,13 @@ export default function StockOutPage() {
       </div>
 
       {/* Stock Out List */}
-      <div className="rounded-xl border border-border bg-card shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-border bg-muted/50">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <div className="px-6 py-5 border-b border-border">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-foreground">📋 Recent stock out transactions</h2>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Recent Transactions</h2>
+              <p className="text-sm text-muted-foreground mt-1">Stock out history</p>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -469,10 +473,10 @@ export default function StockOutPage() {
       {detailsRef && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <button aria-label="Close" className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setDetailsRef(null); setDetails([]) }} />
-          <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-lg">
+          <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-xl animate-scale-in">
             <div className="flex items-start justify-between gap-4 mb-4">
               <h3 className="text-xl font-bold text-foreground">Stock Out Details: {detailsRef}</h3>
-              <button className="rounded-md border border-border bg-background px-3 py-2" onClick={() => { setDetailsRef(null); setDetails([]) }}>Close</button>
+              <button className="rounded-lg border border-border bg-background px-3 py-2 hover:bg-accent transition-colors" onClick={() => { setDetailsRef(null); setDetails([]) }}>Close</button>
             </div>
             {details.length === 0 ? (
               <p className="text-sm text-muted-foreground">No items</p>
@@ -511,6 +515,7 @@ export default function StockOutPage() {
         </div>
       )}
 
+      </div>
     </div>
   )
 }

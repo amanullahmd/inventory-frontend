@@ -269,20 +269,20 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-down">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight flex items-center gap-3 text-foreground">
               <Users className="w-8 h-8 text-primary" />
               User Management
             </h1>
-            <p className="mt-2 text-base text-muted-foreground">Manage system users, roles, and access permissions</p>
+            <p className="mt-2 text-muted-foreground">Manage system users, roles, and access permissions</p>
           </div>
           {!showForm && (
             <button 
               onClick={handleAddNewClick}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:opacity-90 transition-all"
             >
               <Users className="w-4 h-4" /> Add New User
             </button>
@@ -294,7 +294,7 @@ export default function UsersPage() {
         
         {/* Inline Create/Edit Form */}
         {showForm && (
-          <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 animate-in slide-in-from-top-4 duration-200">
+          <form onSubmit={handleSubmit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 animate-slide-up">
           <div className="md:col-span-4 mb-2">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               {editingUserId ? <><Briefcase className="w-5 h-5" /> Edit User</> : <><Users className="w-5 h-5" /> Add New User</>}
@@ -413,7 +413,7 @@ export default function UsersPage() {
         )}
         
         {/* Search & Filter Bar */}
-        <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+        <div className="mb-6 rounded-2xl border border-border bg-card p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -439,7 +439,7 @@ export default function UsersPage() {
         </div>
 
         {/* Users Table */}
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '100ms' }}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">
