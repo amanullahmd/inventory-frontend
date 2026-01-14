@@ -12,22 +12,25 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   text
 }) => {
   const sizeClasses = {
-    small: 'w-4 h-4 border-2',
-    medium: 'w-8 h-8 border-2',
-    large: 'w-12 h-12 border-4'
+    small: 'w-5 h-5',
+    medium: 'w-8 h-8',
+    large: 'w-12 h-12'
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center space-y-2 ${className}`}>
-      <div 
-        className={`${sizeClasses[size]} spinner`}
-        role="status"
-        aria-label="Loading"
-      >
-        <span className="sr-only">Loading...</span>
+    <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
+      <div className="relative">
+        <div 
+          className={`${sizeClasses[size]} rounded-full border-2 border-muted animate-spin`}
+          style={{ borderTopColor: 'var(--primary)' }}
+          role="status"
+          aria-label="Loading"
+        >
+          <span className="sr-only">Loading...</span>
+        </div>
       </div>
       {text && (
-        <p className="text-sm text-secondary-600 animate-pulse">{text}</p>
+        <p className="text-sm text-muted-foreground animate-pulse-soft">{text}</p>
       )}
     </div>
   );
