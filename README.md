@@ -424,6 +424,7 @@ chore: update dependencies
 
 ## Roadmap
 
+- [x] Progressive Web App (PWA) support
 - [ ] Dark mode toggle
 - [ ] Advanced filtering and search
 - [ ] Bulk import/export
@@ -431,7 +432,94 @@ chore: update dependencies
 - [ ] Mobile app (React Native)
 - [ ] Advanced analytics dashboard
 - [ ] Multi-language support
-- [ ] Offline mode
+
+## Progressive Web App (PWA)
+
+The Inventory Management System is a fully-featured Progressive Web App that can be installed on any platform and works offline.
+
+### Installation
+
+#### Desktop (Chrome, Edge, Firefox)
+1. Visit the application URL
+2. Look for the install icon in the address bar (or the "Install" prompt)
+3. Click "Install" to add the app to your desktop
+4. The app will open in its own window
+
+#### Android
+1. Open the app in Chrome
+2. Tap the "Add to Home Screen" prompt or menu option
+3. The app icon will appear on your home screen
+
+#### iOS (Safari)
+1. Open the app in Safari
+2. Tap the Share button
+3. Select "Add to Home Screen"
+4. Tap "Add" to confirm
+
+### Offline Capabilities
+
+The PWA supports offline functionality for most features:
+
+| Feature | Offline Read | Offline Write | Sync |
+|---------|--------------|---------------|------|
+| Dashboard | ✅ Cached stats | ❌ | Auto |
+| Items | ✅ Cached list | ⏳ Queued | Background |
+| Categories | ✅ Cached list | ⏳ Queued | Background |
+| Stock In/Out | ✅ Form data | ⏳ Queued | Background |
+| Stock Movements | ✅ History | ❌ | Auto |
+| Reports | ✅ Cached | ❌ | Auto |
+| Auth | ❌ Requires network | ❌ | - |
+
+### Offline Queue
+
+When you're offline, write operations (create, update, delete) are automatically queued:
+- A sync status indicator shows pending operations
+- Operations sync automatically when you come back online
+- Failed operations can be retried manually
+
+### Data Freshness
+
+- Dashboard shows "Last updated" timestamp
+- Stale data is indicated with a warning
+- Auto-refresh when coming back online
+- Manual refresh button available
+
+### Updates
+
+When a new version is available:
+1. The app downloads the update in the background
+2. A notification appears when the update is ready
+3. Click "Update" to reload with the new version
+4. Or dismiss to update later
+
+### PWA Testing
+
+To test PWA features:
+
+1. **Lighthouse Audit**
+   - Open Chrome DevTools (F12)
+   - Go to "Lighthouse" tab
+   - Select "Progressive Web App"
+   - Click "Analyze page load"
+   - Target score: 90+
+
+2. **Offline Testing**
+   - Open DevTools > Network tab
+   - Check "Offline" checkbox
+   - Navigate the app to test cached content
+   - Try creating/editing items (should queue)
+   - Uncheck "Offline" to sync
+
+3. **Install Testing**
+   - Clear site data in DevTools > Application
+   - Reload the page
+   - Wait for install prompt (after interaction)
+   - Test installation flow
+
+4. **Service Worker**
+   - DevTools > Application > Service Workers
+   - Verify SW is registered and active
+   - Test "Update on reload" for development
 
 ## License
 

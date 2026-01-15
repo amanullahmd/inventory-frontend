@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { AlertCircle, Loader2, Mail, Lock, ArrowRight } from 'lucide-react';
+import { AlertCircle, Loader2, Mail, Lock, ArrowRight, WifiOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginForm() {
@@ -12,9 +12,32 @@ export default function LoginForm() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [isOffline, setIsOffline] = useState(false);
+
+    // Track online/offline status
+    useEffect(() => {
+        setIsOffline(!navigator.onLine);
+        
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (isOffline) {
+            setError('You are offline. Please check your internet connection.');
+            return;
+        }
+        
         setLoading(true);
         setError(null);
 
@@ -40,7 +63,17 @@ export default function LoginForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
+            {isOffline && (
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20 text-warning animate-slide-down">
+                    <WifiOff className="h-5 w-5 flex-shrink-0" />
+                    <div>
+                        <p className="text-sm font-medium">You&apos;re offline</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Sign in requires an internet connection</p>
+                    </div>
+                </div>
+            )}
+            
+            {error && !isOffline && (
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive animate-slide-down">
                     <AlertCircle className="h-5 w-5 flex-shrink-0" />
                     <p className="text-sm font-medium">{error}</p>
@@ -91,7 +124,7 @@ export default function LoginForm() {
 
             <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isOffline}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {loading ? (

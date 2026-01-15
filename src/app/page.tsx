@@ -2,8 +2,10 @@
 
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useCallback } from 'react'
 import { ItemService } from '@/lib/services/itemService'
+import { useCachedData } from '@/hooks/useCachedData'
+import { DataFreshnessIndicator } from '@/components/pwa/DataFreshnessIndicator'
 import {
   Package,
   ArrowDownToLine,
@@ -28,38 +30,40 @@ interface Stats {
 
 export default function Home() {
   const { data: session } = useSession()
-  const [stats, setStats] = useState<Stats>({
+  
+  // Fetch function for statistics
+  const fetchStats = useCallback(async (): Promise<Stats> => {
+    const s = await ItemService.getStatistics()
+    return {
+      totalItems: Number(s.totalItems ?? 0),
+      totalValue: Number(s.totalValue ?? 0),
+      lowStockItems: Number((s as Record<string, unknown>).lowStockCount ?? 0),
+      outOfStockItems: Number((s as Record<string, unknown>).outOfStockCount ?? 0),
+    }
+  }, [])
+
+  // Use cached data hook for offline support
+  const {
+    data: stats,
+    isLoading: loading,
+    lastUpdated,
+    isStale,
+    isOffline,
+    refetch,
+  } = useCachedData<Stats>({
+    cacheKey: 'dashboard-stats',
+    fetchFn: fetchStats,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!session,
+  })
+
+  // Default stats if no data
+  const displayStats = stats || {
     totalItems: 0,
     totalValue: 0,
     lowStockItems: 0,
     outOfStockItems: 0,
-  })
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let active = true
-    const fetchStats = async () => {
-      if (!session) return
-      setLoading(true)
-      try {
-        const s = await ItemService.getStatistics()
-        if (!active) return
-        setStats({
-          totalItems: Number(s.totalItems ?? 0),
-          totalValue: Number(s.totalValue ?? 0),
-          lowStockItems: Number((s as Record<string, unknown>).lowStockCount ?? 0),
-          outOfStockItems: Number((s as Record<string, unknown>).outOfStockCount ?? 0),
-        })
-      } catch {
-        if (!active) return
-        setStats({ totalItems: 0, totalValue: 0, lowStockItems: 0, outOfStockItems: 0 })
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    fetchStats()
-    return () => { active = false }
-  }, [session])
+  }
 
   if (!session) {
     return (
@@ -167,16 +171,38 @@ export default function Home() {
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 animate-slide-down">
-          <div className="flex items-center gap-2 text-muted-foreground mb-2">
-            <Sparkles size={16} />
-            <span className="text-sm">Welcome back</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                <Sparkles size={16} />
+                <span className="text-sm">Welcome back</span>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
+                Hello, {session.user?.name?.split(' ')[0] || 'there'}!
+              </h1>
+              <p className="mt-2 text-lg text-muted-foreground">
+                Here&apos;s what&apos;s happening with your inventory today.
+              </p>
+            </div>
+            <DataFreshnessIndicator
+              lastUpdated={lastUpdated}
+              isStale={isStale}
+              isOffline={isOffline}
+              isLoading={loading}
+              onRefresh={refetch}
+              className="hidden sm:flex"
+            />
           </div>
-          <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-            Hello, {session.user?.name?.split(' ')[0] || 'there'}!
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Here&apos;s what&apos;s happening with your inventory today.
-          </p>
+          {/* Mobile freshness indicator */}
+          <div className="sm:hidden mt-4">
+            <DataFreshnessIndicator
+              lastUpdated={lastUpdated}
+              isStale={isStale}
+              isOffline={isOffline}
+              isLoading={loading}
+              onRefresh={refetch}
+            />
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -197,7 +223,7 @@ export default function Home() {
               <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
                 <StatCard
                   title="Total Items"
-                  value={stats.totalItems.toLocaleString()}
+                  value={displayStats.totalItems.toLocaleString()}
                   subtitle="Items in inventory"
                   icon={Package}
                   href="/items?filter=all"
@@ -207,7 +233,7 @@ export default function Home() {
               <div className="animate-slide-up" style={{ animationDelay: '50ms' }}>
                 <StatCard
                   title="Total Value"
-                  value={`$${stats.totalValue.toLocaleString()}`}
+                  value={`$${displayStats.totalValue.toLocaleString()}`}
                   subtitle="Inventory worth"
                   icon={BarChart3}
                   href="/items"
@@ -218,7 +244,7 @@ export default function Home() {
               <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
                 <StatCard
                   title="Low Stock"
-                  value={stats.lowStockItems}
+                  value={displayStats.lowStockItems}
                   subtitle="Items below threshold"
                   icon={AlertTriangle}
                   href="/items?filter=low_stock"
@@ -228,7 +254,7 @@ export default function Home() {
               <div className="animate-slide-up" style={{ animationDelay: '150ms' }}>
                 <StatCard
                   title="Out of Stock"
-                  value={stats.outOfStockItems}
+                  value={displayStats.outOfStockItems}
                   subtitle="Items unavailable"
                   icon={PackageX}
                   href="/items?filter=out_of_stock"
