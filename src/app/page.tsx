@@ -2,9 +2,8 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useCallback, memo } from 'react'
 import Link from 'next/link'
-import { useCallback } from 'react'
 import { ItemService } from '@/lib/services/itemService'
 import { useCachedData } from '@/hooks/useCachedData'
 import { DataFreshnessIndicator } from '@/components/pwa/DataFreshnessIndicator'
@@ -20,7 +19,6 @@ import {
   BarChart3,
   Users,
   ArrowRight,
-  Sparkles
 } from 'lucide-react'
 
 interface Stats {
@@ -91,7 +89,7 @@ export default function Home() {
 
   const isAdmin = (session as { roles?: string[] })?.roles?.includes('ROLE_ADMIN')
 
-  const StatCard = ({ 
+  const StatCard = memo(({ 
     title, 
     value, 
     subtitle, 
@@ -136,9 +134,11 @@ export default function Home() {
         </div>
       </Link>
     )
-  }
+  })
 
-  const QuickAction = ({ 
+  StatCard.displayName = 'StatCard'
+
+  const QuickAction = memo(({ 
     title, 
     description, 
     icon: Icon, 
@@ -161,7 +161,9 @@ export default function Home() {
         <ArrowRight size={18} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
       </div>
     </Link>
-  )
+  ))
+
+  QuickAction.displayName = 'QuickAction'
 
   return (
     <div className="min-h-screen bg-background">

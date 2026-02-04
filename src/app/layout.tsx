@@ -5,15 +5,21 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import Layout from "@/components/layout/Layout";
 import { auth } from "@/auth";
 import { PWAProvider } from "@/components/pwa/PWAProvider";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
+// Optimize font loading with display swap
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 // PWA Metadata
@@ -71,6 +77,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Preconnect to critical resources */}
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || ""} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || ""} />
+        
         {/* PWA Meta Tags */}
         <meta name="application-name" content="DPE Inventory" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -80,17 +90,17 @@ export default async function RootLayout({
         <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-tap-highlight" content="no" />
         
-        {/* Resource Hints for Performance */}
-        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || ""} />
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || ""} />
-        
         {/* Prefetch critical routes */}
-        <link rel="prefetch" href="/items" />
-        <link rel="prefetch" href="/stock-in" />
-        <link rel="prefetch" href="/stock-out" />
+        <link rel="prefetch" href="/items" as="fetch" crossOrigin="anonymous" />
+        <link rel="prefetch" href="/stock-in" as="fetch" crossOrigin="anonymous" />
+        <link rel="prefetch" href="/stock-out" as="fetch" crossOrigin="anonymous" />
         
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.svg" />
+        
+        {/* Preload critical SVG icons */}
+        <link rel="preload" href="/icons/icon-192x192.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/icons/icon-512x512.svg" as="image" type="image/svg+xml" />
         
         {/* Splash screens for iOS */}
         <link
@@ -103,11 +113,13 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ErrorBoundary>
-          <PWAProvider>
-            <Layout session={session}>
-              {children}
-            </Layout>
-          </PWAProvider>
+          <ThemeProvider>
+            <PWAProvider>
+              <Layout session={session}>
+                {children}
+              </Layout>
+            </PWAProvider>
+          </ThemeProvider>
         </ErrorBoundary>
       </body>
     </html>

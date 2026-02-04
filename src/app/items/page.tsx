@@ -571,9 +571,9 @@ export default function ItemsPage() {
                   {categories.length === 0 ? (
                     <p className="w-full text-center text-sm text-muted-foreground py-4">No categories yet</p>
                   ) : (
-                    categories.map((category) => (
+                    categories.map((category, index) => (
                       <button
-                        key={category.id}
+                        key={`${category.id}-${index}`}
                         type="button"
                         onClick={() => router.push(`/categories/${category.id}`)}
                         className="rounded-full border border-border bg-background text-muted-foreground hover:bg-accent hover:border-primary/50 px-4 py-2 text-sm font-semibold transition-all"
@@ -647,8 +647,8 @@ export default function ItemsPage() {
                         required
                       >
                         <option value="">Select a category</option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
+                        {categories.map((cat, index) => (
+                          <option key={`${cat.id}-${index}`} value={cat.id}>
                             {cat.name}
                           </option>
                         ))}
@@ -822,8 +822,8 @@ export default function ItemsPage() {
                       required
                     >
                       <option value="">Select a category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
+                      {categories.map((cat, index) => (
+                        <option key={`${cat.id}-${index}`} value={cat.id}>
                           {cat.name}
                         </option>
                       ))}

@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo, useMemo } from 'react'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
   LayoutDashboard,
@@ -22,8 +22,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Sun,
-  Moon,
   Menu,
   X
 } from 'lucide-react'
@@ -55,60 +53,72 @@ const managementItems: NavItem[] = [
   { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
 ]
 
+// Memoized nav link component
+const NavLink = memo(({ item, collapsed, isActive, isAdmin, onNavigate }: { 
+  item: NavItem
+  collapsed: boolean
+  isActive: boolean
+  isAdmin: boolean
+  onNavigate: () => void
+}) => {
+  if (item.adminOnly && !isAdmin) return null
+  
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      className={`
+        flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+        ${isActive 
+          ? 'bg-primary text-primary-foreground shadow-md' 
+          : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+        }
+        ${collapsed ? 'justify-center' : ''}
+      `}
+      title={collapsed ? item.name : undefined}
+    >
+      <span className={isActive ? 'text-primary-foreground' : ''}>{item.icon}</span>
+      {!collapsed && <span className="font-medium text-sm">{item.name}</span>}
+    </Link>
+  )
+})
+
+NavLink.displayName = 'NavLink'
+
 export default function Sidebar() {
   const { data: session } = useSession()
   const { isAdmin } = usePermissions()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [mounted, setMounted] = useState(false)
 
+  // Ensure hydration matches by only rendering after mount
   useEffect(() => {
-    const stored = window.localStorage.getItem('theme')
-    const initial = stored === 'dark' ? 'dark' : 'light'
-    setTheme(initial)
-    document.documentElement.classList.toggle('dark', initial === 'dark')
+    setMounted(true)
   }, [])
 
-  const toggleTheme = () => {
-    setTheme(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark'
-      window.localStorage.setItem('theme', next)
-      document.documentElement.classList.toggle('dark', next === 'dark')
-      return next
-    })
-  }
-
   if (!session) return null
+
+  if (!mounted) {
+    return null
+  }
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
     return pathname.startsWith(href)
   }
 
-  const NavLink = ({ item }: { item: NavItem }) => {
-    if (item.adminOnly && !isAdmin()) return null
-    
-    const active = isActive(item.href)
-    return (
-      <Link
-        href={item.href}
-        onClick={() => setMobileOpen(false)}
-        className={`
-          flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-          ${active 
-            ? 'bg-primary text-primary-foreground shadow-md' 
-            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-          }
-          ${collapsed ? 'justify-center' : ''}
-        `}
-        title={collapsed ? item.name : undefined}
-      >
-        <span className={active ? 'text-primary-foreground' : ''}>{item.icon}</span>
-        {!collapsed && <span className="font-medium text-sm">{item.name}</span>}
-      </Link>
-    )
-  }
+  // Memoize filtered nav items
+  const filteredNavItems = useMemo(() => 
+    navItems.filter(item => !item.adminOnly || isAdmin()),
+    [isAdmin]
+  )
+
+  const filteredManagementItems = useMemo(() => 
+    managementItems.filter(item => !item.adminOnly || isAdmin()),
+    [isAdmin]
+  )
 
   const sidebarContent = (
     <>
@@ -138,7 +148,16 @@ export default function Sidebar() {
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-1">
-          {navItems.map(item => <NavLink key={item.href} item={item} />)}
+          {filteredNavItems.map(item => (
+            <NavLink 
+              key={item.href} 
+              item={item}
+              collapsed={collapsed}
+              isActive={isActive(item.href)}
+              isAdmin={isAdmin()}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          ))}
         </div>
 
         {!collapsed && (
@@ -149,7 +168,16 @@ export default function Sidebar() {
         {collapsed && <div className="my-4 border-t border-sidebar-border" />}
         
         <div className="space-y-1">
-          {managementItems.map(item => <NavLink key={item.href} item={item} />)}
+          {filteredManagementItems.map(item => (
+            <NavLink 
+              key={item.href} 
+              item={item}
+              collapsed={collapsed}
+              isActive={isActive(item.href)}
+              isAdmin={isAdmin()}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          ))}
         </div>
       </div>
 
@@ -172,14 +200,6 @@ export default function Sidebar() {
         </div>
 
         <div className={`flex ${collapsed ? 'flex-col' : ''} gap-2 mt-3`}>
-          <button
-            onClick={toggleTheme}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-sidebar-border hover:bg-sidebar-accent transition-colors ${collapsed ? 'w-full' : 'flex-1'}`}
-            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
-          >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            {!collapsed && <span className="text-sm">{theme === 'dark' ? 'Light' : 'Dark'}</span>}
-          </button>
           <button
             onClick={() => signOut({ callbackUrl: '/auth/signin' })}
             className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors ${collapsed ? 'w-full' : 'flex-1'}`}

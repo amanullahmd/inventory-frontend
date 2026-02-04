@@ -2,6 +2,7 @@
 
 import { SessionProvider } from 'next-auth/react'
 import Sidebar from './Sidebar'
+import TopHeader from './TopHeader'
 import type { Session } from 'next-auth'
 
 interface LayoutProps {
@@ -14,10 +15,11 @@ export default function Layout({ children, session }: LayoutProps) {
     <SessionProvider session={session}>
       {session ? (
         <div className="min-h-screen bg-background">
+          <TopHeader />
           <Sidebar />
           
           {/* Main Content */}
-          <main className="transition-all duration-300 ease-in-out pt-14 lg:pt-0 lg:ml-64">
+          <main className="transition-all duration-300 ease-in-out pt-20 lg:pt-16 lg:ml-64">
             <div className="min-h-screen">
               {children}
             </div>
@@ -29,3 +31,4 @@ export default function Layout({ children, session }: LayoutProps) {
     </SessionProvider>
   )
 }
+
