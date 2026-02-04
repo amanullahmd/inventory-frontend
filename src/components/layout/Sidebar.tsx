@@ -91,23 +91,8 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  // Ensure hydration matches by only rendering after mount
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   if (!session) return null
-
-  if (!mounted) {
-    return null
-  }
-
-  const isActive = (href: string) => {
-    if (href === '/') return pathname === '/'
-    return pathname.startsWith(href)
-  }
 
   // Memoize filtered nav items
   const filteredNavItems = useMemo(() => 
@@ -119,6 +104,11 @@ export default function Sidebar() {
     managementItems.filter(item => !item.adminOnly || isAdmin()),
     [isAdmin]
   )
+
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    return pathname.startsWith(href)
+  }
 
   const sidebarContent = (
     <>

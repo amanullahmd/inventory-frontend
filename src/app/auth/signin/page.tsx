@@ -26,50 +26,25 @@ export default function SignIn() {
           </svg>
         </div>
 
-        {/* Floating Animation Elements */}
-        <style>{`
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-          }
-          @keyframes float-slow {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-30px); }
-          }
-          @keyframes float-reverse {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(20px); }
-          }
-          .animate-float {
-            animation: float 4s ease-in-out infinite;
-          }
-          .animate-float-slow {
-            animation: float-slow 5s ease-in-out infinite;
-          }
-          .animate-float-reverse {
-            animation: float-reverse 4.5s ease-in-out infinite;
-          }
-        `}</style>
-
         {/* Floating Icons - Top Right */}
-        <div className="absolute top-20 right-10 opacity-20 animate-float">
+        <div className="absolute top-20 right-10 opacity-20">
           <Boxes size={60} className="text-blue-400" />
         </div>
 
         {/* Floating Icons - Bottom Left */}
-        <div className="absolute bottom-32 left-8 opacity-15 animate-float-slow">
+        <div className="absolute bottom-32 left-8 opacity-15">
           <Warehouse size={80} className="text-blue-300" />
         </div>
 
         {/* Floating Icons - Middle Right */}
-        <div className="absolute top-1/2 right-16 opacity-10 animate-float-reverse">
+        <div className="absolute top-1/2 right-16 opacity-10">
           <TrendingUp size={70} className="text-blue-400" />
         </div>
 
         {/* Content */}
         <div className="relative z-10 px-8 pt-12 space-y-6 flex-1 flex flex-col items-center justify-start">
           {/* 1. DPE Inventory */}
-          <div className="flex items-center gap-4 justify-center animate-fade-in">
+          <div className="flex items-center gap-4 justify-center">
             <div className="w-16 h-16 rounded-xl bg-blue-100 flex items-center justify-center">
               <Package size={40} className="text-blue-600" />
             </div>
@@ -77,7 +52,7 @@ export default function SignIn() {
           </div>
 
           {/* 2. Government Logo and Text */}
-          <div className="flex items-center gap-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center gap-6">
             <div className="bg-white rounded-full p-4 shadow-lg flex-shrink-0">
               <Image
                 src="/government-bangladesh-logo.avif"
@@ -98,7 +73,7 @@ export default function SignIn() {
           <div className="h-4"></div>
 
           {/* Cover Photo - After 3 lines */}
-          <div className="relative w-64 h-48 rounded-2xl overflow-hidden shadow-xl border-4 border-white animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="relative w-64 h-48 rounded-2xl overflow-hidden shadow-xl border-4 border-white">
             <Image
               src="/DPE_cover.webp"
               alt="DPE Cover"
@@ -117,7 +92,7 @@ export default function SignIn() {
 
       {/* Right Panel - Login Form */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-white">
-        <div className="w-full max-w-md animate-fade-in">
+        <div className="w-full max-w-md">
           {/* Government Logo and Text - Mobile */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="bg-blue-50 rounded-full p-2">
