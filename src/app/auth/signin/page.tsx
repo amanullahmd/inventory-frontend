@@ -1,6 +1,6 @@
 import LoginForm from "@/components/auth/LoginForm"
 import Image from "next/image"
-import { Shield, User, Lock, Boxes, Warehouse, TrendingUp } from "lucide-react"
+import { Shield, User, Lock } from "lucide-react"
 
 const DEMO_CREDENTIALS = [
   { email: 'admin@example.com', password: 'Admin@123456', role: 'Admin', icon: Shield },
@@ -26,20 +26,7 @@ export default function SignIn() {
           </svg>
         </div>
 
-        {/* Floating Icons - Top Right */}
-        <div className="absolute top-20 right-10 opacity-20">
-          <Boxes size={60} className="text-blue-400" />
-        </div>
 
-        {/* Floating Icons - Bottom Left */}
-        <div className="absolute bottom-32 left-8 opacity-15">
-          <Warehouse size={80} className="text-blue-300" />
-        </div>
-
-        {/* Floating Icons - Middle Right */}
-        <div className="absolute top-1/2 right-16 opacity-10">
-          <TrendingUp size={70} className="text-blue-400" />
-        </div>
 
         {/* Content */}
         <div className="relative z-10 px-8 pt-12 space-y-6 flex-1 flex flex-col items-center justify-start">

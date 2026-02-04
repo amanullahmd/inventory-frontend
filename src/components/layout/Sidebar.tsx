@@ -206,7 +206,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-background border-b border-border flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-background border-b border-border flex items-center justify-between px-4" suppressHydrationWarning>
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
             <Package size={18} className="text-primary-foreground" />
@@ -234,7 +234,7 @@ export default function Sidebar() {
         lg:hidden fixed top-14 left-0 bottom-0 z-50 w-72 bg-sidebar border-r border-sidebar-border
         transform transition-transform duration-300 ease-in-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      `} suppressHydrationWarning>
         <div className="flex flex-col h-full">
           {sidebarContent}
         </div>
@@ -246,7 +246,7 @@ export default function Sidebar() {
         bg-sidebar border-r border-sidebar-border
         transition-all duration-300 ease-in-out
         ${collapsed ? 'w-[72px]' : 'w-64'}
-      `}>
+      `} suppressHydrationWarning>
         {sidebarContent}
       </aside>
     </>
