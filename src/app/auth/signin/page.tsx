@@ -10,7 +10,7 @@ const DEMO_CREDENTIALS = [
 export default function SignIn() {
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left Panel - Branding with Cover Photo */}
+      {/* Left Panel - Government Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
         {/* Water Wave Background Effect */}
         <div className="absolute inset-0 opacity-30">
@@ -26,34 +26,29 @@ export default function SignIn() {
           </svg>
         </div>
 
-
-
         {/* Content */}
-        <div className="relative z-10 px-8 pt-12 space-y-6 flex-1 flex flex-col items-center justify-start">
+        <div className="relative z-10 px-8 pt-12 space-y-8 flex-1 flex flex-col items-center justify-center">
           {/* Government Logo and Text */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="bg-white rounded-full p-6 shadow-2xl flex-shrink-0 border-4 border-blue-100">
+          <div className="flex flex-col items-center gap-6">
+            <div className="bg-white rounded-full p-5 shadow-2xl flex-shrink-0 border-4 border-blue-100">
               <Image
                 src="/government-bangladesh-logo.avif"
                 alt="Government of Bangladesh"
-                width={120}
-                height={120}
+                width={96}
+                height={96}
                 className="rounded-full"
                 quality={95}
                 priority
               />
             </div>
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <p className="text-slate-700 text-lg font-semibold tracking-wide">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
               <p className="text-slate-800 text-xl font-bold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
             </div>
           </div>
 
-          {/* Empty line space */}
-          <div className="h-4"></div>
-
-          {/* Cover Photo - After 3 lines */}
-          <div className="relative w-64 h-48 rounded-2xl overflow-hidden shadow-xl border-4 border-white">
+          {/* Cover Photo */}
+          <div className="relative w-72 h-56 rounded-2xl overflow-hidden shadow-xl border-4 border-white">
             <Image
               src="/DPE_cover.webp"
               alt="DPE Cover"
@@ -65,8 +60,7 @@ export default function SignIn() {
         </div>
         
         <div className="relative z-10 px-8 pb-8 text-slate-600 text-xs text-center">
-          <p className="mb-2">© 2026 DPE Inventory Management System</p>
-          <p className="text-slate-500">Developed by FinkOps</p>
+          <p className="text-slate-500">© 2026 প্রাথমিক শিক্ষা অধিদপ্তর</p>
         </div>
       </div>
 
@@ -75,12 +69,12 @@ export default function SignIn() {
         <div className="w-full max-w-md">
           {/* Government Logo and Text - Mobile */}
           <div className="lg:hidden flex flex-col items-center gap-4 mb-8">
-            <div className="bg-blue-50 rounded-full p-4 border-2 border-blue-200">
+            <div className="bg-blue-50 rounded-full p-3 border-2 border-blue-200">
               <Image
                 src="/government-bangladesh-logo.avif"
                 alt="Government of Bangladesh"
-                width={80}
-                height={80}
+                width={64}
+                height={64}
                 className="rounded-full"
                 quality={95}
                 priority
