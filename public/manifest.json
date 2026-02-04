@@ -1,6 +1,6 @@
 {
-  "name": "Inventory Management System",
-  "short_name": "Inventory",
+  "name": "DPE Inventory Management System",
+  "short_name": "DPE Inventory",
   "description": "Manage your inventory efficiently with this cross-platform application. Track items, stock movements, suppliers, and generate reports.",
   "start_url": "/",
   "display": "standalone",

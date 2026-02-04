@@ -11,7 +11,6 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   History,
-  ArrowLeftRight,
   ShoppingCart,
   Receipt,
   TrendingUp,
@@ -42,7 +41,6 @@ const navItems: NavItem[] = [
   { name: 'Stock In', href: '/stock-in', icon: <ArrowDownToLine size={20} /> },
   { name: 'Stock Out', href: '/stock-out', icon: <ArrowUpFromLine size={20} /> },
   { name: 'Movements', href: '/stock-movements', icon: <History size={20} /> },
-  { name: 'Transfers', href: '/transfers', icon: <ArrowLeftRight size={20} /> },
   { name: 'Purchase Orders', href: '/orders/purchase', icon: <ShoppingCart size={20} /> },
   { name: 'Sales Orders', href: '/orders/sales', icon: <Receipt size={20} /> },
   { name: 'Demand', href: '/demand', icon: <TrendingUp size={20} /> },
@@ -121,7 +119,7 @@ export default function Sidebar() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
               <Package size={18} className="text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg text-sidebar-foreground">Inventory</span>
+            <span className="font-bold text-lg text-sidebar-foreground">DPE Inventory</span>
           </Link>
         )}
         {collapsed && (
@@ -183,7 +181,7 @@ export default function Sidebar() {
             {!collapsed && <span className="text-sm">{theme === 'dark' ? 'Light' : 'Dark'}</span>}
           </button>
           <button
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
             className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors ${collapsed ? 'w-full' : 'flex-1'}`}
             title="Sign out"
           >
@@ -203,7 +201,7 @@ export default function Sidebar() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
             <Package size={18} className="text-primary-foreground" />
           </div>
-          <span className="font-bold text-lg">Inventory</span>
+          <span className="font-bold text-lg">DPE Inventory</span>
         </Link>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}

@@ -18,26 +18,26 @@ const geistMono = Geist_Mono({
 
 // PWA Metadata
 export const metadata: Metadata = {
-  title: "Inventory Management System",
+  title: "DPE Inventory Management System",
   description: "Manage your inventory efficiently with this cross-platform application. Track items, stock movements, suppliers, and generate reports.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Inventory",
+    title: "DPE Inventory",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "Inventory Management System",
-    title: "Inventory Management System",
+    siteName: "DPE Inventory Management System",
+    title: "DPE Inventory Management System",
     description: "Manage your inventory efficiently",
   },
   twitter: {
     card: "summary",
-    title: "Inventory Management System",
+    title: "DPE Inventory Management System",
     description: "Manage your inventory efficiently",
   },
   icons: {
@@ -72,10 +72,10 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         {/* PWA Meta Tags */}
-        <meta name="application-name" content="Inventory" />
+        <meta name="application-name" content="DPE Inventory" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Inventory" />
+        <meta name="apple-mobile-web-app-title" content="DPE Inventory" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-tap-highlight" content="no" />

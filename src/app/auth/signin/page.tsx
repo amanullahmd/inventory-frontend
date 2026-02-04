@@ -1,5 +1,6 @@
 import LoginForm from "@/components/auth/LoginForm"
-import { Package, Shield, User, Lock } from "lucide-react"
+import Image from "next/image"
+import { Package, Shield, User, Lock, Boxes, Warehouse, TrendingUp } from "lucide-react"
 
 const DEMO_CREDENTIALS = [
   { email: 'admin@example.com', password: 'Admin@123456', role: 'Admin', icon: Shield },
@@ -9,100 +10,173 @@ const DEMO_CREDENTIALS = [
 export default function SignIn() {
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-12 flex-col justify-between relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
+      {/* Left Panel - Branding with Cover Photo */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
+        {/* Water Wave Background Effect */}
+        <div className="absolute inset-0 opacity-30">
+          <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#e0f2fe', stopOpacity: 0.3 }} />
+                <stop offset="100%" style={{ stopColor: '#bae6fd', stopOpacity: 0.1 }} />
+              </linearGradient>
+            </defs>
+            <path d="M0,400 Q300,350 600,400 T1200,400 L1200,800 L0,800 Z" fill="url(#waterGradient)" />
+            <path d="M0,500 Q300,450 600,500 T1200,500 L1200,800 L0,800 Z" fill="#bae6fd" opacity="0.2" />
+          </svg>
         </div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-              <Package size={28} className="text-white" />
+
+        {/* Floating Animation Elements */}
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+          @keyframes float-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+          }
+          @keyframes float-reverse {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+          }
+          .animate-float {
+            animation: float 4s ease-in-out infinite;
+          }
+          .animate-float-slow {
+            animation: float-slow 5s ease-in-out infinite;
+          }
+          .animate-float-reverse {
+            animation: float-reverse 4.5s ease-in-out infinite;
+          }
+        `}</style>
+
+        {/* Floating Icons - Top Right */}
+        <div className="absolute top-20 right-10 opacity-20 animate-float">
+          <Boxes size={60} className="text-blue-400" />
+        </div>
+
+        {/* Floating Icons - Bottom Left */}
+        <div className="absolute bottom-32 left-8 opacity-15 animate-float-slow">
+          <Warehouse size={80} className="text-blue-300" />
+        </div>
+
+        {/* Floating Icons - Middle Right */}
+        <div className="absolute top-1/2 right-16 opacity-10 animate-float-reverse">
+          <TrendingUp size={70} className="text-blue-400" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 px-8 pt-12 space-y-6 flex-1 flex flex-col items-center justify-start">
+          {/* 1. DPE Inventory */}
+          <div className="flex items-center gap-4 justify-center animate-fade-in">
+            <div className="w-16 h-16 rounded-xl bg-blue-100 flex items-center justify-center">
+              <Package size={40} className="text-blue-600" />
             </div>
-            <span className="text-2xl font-bold text-white">Inventory</span>
+            <span className="text-4xl font-bold text-slate-800">DPE Inventory</span>
+          </div>
+
+          {/* 2. Government Logo and Text */}
+          <div className="flex items-center gap-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-white rounded-full p-4 shadow-lg flex-shrink-0">
+              <Image
+                src="/government-bangladesh-logo.avif"
+                alt="Government of Bangladesh"
+                width={90}
+                height={90}
+                className="rounded-full"
+                quality={90}
+              />
+            </div>
+            <div className="text-left">
+              <p className="text-slate-700 text-base font-semibold tracking-wide">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
+              <p className="text-slate-800 text-lg font-bold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
+            </div>
+          </div>
+
+          {/* 3. Empty line space */}
+          <div className="h-4"></div>
+
+          {/* Cover Photo - After 3 lines */}
+          <div className="relative w-64 h-48 rounded-2xl overflow-hidden shadow-xl border-4 border-white animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <Image
+              src="/DPE_cover.webp"
+              alt="DPE Cover"
+              fill
+              className="object-cover object-center"
+              quality={90}
+            />
           </div>
         </div>
         
-        <div className="relative z-10 space-y-6">
-          <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight">
-            Manage your inventory with confidence
-          </h1>
-          <p className="text-lg text-white/80 max-w-md">
-            Track stock levels, manage suppliers, and streamline your operations with our powerful inventory management system.
-          </p>
-          
-          <div className="flex gap-4 pt-4">
-            <div className="flex items-center gap-2 text-white/90">
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Real-time tracking</span>
-            </div>
-            <div className="flex items-center gap-2 text-white/90">
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Secure access</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="relative z-10 text-white/60 text-sm">
-          © 2026 Inventory Management System
+        <div className="relative z-10 px-8 pb-8 text-slate-600 text-xs text-center">
+          <p className="mb-2">© 2026 DPE Inventory Management System</p>
+          <p className="text-slate-500">Developed by FinkOps</p>
         </div>
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-white">
         <div className="w-full max-w-md animate-fade-in">
-          {/* Mobile Logo */}
+          {/* Government Logo and Text - Mobile */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <Package size={22} className="text-primary-foreground" />
+            <div className="bg-blue-50 rounded-full p-2">
+              <Image
+                src="/government-bangladesh-logo.avif"
+                alt="Government of Bangladesh"
+                width={50}
+                height={50}
+                className="rounded-full"
+                quality={90}
+              />
             </div>
-            <span className="text-xl font-bold text-foreground">Inventory</span>
+            <div className="text-left">
+              <p className="text-slate-700 text-xs font-semibold">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
+              <p className="text-slate-800 text-xs font-bold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
+            </div>
+          </div>
+
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+              <Package size={22} className="text-blue-600" />
+            </div>
+            <span className="text-xl font-bold text-slate-800">DPE Inventory</span>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
-            <p className="mt-2 text-muted-foreground">Sign in to your account to continue</p>
+            <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+            <p className="mt-2 text-gray-600">Sign in to your account to continue</p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
             <LoginForm />
           </div>
 
           {/* Demo Credentials */}
-          <div className="mt-6 rounded-2xl border border-border bg-card/50 p-5">
+          <div className="mt-6 rounded-2xl border border-gray-200 bg-blue-50 p-5">
             <div className="flex items-center gap-2 mb-4">
-              <Lock size={16} className="text-muted-foreground" />
-              <h3 className="text-sm font-semibold text-foreground">Demo Credentials</h3>
+              <Lock size={16} className="text-blue-600" />
+              <h3 className="text-sm font-semibold text-gray-900">Demo Credentials</h3>
             </div>
             <div className="space-y-3">
               {DEMO_CREDENTIALS.map((cred, idx) => {
                 const Icon = cred.icon
                 return (
-                  <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-background border border-border hover:border-primary/30 transition-colors">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                    <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
                       <Icon size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground">{cred.role}</span>
+                        <span className="text-sm font-semibold text-gray-900">{cred.role}</span>
                       </div>
                       <div className="mt-1 space-y-0.5">
-                        <p className="text-xs text-muted-foreground">
-                          <span className="font-mono text-foreground/80">{cred.email}</span>
+                        <p className="text-xs text-gray-600">
+                          <span className="font-mono text-gray-800">{cred.email}</span>
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          <span className="font-mono text-foreground/80">{cred.password}</span>
+                        <p className="text-xs text-gray-600">
+                          <span className="font-mono text-gray-800">{cred.password}</span>
                         </p>
                       </div>
                     </div>

@@ -1,6 +1,8 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { useCallback } from 'react'
 import { ItemService } from '@/lib/services/itemService'
@@ -29,7 +31,15 @@ interface Stats {
 }
 
 export default function Home() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  // Redirect to signin if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
   
   // Fetch function for statistics
   const fetchStats = useCallback(async (): Promise<Stats> => {
@@ -65,28 +75,15 @@ export default function Home() {
     outOfStockItems: 0,
   }
 
-  if (!session) {
+  // Show loading while redirecting
+  if (status === 'loading' || !session) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md animate-scale-in">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 mb-4">
-              <Package size={32} className="text-primary-foreground" />
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">Inventory System</h1>
-            <p className="mt-2 text-muted-foreground">Manage your inventory efficiently</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 mb-4 animate-pulse">
+            <Package size={32} className="text-primary-foreground" />
           </div>
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">
-            <h2 className="text-xl font-semibold text-foreground mb-2">Welcome back</h2>
-            <p className="text-muted-foreground mb-6">Sign in to access your dashboard and manage inventory.</p>
-            <Link
-              href="/auth/signin"
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-lg hover:opacity-90 transition-all hover:shadow-xl"
-            >
-              Sign in
-              <ArrowRight size={18} />
-            </Link>
-          </div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -173,15 +170,11 @@ export default function Home() {
         <div className="mb-8 animate-slide-down">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <Sparkles size={16} />
-                <span className="text-sm">Welcome back</span>
-              </div>
               <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-                Hello, {session.user?.name?.split(' ')[0] || 'there'}!
+                Inventory Dashboard
               </h1>
               <p className="mt-2 text-lg text-muted-foreground">
-                Here&apos;s what&apos;s happening with your inventory today.
+                Monitor your stock levels, track movements, and manage inventory efficiently
               </p>
             </div>
             <DataFreshnessIndicator

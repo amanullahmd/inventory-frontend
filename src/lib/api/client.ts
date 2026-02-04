@@ -23,7 +23,10 @@ export interface UpdateUserRequest {
 }
 
 import { getSession, signOut } from 'next-auth/react';
+import { mockApiClient } from './mockClient';
 
+// Enable mock mode to disable database connections
+const USE_MOCK_API = true;
 
 class ApiClient {
   private client: AxiosInstance;
@@ -200,6 +203,13 @@ class ApiClient {
   // Enhanced HTTP methods with better error handling
   async get<T>(url: string): Promise<ApiResponse<T>> {
     try {
+      if (USE_MOCK_API) {
+        const response = await mockApiClient.get<T>(url);
+        return {
+          data: response.data,
+          message: 'Operation successful',
+        };
+      }
       const response = await this.client.get<ApiResponse<T> | T>(url);
       return this.processSuccessResponse(response);
     } catch (error) {
@@ -209,6 +219,13 @@ class ApiClient {
 
   async post<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
     try {
+      if (USE_MOCK_API) {
+        const response = await mockApiClient.post<T>(url, data);
+        return {
+          data: response.data,
+          message: 'Operation successful',
+        };
+      }
       const response = await this.client.post<ApiResponse<T> | T>(url, data);
       return this.processSuccessResponse(response);
     } catch (error) {
@@ -218,6 +235,13 @@ class ApiClient {
 
   async put<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
     try {
+      if (USE_MOCK_API) {
+        const response = await mockApiClient.put<T>(url, data);
+        return {
+          data: response.data,
+          message: 'Operation successful',
+        };
+      }
       const response = await this.client.put<ApiResponse<T> | T>(url, data);
       return this.processSuccessResponse(response);
     } catch (error) {
@@ -227,6 +251,13 @@ class ApiClient {
 
   async patch<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
     try {
+      if (USE_MOCK_API) {
+        const response = await mockApiClient.patch<T>(url, data);
+        return {
+          data: response.data,
+          message: 'Operation successful',
+        };
+      }
       const response = await this.client.patch<ApiResponse<T> | T>(url, data);
       return this.processSuccessResponse(response);
     } catch (error) {
@@ -236,6 +267,13 @@ class ApiClient {
 
   async delete<T>(url: string): Promise<ApiResponse<T>> {
     try {
+      if (USE_MOCK_API) {
+        const response = await mockApiClient.delete<T>(url);
+        return {
+          data: response.data,
+          message: 'Operation successful',
+        };
+      }
       const response = await this.client.delete<ApiResponse<T> | T>(url);
       return this.processSuccessResponse(response);
     } catch (error) {
@@ -255,11 +293,17 @@ class ApiClient {
   }
 
   async addStock(request: StockInRequest): Promise<StockMovement> {
+    if (USE_MOCK_API) {
+      return await mockApiClient.addStock<StockMovement>(request);
+    }
     const response = await this.post<StockMovement>('/stock/in', request);
     return response.data;
   }
 
   async removeStock(request: StockOutRequest): Promise<StockMovement> {
+    if (USE_MOCK_API) {
+      return await mockApiClient.removeStock<StockMovement>(request);
+    }
     const response = await this.post<StockMovement>('/stock/out', request);
     return response.data;
   }

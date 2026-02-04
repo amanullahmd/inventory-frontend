@@ -36,7 +36,7 @@ export function InstallPrompt({ isVisible, onInstall, onDismiss }: InstallPrompt
             Install App
           </h3>
           <p id="install-prompt-description" className="mt-1 text-sm text-gray-500">
-            Install Inventory Management for quick access and offline support.
+            Install DPE Inventory Management for quick access and offline support.
           </p>
         </div>
       </div>

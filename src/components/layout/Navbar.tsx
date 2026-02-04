@@ -35,7 +35,7 @@ export default function Navbar() {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
           <Link href="/" className="text-lg font-bold text-foreground hover:text-primary transition-colors">
-            📦 Inventory
+            📦 DPE Inventory
           </Link>
 
           <div className="hidden lg:flex items-center gap-2">
@@ -62,9 +62,6 @@ export default function Navbar() {
             </Link>
             <Link href="/stock-movements" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Movements
-            </Link>
-            <Link href="/transfers" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-              Transfers
             </Link>
             <Link href="/orders/purchase" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Purchase Orders
@@ -109,7 +106,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-base font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
           >
             Sign out
@@ -155,9 +152,6 @@ export default function Navbar() {
               </Link>
               <Link href="/stock-movements" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Movements
-              </Link>
-              <Link href="/transfers" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
-                Transfers
               </Link>
               <Link href="/orders/purchase" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Purchase Orders
