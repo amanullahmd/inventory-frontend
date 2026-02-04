@@ -1,6 +1,6 @@
 import LoginForm from "@/components/auth/LoginForm"
 import Image from "next/image"
-import { Package, Shield, User, Lock, Boxes, Warehouse, TrendingUp } from "lucide-react"
+import { Shield, User, Lock, Boxes, Warehouse, TrendingUp } from "lucide-react"
 
 const DEMO_CREDENTIALS = [
   { email: 'admin@example.com', password: 'Admin@123456', role: 'Admin', icon: Shield },
@@ -43,33 +43,26 @@ export default function SignIn() {
 
         {/* Content */}
         <div className="relative z-10 px-8 pt-12 space-y-6 flex-1 flex flex-col items-center justify-start">
-          {/* 1. DPE Inventory */}
-          <div className="flex items-center gap-4 justify-center">
-            <div className="w-16 h-16 rounded-xl bg-blue-100 flex items-center justify-center">
-              <Package size={40} className="text-blue-600" />
-            </div>
-            <span className="text-4xl font-bold text-slate-800">DPE Inventory</span>
-          </div>
-
-          {/* 2. Government Logo and Text */}
-          <div className="flex items-center gap-6">
-            <div className="bg-white rounded-full p-4 shadow-lg flex-shrink-0">
+          {/* Government Logo and Text */}
+          <div className="flex flex-col items-center gap-4">
+            <div className="bg-white rounded-full p-6 shadow-2xl flex-shrink-0 border-4 border-blue-100">
               <Image
                 src="/government-bangladesh-logo.avif"
                 alt="Government of Bangladesh"
-                width={90}
-                height={90}
+                width={120}
+                height={120}
                 className="rounded-full"
-                quality={90}
+                quality={95}
+                priority
               />
             </div>
-            <div className="text-left">
-              <p className="text-slate-700 text-base font-semibold tracking-wide">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
-              <p className="text-slate-800 text-lg font-bold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
+            <div className="text-center">
+              <p className="text-slate-700 text-lg font-semibold tracking-wide">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
+              <p className="text-slate-800 text-xl font-bold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
             </div>
           </div>
 
-          {/* 3. Empty line space */}
+          {/* Empty line space */}
           <div className="h-4"></div>
 
           {/* Cover Photo - After 3 lines */}
@@ -94,29 +87,22 @@ export default function SignIn() {
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-white">
         <div className="w-full max-w-md">
           {/* Government Logo and Text - Mobile */}
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="bg-blue-50 rounded-full p-2">
+          <div className="lg:hidden flex flex-col items-center gap-4 mb-8">
+            <div className="bg-blue-50 rounded-full p-4 border-2 border-blue-200">
               <Image
                 src="/government-bangladesh-logo.avif"
                 alt="Government of Bangladesh"
-                width={50}
-                height={50}
+                width={80}
+                height={80}
                 className="rounded-full"
-                quality={90}
+                quality={95}
+                priority
               />
             </div>
-            <div className="text-left">
-              <p className="text-slate-700 text-xs font-semibold">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
-              <p className="text-slate-800 text-xs font-bold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
+            <div className="text-center">
+              <p className="text-slate-700 text-sm font-semibold">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
+              <p className="text-slate-800 text-base font-bold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
             </div>
-          </div>
-
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-              <Package size={22} className="text-blue-600" />
-            </div>
-            <span className="text-xl font-bold text-slate-800">DPE Inventory</span>
           </div>
 
           <div className="mb-8">
