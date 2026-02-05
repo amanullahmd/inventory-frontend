@@ -11,7 +11,7 @@ The Inventory Frontend is a production-ready React/Next.js application built wit
 
 ## Tech Stack
 
-- **Next.js 14** - React framework with App Router
+- **Next.js 14** - React framework with App Router //
 - **React 18** - UI library
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
