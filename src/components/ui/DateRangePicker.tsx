@@ -57,7 +57,8 @@ export function DateRangePicker({
             value={startDate}
             onChange={handleStartDateChange}
             disabled={disabled}
-            className="w-full px-4 py-2 text-base border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:bg-muted disabled:cursor-not-allowed"
+            suppressHydrationWarning
+            className="w-full px-4 py-2 text-base border border-border rounded-lg bg-background text-foreground dark:bg-slate-900 dark:text-white dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:bg-muted disabled:cursor-not-allowed dark:focus:ring-red-500 dark:[color-scheme:dark]"
           />
         </div>
         <div>
@@ -68,7 +69,8 @@ export function DateRangePicker({
             value={endDate}
             onChange={handleEndDateChange}
             disabled={disabled}
-            className="w-full px-4 py-2 text-base border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:bg-muted disabled:cursor-not-allowed"
+            suppressHydrationWarning
+            className="w-full px-4 py-2 text-base border border-border rounded-lg bg-background text-foreground dark:bg-slate-900 dark:text-white dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:bg-muted disabled:cursor-not-allowed dark:focus:ring-red-500 dark:[color-scheme:dark]"
           />
         </div>
       </div>

@@ -230,14 +230,15 @@ export default function StockOutReasonsReportPage() {
                   
                   const largeArc = endAngle - startAngle > 180 ? 1 : 0
                   
+                  // Vibrant colors for pie chart
                   const colors = [
-                    'hsl(var(--chart-1))',
-                    'hsl(var(--chart-4))',
-                    'hsl(var(--chart-3))',
-                    'hsl(var(--destructive))',
-                    'hsl(var(--chart-5))',
-                    'hsl(var(--chart-2))',
-                    'hsl(var(--chart-1))',
+                    '#3B82F6', // Blue
+                    '#10B981', // Green
+                    '#F59E0B', // Amber
+                    '#EF4444', // Red
+                    '#8B5CF6', // Purple
+                    '#06B6D4', // Cyan
+                    '#EC4899', // Pink
                   ]
                   
                   return (
@@ -262,15 +263,26 @@ export default function StockOutReasonsReportPage() {
 
           {/* Legend */}
           <div className="flex-1 space-y-3">
-            {reasons.map((reason, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <div className={`w-4 h-4 rounded-full ${getReasonColor(index)}`}></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{reason.reasonLabel}</p>
-                  <p className="text-xs text-muted-foreground">{reason.count} ({reason.percentage}%)</p>
+            {reasons.map((reason, index) => {
+              const colors = [
+                'bg-blue-500',
+                'bg-green-500',
+                'bg-amber-500',
+                'bg-red-500',
+                'bg-purple-500',
+                'bg-cyan-500',
+                'bg-pink-500',
+              ]
+              return (
+                <div key={index} className="flex items-center gap-3">
+                  <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]}`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">{reason.reasonLabel}</p>
+                    <p className="text-xs text-muted-foreground">{reason.count} ({reason.percentage}%)</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
