@@ -6,13 +6,24 @@ import { signIn } from 'next-auth/react';
 import { AlertCircle, Loader2, Mail, Lock, ArrowRight, WifiOff } from 'lucide-react';
 import Link from 'next/link';
 
-export default function LoginForm() {
+interface LoginFormProps {
+    initialEmail?: string;
+    initialPassword?: string;
+}
+
+export default function LoginForm({ initialEmail = '', initialPassword = '' }: LoginFormProps) {
     const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState(initialEmail);
+    const [password, setPassword] = useState(initialPassword);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [isOffline, setIsOffline] = useState(false);
+
+    // Update form when props change
+    useEffect(() => {
+        setEmail(initialEmail);
+        setPassword(initialPassword);
+    }, [initialEmail, initialPassword]);
 
     // Track online/offline status
     useEffect(() => {

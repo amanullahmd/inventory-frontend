@@ -19,3 +19,6 @@ node_modules/
 .env
 .env.*
 .env.local
+
+# PDF files - may contain sensitive information
+*.pdf

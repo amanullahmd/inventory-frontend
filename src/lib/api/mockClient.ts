@@ -17,6 +17,7 @@ import {
   MOCK_BATCHES,
   MOCK_STATISTICS,
   MOCK_STOCK_OUT_REASONS,
+  MOCK_STOCK_MOVEMENTS,
 } from './mockData'
 
 // Simulate network delay
@@ -107,6 +108,11 @@ export class MockApiClient {
     // Stock Out Reasons endpoints
     if (endpoint === '/reports/stock-out-reasons') {
       return { data: MOCK_STOCK_OUT_REASONS as T }
+    }
+
+    // Stock Movements endpoints
+    if (endpoint === '/reports/stock-movements') {
+      return { data: MOCK_STOCK_MOVEMENTS as T }
     }
 
     console.warn(`Mock GET endpoint not found: ${endpoint}`)

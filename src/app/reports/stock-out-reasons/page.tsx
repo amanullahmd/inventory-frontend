@@ -17,6 +17,66 @@ interface ReasonBreakdown {
   percentage: number
 }
 
+// Pie Chart Component - Client only
+function PieChart({ reasons, totalCount }: { reasons: ReasonBreakdown[]; totalCount: number }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return <div className="w-64 h-64 bg-muted rounded-lg animate-pulse" />
+  }
+
+  const colors = [
+    '#3B82F6', // Blue
+    '#10B981', // Green
+    '#F59E0B', // Amber
+    '#EF4444', // Red
+    '#8B5CF6', // Purple
+    '#06B6D4', // Cyan
+    '#EC4899', // Pink
+  ]
+
+  return (
+    <div className="relative w-64 h-64">
+      <svg viewBox="0 0 200 200" className="w-full h-full">
+        {reasons.map((reason, index) => {
+          const startAngle = reasons.slice(0, index).reduce((sum, r) => sum + (r.percentage / 100) * 360, 0)
+          const endAngle = startAngle + (reason.percentage / 100) * 360
+          
+          const startRad = (startAngle - 90) * (Math.PI / 180)
+          const endRad = (endAngle - 90) * (Math.PI / 180)
+          
+          const x1 = 100 + 80 * Math.cos(startRad)
+          const y1 = 100 + 80 * Math.sin(startRad)
+          const x2 = 100 + 80 * Math.cos(endRad)
+          const y2 = 100 + 80 * Math.sin(endRad)
+          
+          const largeArc = endAngle - startAngle > 180 ? 1 : 0
+          
+          return (
+            <path
+              key={index}
+              d={`M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`}
+              fill={colors[index % colors.length]}
+              stroke="white"
+              strokeWidth="2"
+            />
+          )
+        })}
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-2xl font-semibold text-foreground">{totalCount}</p>
+          <p className="text-xs text-muted-foreground">Total</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 
 export default function StockOutReasonsReportPage() {
@@ -214,51 +274,7 @@ export default function StockOutReasonsReportPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Chart */}
           <div className="flex-1 flex items-center justify-center">
-            <div className="relative w-64 h-64">
-              <svg viewBox="0 0 200 200" className="w-full h-full">
-                {reasons.map((reason, index) => {
-                  const startAngle = reasons.slice(0, index).reduce((sum, r) => sum + (r.percentage / 100) * 360, 0)
-                  const endAngle = startAngle + (reason.percentage / 100) * 360
-                  
-                  const startRad = (startAngle - 90) * (Math.PI / 180)
-                  const endRad = (endAngle - 90) * (Math.PI / 180)
-                  
-                  const x1 = 100 + 80 * Math.cos(startRad)
-                  const y1 = 100 + 80 * Math.sin(startRad)
-                  const x2 = 100 + 80 * Math.cos(endRad)
-                  const y2 = 100 + 80 * Math.sin(endRad)
-                  
-                  const largeArc = endAngle - startAngle > 180 ? 1 : 0
-                  
-                  // Vibrant colors for pie chart
-                  const colors = [
-                    '#3B82F6', // Blue
-                    '#10B981', // Green
-                    '#F59E0B', // Amber
-                    '#EF4444', // Red
-                    '#8B5CF6', // Purple
-                    '#06B6D4', // Cyan
-                    '#EC4899', // Pink
-                  ]
-                  
-                  return (
-                    <path
-                      key={index}
-                      d={`M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`}
-                      fill={colors[index % colors.length]}
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                  )
-                })}
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-2xl font-semibold text-foreground">{totalCount}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                </div>
-              </div>
-            </div>
+            <PieChart reasons={reasons} totalCount={totalCount} />
           </div>
 
           {/* Legend */}

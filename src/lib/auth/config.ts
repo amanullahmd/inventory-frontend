@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials"
 
 // Demo users for development
 const DEMO_USERS = [
+  // Demo accounts
   {
     id: '1',
     email: 'admin@example.com',
@@ -16,6 +17,42 @@ const DEMO_USERS = [
     password: 'User@123456',
     name: 'Demo User',
     roles: ['ROLE_USER'],
+  },
+  // DPE Hierarchical accounts
+  {
+    id: '3',
+    email: 'main@dpe.gov.bd',
+    password: 'main123',
+    name: 'Main Branch Admin',
+    roles: ['ROLE_SUPER_ADMIN'],
+  },
+  {
+    id: '4',
+    email: 'admin@dpe.gov.bd',
+    password: 'admin123',
+    name: 'Division Admin',
+    roles: ['ROLE_ADMIN'],
+  },
+  {
+    id: '5',
+    email: 'district.dhaka@dpe.gov.bd',
+    password: 'district123',
+    name: 'District Manager - Dhaka',
+    roles: ['ROLE_DISTRICT_MANAGER'],
+  },
+  {
+    id: '6',
+    email: 'upazila.dhanmondi@dpe.gov.bd',
+    password: 'upazila123',
+    name: 'Upazila Manager - Dhanmondi',
+    roles: ['ROLE_UPAZILA_MANAGER'],
+  },
+  {
+    id: '7',
+    email: 'school.dhanmondi@dpe.gov.bd',
+    password: 'school123',
+    name: 'School Principal - Dhanmondi',
+    roles: ['ROLE_SCHOOL_PRINCIPAL'],
   },
 ]
 
@@ -83,4 +120,5 @@ export const authConfig: NextAuthConfig = {
     strategy: 'jwt',
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
+  trustHost: true,
 }
