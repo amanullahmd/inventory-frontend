@@ -129,4 +129,36 @@ export class ItemService {
       throw new Error(apiError.message || 'Failed to fetch statistics');
     }
   }
+
+  /**
+   * Get most used items based on stock-out quantity
+   * Requirements: 4.1, 4.2
+   */
+  static async getMostUsedItems(): Promise<Array<{
+    itemId: string;
+    name: string;
+    sku: string;
+    totalUsed: number;
+    categoryName?: string;
+  }>> {
+    try {
+      const response = await apiClient.get<Array<{
+        itemId: number;
+        name: string;
+        sku: string;
+        totalUsed: number;
+        categoryName?: string;
+      }>>('/items/most-used');
+      return response.data.map(item => ({
+        itemId: String(item.itemId),
+        name: item.name,
+        sku: item.sku,
+        totalUsed: item.totalUsed,
+        categoryName: item.categoryName,
+      }));
+    } catch (error) {
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || 'Failed to fetch most used items');
+    }
+  }
 }

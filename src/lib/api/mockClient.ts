@@ -34,6 +34,28 @@ export class MockApiClient {
     if (endpoint === '/items/statistics') {
       return { data: MOCK_STATISTICS as T }
     }
+    if (endpoint === '/items/most-used') {
+      // Calculate most used items from stock-out transactions
+      const usageMap = new Map<number, { name: string; sku: string; totalUsed: number; categoryName?: string }>();
+      MOCK_STOCK_OUT_TRANSACTIONS.forEach(transaction => {
+        const existing = usageMap.get(transaction.itemId);
+        if (existing) {
+          existing.totalUsed += transaction.quantity;
+        } else {
+          usageMap.set(transaction.itemId, {
+            name: transaction.itemName,
+            sku: transaction.itemSku,
+            totalUsed: transaction.quantity,
+            categoryName: MOCK_ITEMS.find(item => item.itemId === transaction.itemId)?.categoryName,
+          });
+        }
+      });
+      const mostUsed = Array.from(usageMap.entries())
+        .map(([itemId, data]) => ({ itemId, ...data }))
+        .sort((a, b) => b.totalUsed - a.totalUsed)
+        .slice(0, 10);
+      return { data: mostUsed as T }
+    }
 
     // Categories endpoints
     if (endpoint === '/categories') {

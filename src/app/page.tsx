@@ -26,6 +26,7 @@ interface Stats {
   totalValue: number
   lowStockItems: number
   outOfStockItems: number
+  mostUsedCount: number
 }
 
 export default function Home() {
@@ -41,12 +42,16 @@ export default function Home() {
   
   // Fetch function for statistics
   const fetchStats = useCallback(async (): Promise<Stats> => {
-    const s = await ItemService.getStatistics()
+    const [s, mostUsed] = await Promise.all([
+      ItemService.getStatistics(),
+      ItemService.getMostUsedItems(),
+    ])
     return {
       totalItems: Number(s.totalItems ?? 0),
       totalValue: Number(s.totalValue ?? 0),
       lowStockItems: Number((s as Record<string, unknown>).lowStockCount ?? 0),
       outOfStockItems: Number((s as Record<string, unknown>).outOfStockCount ?? 0),
+      mostUsedCount: mostUsed.length,
     }
   }, [])
 
@@ -71,6 +76,7 @@ export default function Home() {
     totalValue: 0,
     lowStockItems: 0,
     outOfStockItems: 0,
+    mostUsedCount: 0,
   }
 
   // Show loading while redirecting
@@ -201,10 +207,10 @@ export default function Home() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 mb-8">
           {loading ? (
             <>
-              {[1, 2, 3, 4].map(i => (
+              {[1, 2, 3, 4, 5].map(i => (
                 <div key={i} className="rounded-2xl border border-border bg-card p-6 animate-pulse">
                   <div className="w-12 h-12 rounded-xl skeleton mb-4" />
                   <div className="h-4 w-24 skeleton mb-2" />
@@ -256,6 +262,16 @@ export default function Home() {
                   color="destructive"
                 />
               </div>
+              <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
+                <StatCard
+                  title="Most Used"
+                  value={displayStats.mostUsedCount}
+                  subtitle="Items tracked by usage"
+                  icon={TrendingUp}
+                  href="/reports/most-used-items"
+                  color="primary"
+                />
+              </div>
             </>
           )}
         </div>
@@ -263,7 +279,7 @@ export default function Home() {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Quick Actions */}
-          <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: '250ms' }}>
             <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
               <div className="px-6 py-5 border-b border-border">
                 <h2 className="text-xl font-bold text-foreground">Quick Actions</h2>
@@ -299,7 +315,7 @@ export default function Home() {
           </div>
 
           {/* Reports & Admin */}
-          <div className="animate-slide-up" style={{ animationDelay: '250ms' }}>
+          <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
             <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
               <div className="px-6 py-5 border-b border-border">
                 <h2 className="text-xl font-bold text-foreground">Reports</h2>
