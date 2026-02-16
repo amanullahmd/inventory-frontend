@@ -1,6 +1,6 @@
-# Inventory Management System - Frontend
+# Store Management System - Frontend
 
-A modern, responsive Next.js web application for inventory management with real-time stock tracking, user authentication, and comprehensive reporting capabilities.
+A modern, responsive Next.js web application for store management with real-time stock tracking, user authentication, and comprehensive reporting capabilities.
 
 ## Overview
 
@@ -30,7 +30,7 @@ The Inventory Frontend is a production-ready React/Next.js application built wit
 - Session persistence
 - Role-based access control
 
-### Inventory Management
+### Store Management
 - View and manage items
 - Create new items with categories
 - Update item details
@@ -435,7 +435,7 @@ chore: update dependencies
 
 ## Progressive Web App (PWA)
 
-The Inventory Management System is a fully-featured Progressive Web App that can be installed on any platform and works offline.
+The Store Management System is a fully-featured Progressive Web App that can be installed on any platform and works offline.
 
 ### Installation
 

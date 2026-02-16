@@ -2,7 +2,7 @@
 
 ## Status: 🟢 READY TO USE
 
-Your inventory management system is now fully configured with mock data and all database connections disabled.
+Your store management system is now fully configured with mock data and all database connections disabled.
 
 ---
 
@@ -295,7 +295,7 @@ src/lib/auth/
 
 ## 🎉 You're All Set!
 
-Your inventory management system is ready to use with:
+Your store management system is ready to use with:
 
 ✅ **No Backend Required** - Everything works with mock data
 ✅ **Demo Accounts Ready** - Log in immediately

@@ -357,7 +357,7 @@ export default function StockOutReasonsReportPage() {
         <h3 className="text-sm font-semibold text-foreground">Insights</h3>
         <ul className="text-sm text-muted-foreground mt-2 space-y-1">
           <li>• Track the most common reasons for stock-out to identify patterns</li>
-          <li>• Use this data to improve inventory management and reduce losses</li>
+          <li>• Use this data to improve store management and reduce losses</li>
           <li>• Monitor damaged and lost items to prevent future occurrences</li>
           <li>• Analyze transfers to optimize branch distribution</li>
         </ul>

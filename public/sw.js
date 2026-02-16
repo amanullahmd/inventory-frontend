@@ -1,4 +1,4 @@
-// Service Worker for Inventory Management System PWA
+// Service Worker for Store Management System PWA
 // Version: 1.1.0
 
 const CACHE_VERSION = 'v1';

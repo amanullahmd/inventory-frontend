@@ -173,7 +173,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-                Inventory Dashboard
+                Store Dashboard
               </h1>
               <p className="mt-2 text-lg text-muted-foreground">
                 Monitor your stock levels, track movements, and manage inventory efficiently

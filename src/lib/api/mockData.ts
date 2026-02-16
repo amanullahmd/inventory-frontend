@@ -76,6 +76,23 @@ export const MOCK_ITEMS = [
   { itemId: 48, name: 'Office Desk (Standard)', sku: 'DESK-OFFICE', description: 'অফিস ডেস্ক স্ট্যান্ডার্ড', unitPrice: 15000, currentStock: 6, categoryId: 8, categoryName: 'আসবাবপত্র', minimumStock: 1, maximumStock: 12, reorderLevel: 4, createdAt: '2024-02-17T00:00:00Z' },
   { itemId: 49, name: 'Bookshelf (5 Shelf)', sku: 'BOOKSHELF-5', description: 'বুকশেলফ 5 শেলফ', unitPrice: 12000, currentStock: 4, categoryId: 8, categoryName: 'আসবাবপত্র', minimumStock: 1, maximumStock: 8, reorderLevel: 3, createdAt: '2024-02-18T00:00:00Z' },
   { itemId: 50, name: 'Filing Cabinet (4 Drawer)', sku: 'CABINET-4DRAWER', description: 'ফাইলিং ক্যাবিনেট 4 ড্রয়ার', unitPrice: 18000, currentStock: 3, categoryId: 8, categoryName: 'আসবাবপত্র', minimumStock: 1, maximumStock: 6, reorderLevel: 2, createdAt: '2024-02-19T00:00:00Z' },
+  
+  // Low Stock Items - Added for testing
+  { itemId: 51, name: 'HP Laser Jet Pro M404n Printer', sku: 'HP-M404N', description: 'HP লেজার প্রিন্টার', unitPrice: 32000, currentStock: 1, categoryId: 1, categoryName: 'প্রিন্টার এবং টোনার', minimumStock: 3, maximumStock: 10, reorderLevel: 5, createdAt: '2024-02-20T00:00:00Z' },
+  { itemId: 52, name: 'Canon LBP6030 Printer', sku: 'CANON-LBP6030', description: 'ক্যানন লেজার প্রিন্টার', unitPrice: 18000, currentStock: 2, categoryId: 1, categoryName: 'প্রিন্টার এবং টোনার', minimumStock: 4, maximumStock: 12, reorderLevel: 6, createdAt: '2024-02-21T00:00:00Z' },
+  { itemId: 53, name: 'Xerox WorkCentre 5335 Printer', sku: 'XEROX-5335', description: 'জেরক্স মাল্টিফাংশন প্রিন্টার', unitPrice: 95000, currentStock: 0, categoryId: 1, categoryName: 'প্রিন্টার এবং টোনার', minimumStock: 1, maximumStock: 3, reorderLevel: 1, createdAt: '2024-02-22T00:00:00Z' },
+  { itemId: 54, name: 'Desktop Computer (i7 Processor)', sku: 'DESKTOP-I7', description: 'ডেস্কটপ কম্পিউটার i7 প্রসেসর সহ', unitPrice: 55000, currentStock: 1, categoryId: 2, categoryName: 'কম্পিউটার হার্ডওয়্যার', minimumStock: 2, maximumStock: 8, reorderLevel: 4, createdAt: '2024-02-23T00:00:00Z' },
+  { itemId: 55, name: 'Laptop (Intel i9, 16GB RAM)', sku: 'LAPTOP-I9-16GB', description: 'ল্যাপটপ i9 প্রসেসর, 16GB RAM', unitPrice: 95000, currentStock: 1, categoryId: 2, categoryName: 'কম্পিউটার হার্ডওয়্যার', minimumStock: 1, maximumStock: 5, reorderLevel: 2, createdAt: '2024-02-24T00:00:00Z' },
+  { itemId: 56, name: 'Toshiba Photocopy Machine 2505A', sku: 'TOSHIBA-2505A', description: 'টোশিবা ফটোকপি মেশিন', unitPrice: 220000, currentStock: 0, categoryId: 2, categoryName: 'কম্পিউটার হার্ডওয়্যার', minimumStock: 1, maximumStock: 2, reorderLevel: 1, createdAt: '2024-02-25T00:00:00Z' },
+  { itemId: 57, name: 'Scanner (Document)', sku: 'SCANNER-DOC', description: 'ডকুমেন্ট স্ক্যানার', unitPrice: 12000, currentStock: 1, categoryId: 3, categoryName: 'পেরিফেরাল ডিভাইস', minimumStock: 2, maximumStock: 8, reorderLevel: 4, createdAt: '2024-02-26T00:00:00Z' },
+  { itemId: 58, name: 'UPS (3.5 KVA)', sku: 'UPS-3.5KVA', description: 'ইউপিএস 3.5 KVA', unitPrice: 25000, currentStock: 1, categoryId: 3, categoryName: 'পেরিফেরাল ডিভাইস', minimumStock: 1, maximumStock: 4, reorderLevel: 2, createdAt: '2024-02-27T00:00:00Z' },
+  { itemId: 59, name: 'Network Switch (24 Port)', sku: 'SWITCH-24PORT', description: 'নেটওয়ার্ক সুইচ 24 পোর্ট', unitPrice: 18000, currentStock: 2, categoryId: 4, categoryName: 'নেটওয়ার্ক এবং ক্যাবল', minimumStock: 3, maximumStock: 10, reorderLevel: 5, createdAt: '2024-02-28T00:00:00Z' },
+  { itemId: 60, name: 'Solid State Drive (SSD) 1TB for PC', sku: 'SSD-1TB-PC', description: 'SSD 1TB ডেস্কটপের জন্য', unitPrice: 15000, currentStock: 2, categoryId: 5, categoryName: 'স্টোরেজ ডিভাইস', minimumStock: 4, maximumStock: 15, reorderLevel: 7, createdAt: '2024-02-29T00:00:00Z' },
+  { itemId: 61, name: 'Desktop Monitor (LG 24")', sku: 'MONITOR-LG-24', description: 'ডেস্কটপ মনিটর 24 ইঞ্চি', unitPrice: 18000, currentStock: 1, categoryId: 6, categoryName: 'ডিসপ্লে এবং মনিটর', minimumStock: 2, maximumStock: 10, reorderLevel: 5, createdAt: '2024-03-01T00:00:00Z' },
+  { itemId: 62, name: 'Projector (3000 Lumens)', sku: 'PROJECTOR-3000', description: 'প্রজেক্টর 3000 লুমেন', unitPrice: 45000, currentStock: 1, categoryId: 6, categoryName: 'ডিসপ্লে এবং মনিটর', minimumStock: 1, maximumStock: 4, reorderLevel: 2, createdAt: '2024-03-02T00:00:00Z' },
+  { itemId: 63, name: 'Whiteboard Marker (Pack of 10)', sku: 'WHITEBOARD-MARKER', description: 'হোয়াইটবোর্ড মার্কার 10 পিস', unitPrice: 200, currentStock: 5, categoryId: 7, categoryName: 'অফিস সরঞ্জাম', minimumStock: 10, maximumStock: 50, reorderLevel: 20, createdAt: '2024-03-03T00:00:00Z' },
+  { itemId: 64, name: 'Stapler (Heavy Duty)', sku: 'STAPLER-HD', description: 'হেভি ডিউটি স্টেপলার', unitPrice: 800, currentStock: 3, categoryId: 7, categoryName: 'অফিস সরঞ্জাম', minimumStock: 5, maximumStock: 20, reorderLevel: 10, createdAt: '2024-03-04T00:00:00Z' },
+  { itemId: 65, name: 'Office Chair (Executive)', sku: 'CHAIR-EXEC', description: 'এক্সিকিউটিভ অফিস চেয়ার', unitPrice: 25000, currentStock: 2, categoryId: 8, categoryName: 'আসবাবপত্র', minimumStock: 2, maximumStock: 8, reorderLevel: 4, createdAt: '2024-03-05T00:00:00Z' },
 ]
 
 // Hierarchical Branch Structure
@@ -180,10 +197,10 @@ export const MOCK_USERS = [
 ]
 
 export const MOCK_STATISTICS = {
-  totalItems: 50,
-  totalValue: 2500000,
-  lowStockCount: 5,
-  outOfStockCount: 0,
+  totalItems: 65,
+  totalValue: 2850000,
+  lowStockCount: 15,
+  outOfStockCount: 2,
 }
 
 

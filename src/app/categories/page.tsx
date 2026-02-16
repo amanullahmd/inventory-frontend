@@ -268,9 +268,9 @@ export default function CategoriesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-slide-up">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <div
-                key={category.id}
+                key={category.id || `category-${index}`}
                 onClick={() => router.push(`/categories/${category.id}`)}
                 className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group card-hover"
               >

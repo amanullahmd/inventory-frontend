@@ -49,7 +49,7 @@ export default function Navbar() {
               Suppliers
             </Link>
             <Link href="/warehouses" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-              Branches
+              Division
             </Link>
             <Link href="/categories" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Categories
@@ -65,9 +65,6 @@ export default function Navbar() {
             </Link>
             <Link href="/orders/purchase" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Purchase Orders
-            </Link>
-            <Link href="/orders/sales" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-              Sales Orders
             </Link>
             <Link href="/demand" className="rounded-md px-4 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               Demand
@@ -139,7 +136,7 @@ export default function Navbar() {
                 Suppliers
               </Link>
               <Link href="/warehouses" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
-                Branches
+                Division
               </Link>
               <Link href="/categories" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Categories
@@ -155,9 +152,6 @@ export default function Navbar() {
               </Link>
               <Link href="/orders/purchase" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Purchase Orders
-              </Link>
-              <Link href="/orders/sales" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
-                Sales Orders
               </Link>
               <Link href="/demand" className="rounded-md px-4 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" onClick={() => setIsOpen(false)}>
                 Demand

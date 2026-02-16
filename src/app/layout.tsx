@@ -24,27 +24,27 @@ const geistMono = Geist_Mono({
 
 // PWA Metadata
 export const metadata: Metadata = {
-  title: "DPE Inventory Management System",
-  description: "Manage your inventory efficiently with this cross-platform application. Track items, stock movements, suppliers, and generate reports.",
+  title: "DPE Store Management System",
+  description: "Manage your store efficiently with this cross-platform application. Track items, stock movements, suppliers, and generate reports.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "DPE Inventory",
+    title: "DPE Store",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "DPE Inventory Management System",
-    title: "DPE Inventory Management System",
-    description: "Manage your inventory efficiently",
+    siteName: "DPE Store Management System",
+    title: "DPE Store Management System",
+    description: "Manage your store efficiently",
   },
   twitter: {
     card: "summary",
-    title: "DPE Inventory Management System",
-    description: "Manage your inventory efficiently",
+    title: "DPE Store Management System",
+    description: "Manage your store efficiently",
   },
   icons: {
     icon: [

@@ -53,8 +53,8 @@ describe('Web App Manifest Validation', () => {
    */
   describe('Property 1: Manifest Validity', () => {
     // Requirement 1.1: Name property
-    it('should have name set to "Inventory Management System"', () => {
-      expect(manifest.name).toBe('Inventory Management System');
+    it('should have name set to "Store Management System"', () => {
+      expect(manifest.name).toBe('Store Management System');
     });
 
     // Requirement 1.2: Short name property (max 12 characters)

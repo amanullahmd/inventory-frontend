@@ -363,7 +363,7 @@ export default function ItemsPage() {
         <div className="mb-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground">Inventory Management</h1>
+              <h1 className="text-4xl font-bold tracking-tight text-foreground">Store Management</h1>
               <p className="mt-2 text-base text-muted-foreground">Track items, stock levels, and manage categories</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">

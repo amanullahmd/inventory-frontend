@@ -1,7 +1,7 @@
 {
-  "name": "DPE Inventory Management System",
-  "short_name": "DPE Inventory",
-  "description": "Manage your inventory efficiently with this cross-platform application. Track items, stock movements, suppliers, and generate reports.",
+  "name": "DPE Store Management System",
+  "short_name": "DPE Store",
+  "description": "Manage your store efficiently with this cross-platform application. Track items, stock movements, suppliers, and generate reports.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -133,14 +133,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Desktop view of Inventory Management System"
+      "label": "Desktop view of Store Management System"
     },
     {
       "src": "/screenshots/mobile.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobile view of Inventory Management System"
+      "label": "Mobile view of Store Management System"
     }
   ],
   "related_applications": [],

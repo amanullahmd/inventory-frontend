@@ -275,7 +275,7 @@ experimental: {
 
 ## Conclusion
 
-The DPE Inventory Management System now features enterprise-grade performance optimizations. With aggressive caching, component memoization, and resource optimization, the application delivers:
+The DPE Store Management System now features enterprise-grade performance optimizations. With aggressive caching, component memoization, and resource optimization, the application delivers:
 
 - **52% faster** First Contentful Paint
 - **53% faster** Largest Contentful Paint

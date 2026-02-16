@@ -2,7 +2,7 @@
 
 ## Overview
 
-The DPE Inventory Management System uses a comprehensive design system built on modern design principles. This system provides a cohesive set of design tokens, components, and patterns that ensure consistency across the entire application.
+The DPE Store Management System uses a comprehensive design system built on modern design principles. This system provides a cohesive set of design tokens, components, and patterns that ensure consistency across the entire application.
 
 ## Design System Structure
 

@@ -40,14 +40,13 @@ const navItems: NavItem[] = [
   { name: 'Stock Out', href: '/stock-out', icon: <ArrowUpFromLine size={20} /> },
   { name: 'Movements', href: '/stock-movements', icon: <History size={20} /> },
   { name: 'Purchase Orders', href: '/orders/purchase', icon: <ShoppingCart size={20} /> },
-  { name: 'Sales Orders', href: '/orders/sales', icon: <Receipt size={20} /> },
   { name: 'Demand', href: '/demand', icon: <TrendingUp size={20} /> },
 ]
 
 const managementItems: NavItem[] = [
   { name: 'Categories', href: '/categories', icon: <Tags size={20} /> },
   { name: 'Suppliers', href: '/suppliers', icon: <Truck size={20} /> },
-  { name: 'Branches', href: '/warehouses', icon: <Building2 size={20} /> },
+  { name: 'Division', href: '/warehouses', icon: <Building2 size={20} /> },
   { name: 'Employees', href: '/employees', icon: <Users size={20} /> },
   { name: 'Users', href: '/users', icon: <Users size={20} />, adminOnly: true },
   { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },

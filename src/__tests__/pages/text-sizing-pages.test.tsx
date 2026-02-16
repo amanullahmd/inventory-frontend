@@ -10,7 +10,7 @@
  */
 describe('Items Page Text Sizing', () => {
   it('should have h1 with text-4xl class', () => {
-    // h1 className="text-4xl font-bold tracking-tight text-foreground">Inventory Management
+    // h1 className="text-4xl font-bold tracking-tight text-foreground">Store Management
     const h1Classes = 'text-4xl font-bold tracking-tight text-foreground'
     expect(h1Classes).toContain('text-4xl')
   })

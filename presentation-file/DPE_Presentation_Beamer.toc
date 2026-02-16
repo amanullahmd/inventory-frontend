@@ -1,0 +1,15 @@
+\beamer@sectionintoc {1}{The Opportunity}{3}{0}{1}
+\beamer@sectionintoc {2}{The Problem}{4}{0}{2}
+\beamer@sectionintoc {3}{Our Solution}{5}{0}{3}
+\beamer@sectionintoc {4}{Officer Workload Benefits}{7}{0}{4}
+\beamer@sectionintoc {5}{Architecture}{8}{0}{5}
+\beamer@sectionintoc {6}{Technology Stack}{9}{0}{6}
+\beamer@sectionintoc {7}{Demo}{10}{0}{7}
+\beamer@sectionintoc {8}{Key Features}{11}{0}{8}
+\beamer@sectionintoc {9}{Implementation Benefits}{12}{0}{9}
+\beamer@sectionintoc {10}{Implementation Roadmap}{13}{0}{10}
+\beamer@sectionintoc {11}{Why Us}{14}{0}{11}
+\beamer@sectionintoc {12}{About FinkOps}{15}{0}{12}
+\beamer@sectionintoc {13}{Our Experience}{16}{0}{13}
+\beamer@sectionintoc {14}{Conclusion}{17}{0}{14}
+\beamer@sectionintoc {15}{Questions \& Discussion}{18}{0}{15}

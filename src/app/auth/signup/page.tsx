@@ -105,7 +105,7 @@ export default function SignupPage() {
         
         <div className="relative z-10 space-y-6">
           <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight">
-            Join our inventory management platform
+            Join our store management platform
           </h1>
           <p className="text-lg text-white/80 max-w-md">
             Create an account to start managing your inventory efficiently with our modern tools.
@@ -123,7 +123,7 @@ export default function SignupPage() {
         </div>
         
         <div className="relative z-10 text-white/60 text-sm">
-          © 2024 Inventory Management System
+          © 2024 Store Management System
         </div>
       </div>
 

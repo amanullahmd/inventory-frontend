@@ -1,4 +1,4 @@
-// Core data types for the inventory management system
+// Core data types for the store management system
 
 export interface Item {
   id: string;
