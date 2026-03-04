@@ -1,401 +1,328 @@
-# Store Management System - Frontend
+# DPE Inventory Management System
 
-A modern, responsive Next.js web application for store management with real-time stock tracking, user authentication, and comprehensive reporting capabilities.
+> Enterprise-grade inventory management system for the Directorate of Primary Education (DPE), Bangladesh
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2-blue)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## Overview
 
-The Inventory Frontend is a production-ready React/Next.js application built with TypeScript, Tailwind CSS, and modern web technologies. It provides a seamless user experience for managing inventory, tracking stock movements, and generating detailed reports.
+A production-ready Progressive Web Application (PWA) built with Next.js 16, React 19, and TypeScript. Features real-time stock tracking, multi-warehouse management, supply chain operations, and comprehensive reporting with full offline support.
 
-**Live Application**: [https://inventory-frontend.railway.app](https://inventory-frontend.railway.app)  
-**Backend API**: [https://inventory-backend.railway.app/api](https://inventory-backend.railway.app/api)
+### Key Features
+
+- 📦 Multi-warehouse inventory tracking
+- 📊 Real-time analytics and reporting
+- 🔄 Stock in/out operations with batch processing
+- 👥 User management with role-based access
+- 📱 Progressive Web App with offline support
+- 🌙 Dark mode support
+- ♿ WCAG 2.1 Level AA accessibility
+- 🧪 Property-based testing with Fast-check
 
 ## Tech Stack
 
-- **Next.js 14** - React framework with App Router //
-- **React 18** - UI library
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling
-- **NextAuth.js** - Authentication
-- **Axios** - HTTP client
-- **React Query** - Data fetching & caching
-- **Jest & React Testing Library** - Testing
-- **ESLint & Prettier** - Code quality
-
-## Features
-
-### Authentication
-- User registration and login
-- JWT token-based authentication
-- Secure password management
-- Session persistence
-- Role-based access control
-
-### Store Management
-- View and manage items
-- Create new items with categories
-- Update item details
-- Delete items
-- Real-time stock level updates
-- Category management
-
-### Stock Movements
-- Record stock-in movements
-- Record stock-out movements
-- Track movement history
-- View stock out reasons
-- Detailed movement logs
-
-### Reporting & Analytics
-- Inventory statistics dashboard
-- Stock movement history
-- Stock out reason breakdown
-- Export reports to PDF
-- Date range filtering
-- Real-time data visualization
-
-### User Management
-- User profile management
-- Change password functionality
-- View user information
-- Admin user management
-
-### UI/UX
-- Responsive design (mobile, tablet, desktop)
-- Dark mode support
-- Accessible components
-- Loading states
-- Error handling
-- Toast notifications
-- Smooth animations
-
-## Prerequisites
-
-- Node.js 18+ or higher
-- npm 9+ or yarn 4+
-- Git
-- Backend API running (see backend README)
+| Category | Technologies |
+|----------|-------------|
+| **Framework** | Next.js 16, React 19.2, TypeScript 5 |
+| **Styling** | Tailwind CSS 4, Radix UI, Lucide Icons |
+| **State** | NextAuth.js 5, Axios, IDB-Keyval |
+| **Testing** | Jest 30, React Testing Library, Fast-check |
+| **PWA** | Workbox 7, Service Workers |
 
 ## Quick Start
 
+### Prerequisites
+
+- Node.js 18.0+
+- npm 9.0+ or yarn 4+
+
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/amanullahmd/inventory-frontend.git
-   cd inventory-frontend
-   ```
+```bash
+# Clone repository
+git clone https://github.com/amanullahmd/inventory-frontend.git
+cd inventory-frontend
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+# Install dependencies
+npm install
 
-3. **Configure environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
+# Configure environment
+cp .env.example .env.local
 
-   Edit `.env.local`:
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:8081/api
-   NEXT_PUBLIC_API_BASE_URL=http://localhost:8081/api
-   ```
+# Start development server
+npm run dev
+```
 
-4. **Run development server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+Visit `http://localhost:3000`
 
-5. **Open in browser**
-   - Navigate to `http://localhost:3000`
-   - Login with test credentials
+### Demo Credentials
 
-### Build for Production
+```
+Admin:
+  Email: admin@example.com
+  Password: Admin@123456
+
+User:
+  Email: user@example.com
+  Password: User@123456
+```
+
+## Environment Configuration
+
+Create `.env.local` in the root directory:
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:8081/api
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8081/api
+
+# Authentication
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here
+```
+
+## Mock API Mode
+
+Develop without a backend server using the built-in mock API.
+
+**Enable Mock Mode:**
+
+Edit `src/lib/api/client.ts`:
+```typescript
+const USE_MOCK_API = true;  // Set to false for real backend
+```
+
+**Mock Data Includes:**
+- 10 Items with categories
+- 4 Warehouses
+- 4 Suppliers
+- 5 Employees
+- Stock transactions, orders, and reports
+
+**Customize Mock Data:**
+
+Edit `src/lib/api/mockData.ts` and restart the server.
+
+## Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm start            # Start production server
+npm test             # Run tests
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Generate coverage report
+npm run lint         # Run ESLint
+```
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   ├── auth/              # Authentication pages
+│   ├── items/             # Item management
+│   ├── stock-in/          # Stock in operations
+│   ├── stock-out/         # Stock out operations
+│   ├── reports/           # Analytics & reports
+│   └── ...                # Other feature pages
+├── components/
+│   ├── ui/                # Reusable UI components
+│   ├── layout/            # Layout components
+│   └── pwa/               # PWA components
+├── lib/
+│   ├── api/               # API client & mock data
+│   ├── auth/              # Authentication config
+│   └── design-system/     # Design tokens
+├── contexts/              # React contexts
+└── __tests__/             # Test suites
+```
+
+## Core Features
+
+### Inventory Management
+- Items with SKU tracking
+- Hierarchical categories
+- Multi-warehouse support
+- Batch tracking with expiry dates
+- Real-time stock levels
+
+### Stock Operations
+- Stock in with batch operations
+- Stock out with reason codes
+- Inter-warehouse transfers
+- Complete audit trail
+- Demand management
+
+### Supply Chain
+- Supplier management
+- Purchase orders
+- Sales orders
+- Employee management
+- Grade assignments
+
+### Reporting
+- Real-time dashboard
+- Inventory statistics
+- Stock out analysis
+- Most used items
+- PDF export
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register user
+- `POST /api/auth/signin` - User login
+- `POST /api/auth/signout` - User logout
+
+### Items
+- `GET /items` - List all items
+- `POST /items` - Create item
+- `PUT /items/{id}` - Update item
+- `DELETE /items/{id}` - Delete item
+- `GET /items/statistics` - Get statistics
+
+### Stock Operations
+- `POST /stock/in/batch` - Batch stock in
+- `POST /stock/out/batch` - Batch stock out
+- `GET /stock/in/grouped` - Get stock in transactions
+- `GET /stock/out` - Get stock out transactions
+
+### Reports
+- `GET /reports/stock-out-reasons` - Stock out analysis
+- `GET /reports/stock-movements` - Movement history
+
+[View complete API documentation](#api-endpoints)
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage report
+npm run test:coverage
+```
+
+### Test Structure
+- **Unit Tests**: `src/__tests__/unit/`
+- **Component Tests**: `src/components/ui/__tests__/`
+- **Property Tests**: `src/__tests__/properties/`
+
+## Deployment
+
+### Production Build
 
 ```bash
 npm run build
 npm start
 ```
 
-## Project Structure
+### Docker
 
-```
-frontend/
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── auth/              # Authentication pages
-│   │   ├── items/             # Item management
-│   │   ├── stock-in/          # Stock in page
-│   │   ├── stock-out/         # Stock out page
-│   │   ├── stock-movements/   # Movement history
-│   │   ├── reports/           # Reports & analytics
-│   │   ├── users/             # User management
-│   │   ├── settings/          # Settings page
-│   │   └── layout.tsx         # Root layout
-│   ├── components/
-│   │   ├── ui/                # Reusable UI components
-│   │   ├── layout/            # Layout components
-│   │   └── forms/             # Form components
-│   ├── lib/
-│   │   ├── api/               # API client
-│   │   ├── services/          # Business logic
-│   │   ├── utils/             # Utility functions
-│   │   └── auth/              # Auth configuration
-│   ├── hooks/                 # Custom React hooks
-│   ├── types/                 # TypeScript types
-│   └── __tests__/             # Test files
-├── public/                    # Static assets
-├── .env.example               # Environment template
-├── next.config.ts             # Next.js configuration
-├── tailwind.config.ts         # Tailwind configuration
-├── tsconfig.json              # TypeScript configuration
-├── jest.config.js             # Jest configuration
-└── package.json               # Dependencies
-```
-
-## Key Pages
-
-### Authentication
-- `/auth/signin` - Login page
-- `/auth/signup` - Registration page
-- `/auth/change-password` - Change password
-
-### Inventory
-- `/items` - Item list and management
-- `/stock-in` - Record stock in
-- `/stock-out` - Record stock out
-- `/stock-movements` - Movement history
-
-### Reports
-- `/reports/statistics` - Inventory statistics
-- `/reports/stock-out-reasons` - Stock out analysis
-
-### Admin
-- `/users` - User management
-- `/settings` - Application settings
-
-## Environment Variables
-
-### Development (.env.local)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8081/api
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8081/api
-```
-
-### Production (.env.production)
-```env
-NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api
-NEXT_PUBLIC_API_BASE_URL=https://your-backend-domain.com/api
-```
-
-## API Integration
-
-The frontend communicates with the backend API using Axios. API client is configured in `src/lib/api/client.ts`:
-
-```typescript
-import { apiClient } from '@/lib/api/client';
-
-// GET request
-const items = await apiClient.get('/items');
-
-// POST request
-const newItem = await apiClient.post('/items', itemData);
-
-// PUT request
-await apiClient.put(`/items/${id}`, updatedData);
-
-// DELETE request
-await apiClient.delete(`/items/${id}`);
-```
-
-## Authentication Flow
-
-1. User registers or logs in
-2. Backend returns JWT token
-3. Token stored in secure HTTP-only cookie
-4. Token included in all API requests
-5. Token refreshed automatically when expired
-6. User logged out when token expires
-
-## Testing
-
-### Run Tests
 ```bash
-npm test
+# Build image
+docker build -t dpe-inventory:latest .
+
+# Run container
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_API_URL=https://api.example.com/api \
+  dpe-inventory:latest
 ```
 
-### Run Tests in Watch Mode
-```bash
-npm test -- --watch
-```
+### Platforms
 
-### Generate Coverage Report
-```bash
-npm test -- --coverage
-```
+- **Vercel**: Connect GitHub repo and deploy
+- **Railway**: Auto-deploy on push
+- **Traditional Server**: Use PM2 or systemd
 
-### Run Specific Test File
-```bash
-npm test -- pages/items.test.tsx
-```
+## Progressive Web App
 
-## Code Quality
+### Installation
 
-### Lint Code
-```bash
-npm run lint
-```
+**Desktop**: Click install icon in address bar
+**Android**: Tap "Add to Home Screen"
+**iOS**: Share → "Add to Home Screen"
 
-### Format Code
-```bash
-npm run format
-```
+### Offline Support
 
-### Type Check
-```bash
-npm run type-check
-```
+| Feature | Offline | Sync |
+|---------|---------|------|
+| Dashboard | ✅ Cached | Auto |
+| Items | ✅ Cached | Auto |
+| Stock In/Out | ⏳ Queued | Auto |
+| Reports | ✅ Cached | Auto |
 
-## Building & Deployment
+## Performance
 
-### Build Docker Image
-```bash
-docker build -t inventory-frontend:latest .
-docker run -p 3000:3000 inventory-frontend:latest
-```
-
-### Deploy to Railway
-
-1. Connect your GitHub repository to Railway
-2. Set environment variables in Railway dashboard
-3. Railway automatically builds and deploys on push
-
-See [RAILWAY_DEPLOYMENT_GUIDE.md](../RAILWAY_DEPLOYMENT_GUIDE.md) for detailed instructions.
-
-## Performance Optimization
-
-### Image Optimization
-- Next.js Image component for automatic optimization
-- WebP format support
-- Responsive images
-
-### Code Splitting
-- Automatic code splitting per route
-- Dynamic imports for heavy components
-- Lazy loading of components
-
-### Caching
-- React Query for server state caching
-- Browser caching for static assets
-- API response caching
-
-### Bundle Size
-- Tree shaking of unused code
-- Minification of CSS and JavaScript
-- Compression of assets
+- First Contentful Paint: < 1.5s
+- Largest Contentful Paint: < 2.5s
+- Time to Interactive: < 3.5s
+- Lighthouse Score: 90+
 
 ## Security
 
-### Authentication
-- JWT tokens with secure expiration
-- HTTP-only cookies for token storage
+- JWT token authentication
+- HTTP-only cookies
 - CSRF protection
-- Secure password hashing
-
-### Data Protection
-- HTTPS/SSL encryption
-- Input validation and sanitization
+- Input validation
 - XSS prevention
-- SQL injection prevention (via API)
-
-### Best Practices
-- Environment variables for sensitive data
-- No credentials in code
-- Regular security updates
-- Content Security Policy headers
-
-## Accessibility
-
-- WCAG 2.1 Level AA compliance
-- Semantic HTML
-- ARIA labels and roles
-- Keyboard navigation
-- Screen reader support
-- Color contrast compliance
+- HTTPS/TLS encryption
 
 ## Browser Support
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
+| Browser | Version |
+|---------|---------|
+| Chrome | 90+ |
+| Firefox | 88+ |
+| Safari | 14+ |
+| Edge | 90+ |
 
 ## Troubleshooting
 
-### API Connection Issues
-```
-Error: Failed to fetch from API
-Solution: Verify NEXT_PUBLIC_API_URL is correct and backend is running
-```
+### API Connection Failed
+```bash
+# Check environment variables
+cat .env.local
 
-### Authentication Errors
-```
-Error: Unauthorized (401)
-Solution: Login again, token may have expired
-```
-
-### Build Errors
-```
-Error: TypeScript compilation failed
-Solution: Run npm run type-check to see errors
+# Enable mock mode
+# Edit src/lib/api/client.ts: USE_MOCK_API = true
 ```
 
 ### Port Already in Use
-```
-Error: Port 3000 already in use
-Solution: Kill process on port 3000 or use different port
-```
-
-## Development Guidelines
-
-### Code Style
-- Use TypeScript for type safety
-- Follow ESLint rules
-- Use Prettier for formatting
-- Write meaningful variable names
-- Add comments for complex logic
-
-### Component Structure
-```typescript
-// Functional component with TypeScript
-interface ComponentProps {
-  title: string;
-  onSubmit: (data: FormData) => void;
-}
-
-export const MyComponent: React.FC<ComponentProps> = ({ title, onSubmit }) => {
-  return <div>{title}</div>;
-};
-```
-
-### Git Workflow
 ```bash
-# Create feature branch
-git checkout -b feature/your-feature
+# Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
 
-# Commit with clear messages
-git commit -m "feat: add new feature"
-
-# Push and create pull request
-git push origin feature/your-feature
+# Linux/Mac
+lsof -ti:3000 | xargs kill -9
 ```
 
-### Commit Message Format
+### Build Errors
+```bash
+# Clear cache and rebuild
+rm -rf .next
+npm run build
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'feat: add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
+
+### Commit Convention
+
 ```
 feat: add new feature
 fix: fix bug
@@ -406,155 +333,44 @@ style: update styles
 chore: update dependencies
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Performance Benchmarks
-
-- First Contentful Paint (FCP): < 1.5s
-- Largest Contentful Paint (LCP): < 2.5s
-- Cumulative Layout Shift (CLS): < 0.1
-- Time to Interactive (TTI): < 3.5s
-- Lighthouse Score: 90+
-
 ## Roadmap
 
-- [x] Progressive Web App (PWA) support
-- [ ] Dark mode toggle
-- [ ] Advanced filtering and search
-- [ ] Bulk import/export
-- [ ] Real-time notifications
-- [ ] Mobile app (React Native)
-- [ ] Advanced analytics dashboard
-- [ ] Multi-language support
+### Completed ✅
+- Progressive Web App
+- Mock API mode
+- Design system
+- Offline support
+- Multi-warehouse tracking
 
-## Progressive Web App (PWA)
+### In Progress 🚧
+- Multi-language support (i18n)
+- UI/UX modernization
+- Advanced analytics
 
-The Store Management System is a fully-featured Progressive Web App that can be installed on any platform and works offline.
+### Planned 📋
+- Real-time notifications
+- Bulk import/export
+- Barcode scanning
+- Mobile app (React Native)
+- GraphQL API
 
-### Installation
+## Documentation
 
-#### Desktop (Chrome, Edge, Firefox)
-1. Visit the application URL
-2. Look for the install icon in the address bar (or the "Install" prompt)
-3. Click "Install" to add the app to your desktop
-4. The app will open in its own window
-
-#### Android
-1. Open the app in Chrome
-2. Tap the "Add to Home Screen" prompt or menu option
-3. The app icon will appear on your home screen
-
-#### iOS (Safari)
-1. Open the app in Safari
-2. Tap the Share button
-3. Select "Add to Home Screen"
-4. Tap "Add" to confirm
-
-### Offline Capabilities
-
-The PWA supports offline functionality for most features:
-
-| Feature | Offline Read | Offline Write | Sync |
-|---------|--------------|---------------|------|
-| Dashboard | ✅ Cached stats | ❌ | Auto |
-| Items | ✅ Cached list | ⏳ Queued | Background |
-| Categories | ✅ Cached list | ⏳ Queued | Background |
-| Stock In/Out | ✅ Form data | ⏳ Queued | Background |
-| Stock Movements | ✅ History | ❌ | Auto |
-| Reports | ✅ Cached | ❌ | Auto |
-| Auth | ❌ Requires network | ❌ | - |
-
-### Offline Queue
-
-When you're offline, write operations (create, update, delete) are automatically queued:
-- A sync status indicator shows pending operations
-- Operations sync automatically when you come back online
-- Failed operations can be retried manually
-
-### Data Freshness
-
-- Dashboard shows "Last updated" timestamp
-- Stale data is indicated with a warning
-- Auto-refresh when coming back online
-- Manual refresh button available
-
-### Updates
-
-When a new version is available:
-1. The app downloads the update in the background
-2. A notification appears when the update is ready
-3. Click "Update" to reload with the new version
-4. Or dismiss to update later
-
-### PWA Testing
-
-To test PWA features:
-
-1. **Lighthouse Audit**
-   - Open Chrome DevTools (F12)
-   - Go to "Lighthouse" tab
-   - Select "Progressive Web App"
-   - Click "Analyze page load"
-   - Target score: 90+
-
-2. **Offline Testing**
-   - Open DevTools > Network tab
-   - Check "Offline" checkbox
-   - Navigate the app to test cached content
-   - Try creating/editing items (should queue)
-   - Uncheck "Offline" to sync
-
-3. **Install Testing**
-   - Clear site data in DevTools > Application
-   - Reload the page
-   - Wait for install prompt (after interaction)
-   - Test installation flow
-
-4. **Service Worker**
-   - DevTools > Application > Service Workers
-   - Verify SW is registered and active
-   - Test "Update on reload" for development
+- [PWA Testing Guide](docs/PWA_TESTING_GUIDE.md)
+- [Design System](src/lib/design-system/README.md)
+- [Feature Specs](.kiro/specs/)
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support & Documentation
-
-- **API Documentation**: [Swagger UI](https://inventory-backend.railway.app/api/swagger-ui.html)
-- **Issues**: [GitHub Issues](https://github.com/amanullahmd/inventory-frontend/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/amanullahmd/inventory-frontend/discussions)
-
-## Deployment Checklist
-
-Before deploying to production:
-
-- [ ] Update NEXT_PUBLIC_API_URL to production backend
-- [ ] Run full test suite
-- [ ] Check TypeScript compilation
-- [ ] Run ESLint
-- [ ] Build production bundle
-- [ ] Test all features
-- [ ] Verify API connectivity
-- [ ] Check responsive design
-- [ ] Test authentication flow
-- [ ] Enable HTTPS/SSL
-- [ ] Set up monitoring
-- [ ] Configure error tracking
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
-**Author**: Amanullah  
+**Organization**: Directorate of Primary Education (DPE), Bangladesh  
+**Developer**: Amanullah  
 **Email**: amanullahmd@gmail.com  
 **GitHub**: [@amanullahmd](https://github.com/amanullahmd)
 
 ---
 
-**Last Updated**: December 2024  
-**Version**: 1.0.0
+**Built with ❤️ for the Directorate of Primary Education, Bangladesh**
