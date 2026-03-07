@@ -122,7 +122,7 @@ export default function StockOutReasonsReportPage() {
         filename,
         title: 'Stock-Out Reasons Report',
         timestamp: new Date(),
-        dateRange: selectedDateRange,
+        dateRange: selectedDateRange || undefined,
       })
 
       setSuccess(`Successfully exported stock-out reasons report`)

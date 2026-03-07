@@ -1,5 +1,5 @@
-import { apiClient } from '@/lib/api/client';
-import { Item, CreateItemRequest, ApiError } from '@/lib/types';
+import { apiClient } from "@/lib/api/client";
+import { Item, CreateItemRequest, ApiError } from "@/lib/types";
 
 interface BackendItemStockResponse {
   itemId: number;
@@ -16,6 +16,7 @@ interface BackendItemStockResponse {
   minimumStock?: number;
   maximumStock?: number;
   reorderLevel?: number;
+  expiryDate?: string;
 }
 
 export class ItemService {
@@ -28,11 +29,15 @@ export class ItemService {
       currentStock: backendItem.currentStock,
       createdAt: backendItem.createdAt,
       unitCost: backendItem.unitPrice,
-      categoryId: backendItem.categoryId !== undefined && backendItem.categoryId !== null ? String(backendItem.categoryId) : undefined,
+      categoryId:
+        backendItem.categoryId !== undefined && backendItem.categoryId !== null
+          ? String(backendItem.categoryId)
+          : undefined,
       categoryName: backendItem.categoryName,
       minimumStock: backendItem.minimumStock,
       maximumStock: backendItem.maximumStock,
       reorderLevel: backendItem.reorderLevel,
+      expiryDate: backendItem.expiryDate,
     };
   }
 
@@ -42,13 +47,14 @@ export class ItemService {
    */
   static async getItems(): Promise<Item[]> {
     try {
-      const response = await apiClient.get<BackendItemStockResponse[]>('/items');
+      const response =
+        await apiClient.get<BackendItemStockResponse[]>("/items");
       // Backend returns array directly, not wrapped
       const data = Array.isArray(response.data) ? response.data : [];
       return data.map(ItemService.toItem);
     } catch (error) {
       const apiError = error as ApiError;
-      throw new Error(apiError.message || 'Failed to fetch items');
+      throw new Error(apiError.message || "Failed to fetch items");
     }
   }
 
@@ -63,19 +69,32 @@ export class ItemService {
         sku: item.sku,
         categoryId: item.categoryId,
         description: item.description,
-        minimumStock: item.minimumStock ? parseInt(String(item.minimumStock)) : undefined,
-        maximumStock: item.maximumStock ? parseInt(String(item.maximumStock)) : undefined,
-        reorderLevel: item.reorderLevel ? parseInt(String(item.reorderLevel)) : undefined,
+        minimumStock: item.minimumStock
+          ? parseInt(String(item.minimumStock))
+          : undefined,
+        maximumStock: item.maximumStock
+          ? parseInt(String(item.maximumStock))
+          : undefined,
+        reorderLevel: item.reorderLevel
+          ? parseInt(String(item.reorderLevel))
+          : undefined,
+        expiryDate: item.expiryDate,
       };
       if (item.unitCost !== undefined && item.unitCost !== null) {
-        payload.unitPrice = typeof item.unitCost === 'string' ? parseFloat(item.unitCost) : item.unitCost;
+        payload.unitPrice =
+          typeof item.unitCost === "string"
+            ? parseFloat(item.unitCost)
+            : item.unitCost;
       }
-      
-      const response = await apiClient.post<BackendItemStockResponse>('/items', payload);
+
+      const response = await apiClient.post<BackendItemStockResponse>(
+        "/items",
+        payload,
+      );
       return ItemService.toItem(response.data);
     } catch (error) {
       const apiError = error as ApiError;
-      throw new Error(apiError.message || 'Failed to create item');
+      throw new Error(apiError.message || "Failed to create item");
     }
   }
 
@@ -83,26 +102,42 @@ export class ItemService {
    * Update an existing inventory item
    * Requirements: allow correcting wrong info
    */
-  static async updateItem(itemId: number, item: CreateItemRequest): Promise<Item> {
+  static async updateItem(
+    itemId: number,
+    item: CreateItemRequest,
+  ): Promise<Item> {
     try {
       const payload: any = {
         name: item.name,
         sku: item.sku,
         categoryId: item.categoryId,
         description: item.description,
-        minimumStock: item.minimumStock ? parseInt(String(item.minimumStock)) : undefined,
-        maximumStock: item.maximumStock ? parseInt(String(item.maximumStock)) : undefined,
-        reorderLevel: item.reorderLevel ? parseInt(String(item.reorderLevel)) : undefined,
-      }
+        minimumStock: item.minimumStock
+          ? parseInt(String(item.minimumStock))
+          : undefined,
+        maximumStock: item.maximumStock
+          ? parseInt(String(item.maximumStock))
+          : undefined,
+        reorderLevel: item.reorderLevel
+          ? parseInt(String(item.reorderLevel))
+          : undefined,
+        expiryDate: item.expiryDate,
+      };
       if (item.unitCost !== undefined && item.unitCost !== null) {
-        payload.unitPrice = typeof item.unitCost === 'string' ? parseFloat(item.unitCost) : item.unitCost
+        payload.unitPrice =
+          typeof item.unitCost === "string"
+            ? parseFloat(item.unitCost)
+            : item.unitCost;
       }
 
-      const response = await apiClient.put<BackendItemStockResponse>(`/items/${itemId}`, payload)
-      return ItemService.toItem(response.data)
+      const response = await apiClient.put<BackendItemStockResponse>(
+        `/items/${itemId}`,
+        payload,
+      );
+      return ItemService.toItem(response.data);
     } catch (error) {
-      const apiError = error as ApiError
-      throw new Error(apiError.message || 'Failed to update item')
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || "Failed to update item");
     }
   }
 
@@ -122,11 +157,11 @@ export class ItemService {
         totalValue: number;
         lowStockCount: number;
         outOfStockCount: number;
-      }>('/items/statistics');
+      }>("/items/statistics");
       return response.data;
     } catch (error) {
       const apiError = error as ApiError;
-      throw new Error(apiError.message || 'Failed to fetch statistics');
+      throw new Error(apiError.message || "Failed to fetch statistics");
     }
   }
 
@@ -134,22 +169,26 @@ export class ItemService {
    * Get most used items based on stock-out quantity
    * Requirements: 4.1, 4.2
    */
-  static async getMostUsedItems(): Promise<Array<{
-    itemId: string;
-    name: string;
-    sku: string;
-    totalUsed: number;
-    categoryName?: string;
-  }>> {
+  static async getMostUsedItems(): Promise<
+    Array<{
+      itemId: string;
+      name: string;
+      sku: string;
+      totalUsed: number;
+      categoryName?: string;
+    }>
+  > {
     try {
-      const response = await apiClient.get<Array<{
-        itemId: number;
-        name: string;
-        sku: string;
-        totalUsed: number;
-        categoryName?: string;
-      }>>('/items/most-used');
-      return response.data.map(item => ({
+      const response = await apiClient.get<
+        Array<{
+          itemId: number;
+          name: string;
+          sku: string;
+          totalUsed: number;
+          categoryName?: string;
+        }>
+      >("/items/most-used");
+      return response.data.map((item) => ({
         itemId: String(item.itemId),
         name: item.name,
         sku: item.sku,
@@ -158,7 +197,7 @@ export class ItemService {
       }));
     } catch (error) {
       const apiError = error as ApiError;
-      throw new Error(apiError.message || 'Failed to fetch most used items');
+      throw new Error(apiError.message || "Failed to fetch most used items");
     }
   }
 }

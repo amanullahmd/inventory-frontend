@@ -13,12 +13,13 @@ export interface Item {
   minimumStock?: number;
   maximumStock?: number;
   reorderLevel?: number;
+  expiryDate?: string;
 }
 
 export interface StockMovement {
   id: string;
   itemId: string;
-  movementType: 'IN' | 'OUT';
+  movementType: "IN" | "OUT";
   quantity: number;
   note?: string;
   branch?: string;
@@ -56,6 +57,7 @@ export interface CreateItemRequest {
   maximumStock?: number;
   reorderLevel?: number;
   unit?: string;
+  expiryDate?: string;
 }
 
 export interface StockInRequest {
@@ -66,7 +68,7 @@ export interface StockInRequest {
   batchId?: string;
   warehouseId?: string;
 }
- 
+
 export interface StockInBatchRequest {
   supplierId?: number;
   warehouseId: number;
@@ -92,7 +94,7 @@ export interface StockInSummary {
   createdAt: string;
   updatedAt?: string;
   supplierName?: string;
-  sourceMode?: 'SUPPLIER' | 'NON_SUPPLIER';
+  sourceMode?: "SUPPLIER" | "NON_SUPPLIER";
 }
 
 export interface StockOutRequest {

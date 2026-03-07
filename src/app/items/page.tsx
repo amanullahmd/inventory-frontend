@@ -30,6 +30,7 @@ interface ItemWithCategory extends Item {
   createdBy?: string
   createdAt: string
   updatedAt?: string | null
+  expiryDate?: string
 }
 
 export default function ItemsPage() {
@@ -52,6 +53,7 @@ export default function ItemsPage() {
     description: '',
     minimumStock: '',
     maximumStock: '',
+    expiryDate: '',
   })
   const [showEditForm, setShowEditForm] = useState(false)
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
@@ -62,6 +64,7 @@ export default function ItemsPage() {
     description: '',
     minimumStock: '',
     maximumStock: '',
+    expiryDate: '',
   })
   const [exportLoading, setExportLoading] = useState(false)
   const [creatingCategory, setCreatingCategory] = useState(false)
@@ -188,6 +191,7 @@ export default function ItemsPage() {
         description: itemForm.description || undefined,
         minimumStock: itemForm.minimumStock ? parseInt(itemForm.minimumStock) : undefined,
         maximumStock: itemForm.maximumStock ? parseInt(itemForm.maximumStock) : undefined,
+        expiryDate: itemForm.expiryDate || undefined,
       })
 
       const categoryName = categories.find(c => c.id === itemForm.categoryId)?.name || 'Uncategorized'
@@ -207,6 +211,7 @@ export default function ItemsPage() {
         description: '',
         minimumStock: '',
         maximumStock: '',
+        expiryDate: '',
       })
       setShowItemForm(false)
     } catch (err) {
@@ -228,6 +233,7 @@ export default function ItemsPage() {
       description: item.description || '',
       minimumStock: item.minimumStock !== undefined && item.minimumStock !== null ? String(item.minimumStock) : '',
       maximumStock: item.maximumStock !== undefined && item.maximumStock !== null ? String(item.maximumStock) : '',
+      expiryDate: item.expiryDate || '',
     })
     setShowEditForm(true)
   }
@@ -256,6 +262,7 @@ export default function ItemsPage() {
         description: editForm.description || undefined,
         minimumStock: editForm.minimumStock ? parseInt(editForm.minimumStock) : undefined,
         maximumStock: editForm.maximumStock ? parseInt(editForm.maximumStock) : undefined,
+        expiryDate: editForm.expiryDate || undefined,
       } as any)
 
       const categoryName = categories.find(c => c.id === editForm.categoryId)?.name || 'Uncategorized'
@@ -321,6 +328,10 @@ export default function ItemsPage() {
     return (item.currentStock ?? 0) < threshold
   }).length
   const outOfStockItems = items.filter(item => item.currentStock === 0).length
+  const expiredItemsCount = items.filter(item => {
+    if (!item.expiryDate) return false
+    return new Date(item.expiryDate) < new Date()
+  }).length
 
   const searchParams = useSearchParams()
   const filter = (searchParams?.get('filter') || 'all') as 'all' | 'low_stock' | 'out_of_stock'
@@ -449,6 +460,20 @@ export default function ItemsPage() {
               </div>
             </div>
           </div>
+
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Expired Product</p>
+                <p className="mt-2 text-3xl font-bold text-amber-500">{expiredItemsCount}</p>
+              </div>
+              <div className="rounded-lg bg-amber-500/10 p-3">
+                <svg className="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Messages */}
@@ -514,9 +539,9 @@ export default function ItemsPage() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Item Name</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">SKU</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Expiry Date</th>
 
-
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-muted-wider uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
@@ -534,6 +559,9 @@ export default function ItemsPage() {
                           </td>
                           <td className="px-6 py-4">
                             <span className="inline-flex rounded-md bg-muted/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.sku}</span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-foreground">
+                            {item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : '-'}
                           </td>
 
 
@@ -731,7 +759,15 @@ export default function ItemsPage() {
                     />
                   </div>
 
-
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Expiry Date</label>
+                    <input
+                      type="date"
+                      value={itemForm.expiryDate}
+                      onChange={(e) => setItemForm({ ...itemForm, expiryDate: e.target.value })}
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -852,9 +888,15 @@ export default function ItemsPage() {
                     />
                   </div>
 
-
-
-
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Expiry Date</label>
+                    <input
+                      type="date"
+                      value={editForm.expiryDate}
+                      onChange={(e) => setEditForm({ ...editForm, expiryDate: e.target.value })}
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                    />
+                  </div>
                 </div>
 
                 <div>
