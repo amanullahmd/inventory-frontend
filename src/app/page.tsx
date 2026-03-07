@@ -2,24 +2,31 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useCallback, memo } from 'react'
-import Link from 'next/link'
+import { useEffect, useCallback } from 'react'
 import { ItemService } from '@/lib/services/itemService'
 import { useCachedData } from '@/hooks/useCachedData'
 import { DataFreshnessIndicator } from '@/components/pwa/DataFreshnessIndicator'
 import {
   Package,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  History,
   AlertTriangle,
   PackageX,
   TrendingUp,
-  TrendingDown,
   BarChart3,
-  Users,
-  ArrowRight,
+  Activity,
+  Map,
+  Layers,
 } from 'lucide-react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts'
+import ChartCard from '@/components/dashboard/ChartCard'
 
 interface Stats {
   totalItems: number
@@ -29,18 +36,30 @@ interface Stats {
   mostUsedCount: number
 }
 
+// Vibrant color palette for "random" look
+const VIBRANT_COLORS = [
+  '#3b82f6', // blue
+  '#10b981', // green
+  '#8b5cf6', // purple
+  '#f59e0b', // orange
+  '#ec4899', // pink
+  '#06b6d4', // cyan
+  '#f43f5e', // rose
+  '#6366f1', // indigo
+  '#14b8a6', // teal
+  '#f97316', // orange-500
+]
+
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  
-  // Redirect to signin if not authenticated
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
     }
   }, [status, router])
-  
-  // Fetch function for statistics
+
   const fetchStats = useCallback(async (): Promise<Stats> => {
     const [s, mostUsed] = await Promise.all([
       ItemService.getStatistics(),
@@ -55,9 +74,7 @@ export default function Home() {
     }
   }, [])
 
-  // Use cached data hook for offline support
   const {
-    data: stats,
     isLoading: loading,
     lastUpdated,
     isStale,
@@ -66,20 +83,10 @@ export default function Home() {
   } = useCachedData<Stats>({
     cacheKey: 'dashboard-stats',
     fetchFn: fetchStats,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     enabled: !!session,
   })
 
-  // Default stats if no data
-  const displayStats = stats || {
-    totalItems: 0,
-    totalValue: 0,
-    lowStockItems: 0,
-    outOfStockItems: 0,
-    mostUsedCount: 0,
-  }
-
-  // Show loading while redirecting
   if (status === 'loading' || !session) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -93,83 +100,44 @@ export default function Home() {
     )
   }
 
-  const isAdmin = (session as { roles?: string[] })?.roles?.includes('ROLE_ADMIN')
+  // Demo Data
+  const monthlyData = [
+    { name: 'জানু', totalItems: 400, value: 2400, stockIn: 120, stockOut: 80, usage: 150 },
+    { name: 'ফেব্রু', totalItems: 420, value: 2600, stockIn: 150, stockOut: 90, usage: 180 },
+    { name: 'মার্চ', totalItems: 450, value: 2800, stockIn: 180, stockOut: 110, usage: 210 },
+    { name: 'এপ্রিল', totalItems: 480, value: 3000, stockIn: 200, stockOut: 130, usage: 240 },
+    { name: 'মে', totalItems: 510, value: 3200, stockIn: 220, stockOut: 140, usage: 260 },
+    { name: 'জুন', totalItems: 550, value: 3500, stockIn: 250, stockOut: 160, usage: 290 },
+    { name: 'জুলাই', totalItems: 580, value: 3800, stockIn: 240, stockOut: 170, usage: 310 },
+    { name: 'আগস্ট', totalItems: 610, value: 4100, stockIn: 260, stockOut: 190, usage: 330 },
+    { name: 'সেপ্টে', totalItems: 640, value: 4400, stockIn: 280, stockOut: 210, usage: 350 },
+    { name: 'অক্টো', totalItems: 670, value: 4700, stockIn: 300, stockOut: 230, usage: 380 },
+    { name: 'নভে', totalItems: 700, value: 5000, stockIn: 320, stockOut: 250, usage: 410 },
+    { name: 'ডিসে', totalItems: 750, value: 5400, stockIn: 350, stockOut: 280, usage: 450 },
+  ]
 
-  const StatCard = memo(({ 
-    title, 
-    value, 
-    subtitle, 
-    icon: Icon, 
-    href, 
-    trend,
-    color = 'primary'
-  }: { 
-    title: string
-    value: number | string
-    subtitle: string
-    icon: React.ElementType
-    href: string
-    trend?: 'up' | 'down'
-    color?: 'primary' | 'success' | 'warning' | 'destructive'
-  }) => {
-    const colorClasses = {
-      primary: 'from-primary/20 to-primary/5 text-primary',
-      success: 'from-success/20 to-success/5 text-success',
-      warning: 'from-warning/20 to-warning/5 text-warning',
-      destructive: 'from-destructive/20 to-destructive/5 text-destructive'
-    }
+  const divisionData = [
+    { name: 'ঢাকা', items: 1200, value: 85000, lowStock: 45, outOfStock: 12 },
+    { name: 'চট্টগ্রাম', items: 950, value: 62000, lowStock: 30, outOfStock: 8 },
+    { name: 'রাজশাহী', items: 600, value: 38000, lowStock: 15, outOfStock: 5 },
+    { name: 'খুলনা', items: 550, value: 34000, lowStock: 12, outOfStock: 4 },
+    { name: 'বরিশাল', items: 400, value: 25000, lowStock: 8, outOfStock: 2 },
+    { name: 'সিলেট', items: 480, value: 31000, lowStock: 10, outOfStock: 3 },
+    { name: 'রংপুর', items: 350, value: 21000, lowStock: 7, outOfStock: 1 },
+    { name: 'ময়মনসিংহ', items: 320, value: 19000, lowStock: 5, outOfStock: 1 },
+  ]
 
-    return (
-      <Link href={href} className="group">
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm card-hover">
-          <div className="flex items-start justify-between">
-            <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]}`}>
-              <Icon size={24} />
-            </div>
-            {trend && (
-              <div className={`flex items-center gap-1 text-sm ${trend === 'up' ? 'text-success' : 'text-destructive'}`}>
-                {trend === 'up' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-              </div>
-            )}
-          </div>
-          <div className="mt-4">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold text-foreground mt-1">{value}</p>
-            <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
-          </div>
-        </div>
-      </Link>
-    )
-  })
-
-  StatCard.displayName = 'StatCard'
-
-  const QuickAction = memo(({ 
-    title, 
-    description, 
-    icon: Icon, 
-    href 
-  }: { 
-    title: string
-    description: string
-    icon: React.ElementType
-    href: string
-  }) => (
-    <Link href={href} className="group">
-      <div className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-all card-hover">
-        <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary group-hover:from-primary group-hover:to-primary/80 group-hover:text-primary-foreground transition-all">
-          <Icon size={22} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{title}</p>
-          <p className="text-sm text-muted-foreground truncate">{description}</p>
-        </div>
-        <ArrowRight size={18} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-      </div>
-    </Link>
-  ))
-
-  QuickAction.displayName = 'QuickAction'
+  const customTooltip = {
+    contentStyle: {
+      backgroundColor: '#ffffff',
+      borderRadius: '8px',
+      border: '1px solid #e2e8f0',
+      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+      padding: '10px',
+      color: '#1e293b'
+    },
+    wrapperStyle: { zIndex: 1000 }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -178,206 +146,172 @@ export default function Home() {
         <div className="mb-8 animate-slide-down">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-                Store Dashboard
-              </h1>
-              <p className="mt-2 text-lg text-muted-foreground">
-                Monitor your stock levels, track movements, and manage inventory efficiently
-              </p>
+              <h1 className="text-3xl lg:text-4xl font-bold text-foreground">Dashboard</h1>
+              <p className="mt-2 text-lg text-muted-foreground">Monitor and manage your inventory effectively</p>
             </div>
-            <DataFreshnessIndicator
+            {/* <DataFreshnessIndicator
               lastUpdated={lastUpdated}
               isStale={isStale}
               isOffline={isOffline}
               isLoading={loading}
               onRefresh={refetch}
               className="hidden sm:flex"
-            />
-          </div>
-          {/* Mobile freshness indicator */}
-          <div className="sm:hidden mt-4">
-            <DataFreshnessIndicator
-              lastUpdated={lastUpdated}
-              isStale={isStale}
-              isOffline={isOffline}
-              isLoading={loading}
-              onRefresh={refetch}
-            />
+            /> */}
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 mb-8">
-          {loading ? (
-            <>
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="rounded-2xl border border-border bg-card p-6 animate-pulse">
-                  <div className="w-12 h-12 rounded-xl skeleton mb-4" />
-                  <div className="h-4 w-24 skeleton mb-2" />
-                  <div className="h-8 w-16 skeleton mb-2" />
-                  <div className="h-4 w-32 skeleton" />
-                </div>
-              ))}
-            </>
-          ) : (
-            <>
-              <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
-                <StatCard
-                  title="Total Items"
-                  value={displayStats.totalItems.toLocaleString()}
-                  subtitle="Items in inventory"
-                  icon={Package}
-                  href="/items?filter=all"
-                  color="primary"
-                />
-              </div>
-              <div className="animate-slide-up" style={{ animationDelay: '50ms' }}>
-                <StatCard
-                  title="Total Value"
-                  value={`$${displayStats.totalValue.toLocaleString()}`}
-                  subtitle="Inventory worth"
-                  icon={BarChart3}
-                  href="/items"
-                  color="success"
-                  trend="up"
-                />
-              </div>
-              <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-                <StatCard
-                  title="Low Stock"
-                  value={displayStats.lowStockItems}
-                  subtitle="Items below threshold"
-                  icon={AlertTriangle}
-                  href="/items?filter=low_stock"
-                  color="warning"
-                />
-              </div>
-              <div className="animate-slide-up" style={{ animationDelay: '150ms' }}>
-                <StatCard
-                  title="Out of Stock"
-                  value={displayStats.outOfStockItems}
-                  subtitle="Items unavailable"
-                  icon={PackageX}
-                  href="/items?filter=out_of_stock"
-                  color="destructive"
-                />
-              </div>
-              <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
-                <StatCard
-                  title="Most Used"
-                  value={displayStats.mostUsedCount}
-                  subtitle="Items tracked by usage"
-                  icon={TrendingUp}
-                  href="/reports/most-used-items"
-                  color="primary"
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Quick Actions */}
-          <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: '250ms' }}>
-            <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-              <div className="px-6 py-5 border-b border-border">
-                <h2 className="text-xl font-bold text-foreground">Quick Actions</h2>
-                <p className="text-sm text-muted-foreground mt-1">Common inventory operations</p>
-              </div>
-              <div className="p-4 grid gap-3">
-                <QuickAction
-                  title="Manage Items"
-                  description="View, add, or edit inventory items"
-                  icon={Package}
-                  href="/items"
-                />
-                <QuickAction
-                  title="Stock In"
-                  description="Record incoming inventory"
-                  icon={ArrowDownToLine}
-                  href="/stock-in"
-                />
-                <QuickAction
-                  title="Stock Out"
-                  description="Record outgoing inventory"
-                  icon={ArrowUpFromLine}
-                  href="/stock-out"
-                />
-                <QuickAction
-                  title="Movement History"
-                  description="View all stock movements"
-                  icon={History}
-                  href="/stock-movements"
-                />
-              </div>
-            </div>
+        {/* Monthly Charts */}
+        <section className="mb-12 animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-8 w-1.5 bg-primary rounded-full" />
+            <h2 className="text-2xl font-bold text-foreground">মাসিক ইনভেন্টরি ট্রেন্ড (১২ মাস)</h2>
           </div>
-
-          {/* Reports & Admin */}
-          <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-            <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-              <div className="px-6 py-5 border-b border-border">
-                <h2 className="text-xl font-bold text-foreground">Reports</h2>
-                <p className="text-sm text-muted-foreground mt-1">Analytics & insights</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ChartCard title="মোট আইটেম" subtitle="মাসিক সামষ্টিক তথ্য" icon={Package}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="totalItems" radius={[4, 4, 0, 0]} name="আইটেম">
+                      {monthlyData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={VIBRANT_COLORS[index % VIBRANT_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-              <div className="p-4 grid gap-3">
-                <Link href="/reports/stock-out-reasons" className="group">
-                  <div className="p-4 rounded-xl border border-border hover:bg-accent/50 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-chart-5/10 text-chart-5">
-                        <BarChart3 size={18} />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Stock-out Reasons</p>
-                        <p className="text-xs text-muted-foreground">Breakdown by reason</p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-                <Link href="/stock-movements" className="group">
-                  <div className="p-4 rounded-xl border border-border hover:bg-accent/50 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-chart-2/10 text-chart-2">
-                        <History size={18} />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Audit Trail</p>
-                        <p className="text-xs text-muted-foreground">Full movement history</p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-                {isAdmin && (
-                  <Link href="/users" className="group">
-                    <div className="p-4 rounded-xl border border-border hover:bg-accent/50 transition-all">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-chart-4/10 text-chart-4">
-                          <Users size={18} />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">User Management</p>
-                          <p className="text-xs text-muted-foreground">Manage users & roles</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                )}
+            </ChartCard>
+            <ChartCard title="ইনভেন্টরি ভ্যালু" subtitle="মাসিক আর্থিক মূল্য" icon={BarChart3}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} name="মূল্য">
+                      {monthlyData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={VIBRANT_COLORS[(index + 2) % VIBRANT_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            </div>
-
-            {/* Status Card */}
-            <div className="mt-6 rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                <span className="text-sm font-medium text-foreground">System Status</span>
+            </ChartCard>
+            <ChartCard title="স্টক-ইন বনাম আউট" subtitle="আসা-যাওয়া তথ্য" icon={Activity}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="stockIn" fill="#10b981" radius={[4, 4, 0, 0]} name="ইন" />
+                    <Bar dataKey="stockOut" fill="#f43f5e" radius={[4, 4, 0, 0]} name="আউট" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-              <p className="text-sm text-muted-foreground">
-                All systems operational. Last sync completed successfully.
-              </p>
-            </div>
+            </ChartCard>
+            <ChartCard title="ব্যবহারের হার" subtitle="মাসিক ব্যবহারের তথ্য" icon={TrendingUp}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="usage" radius={[4, 4, 0, 0]} name="ব্যবহার">
+                      {monthlyData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={VIBRANT_COLORS[(index + 4) % VIBRANT_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
           </div>
-        </div>
+        </section>
+
+        {/* Division Charts */}
+        <section className="animate-slide-up" style={{ animationDelay: '300ms' }}>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-8 w-1.5 bg-success rounded-full" />
+            <h2 className="text-2xl font-bold text-foreground">বিভাগীয় বিশ্লেষণ</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ChartCard title="বিভাগ অনুযায়ী আইটেম" subtitle="ভৌগোলিক বন্টন" icon={Map}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={divisionData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" fontSize={11} width={80} tick={{ fill: '#1e293b' }} axisLine={false} tickLine={false} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="items" radius={[0, 4, 4, 0]} name="আইটেম">
+                      {divisionData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={VIBRANT_COLORS[index % VIBRANT_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+            <ChartCard title="বিভাগীয় ভ্যালু" subtitle="অর্থনৈতিক পরিমাপ" icon={Layers}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={divisionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#1e293b' }} />
+                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} name="মূল্য">
+                      {divisionData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={VIBRANT_COLORS[(index + 3) % VIBRANT_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+            <ChartCard title="কম স্টক" subtitle="রি-অর্ডার লেভেল" icon={AlertTriangle}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={divisionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#1e293b' }} />
+                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="lowStock" radius={[4, 4, 0, 0]} name="কম স্টক">
+                      {divisionData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill="#f59e0b" />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+            <ChartCard title="আউট অফ স্টক" subtitle="স্টক নেই" icon={PackageX}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={divisionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#1e293b' }} />
+                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} />
+                    <Tooltip {...customTooltip} />
+                    <Bar dataKey="outOfStock" radius={[4, 4, 0, 0]} name="নেই">
+                      {divisionData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill="#f43f5e" />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          </div>
+        </section>
       </div>
     </div>
   )
