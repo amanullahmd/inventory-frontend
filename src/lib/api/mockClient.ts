@@ -18,26 +18,35 @@ import {
   MOCK_STATISTICS,
   MOCK_STOCK_OUT_REASONS,
   MOCK_STOCK_MOVEMENTS,
-} from './mockData'
+} from "./mockData";
 
 // Simulate network delay
-const delay = (ms: number = 300) => new Promise(resolve => setTimeout(resolve, ms))
+const delay = (ms: number = 300) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+// Local mutable state for mock data
+let localCategories = [...MOCK_CATEGORIES];
+let localItems = [...MOCK_ITEMS];
+let localEmployees = [...MOCK_EMPLOYEES];
 
 export class MockApiClient {
   async get<T>(endpoint: string): Promise<{ data: T }> {
-    await delay()
+    await delay();
 
     // Items endpoints
-    if (endpoint === '/items') {
-      return { data: MOCK_ITEMS as T }
+    if (endpoint === "/items") {
+      return { data: localItems as T };
     }
-    if (endpoint === '/items/statistics') {
-      return { data: MOCK_STATISTICS as T }
+    if (endpoint === "/items/statistics") {
+      return { data: MOCK_STATISTICS as T };
     }
-    if (endpoint === '/items/most-used') {
+    if (endpoint === "/items/most-used") {
       // Calculate most used items from stock-out transactions
-      const usageMap = new Map<number, { name: string; sku: string; totalUsed: number; categoryName?: string }>();
-      MOCK_STOCK_OUT_TRANSACTIONS.forEach(transaction => {
+      const usageMap = new Map<
+        number,
+        { name: string; sku: string; totalUsed: number; categoryName?: string }
+      >();
+      MOCK_STOCK_OUT_TRANSACTIONS.forEach((transaction) => {
         const existing = usageMap.get(transaction.itemId);
         if (existing) {
           existing.totalUsed += transaction.quantity;
@@ -46,7 +55,9 @@ export class MockApiClient {
             name: transaction.itemName,
             sku: transaction.itemSku,
             totalUsed: transaction.quantity,
-            categoryName: MOCK_ITEMS.find(item => item.itemId === transaction.itemId)?.categoryName,
+            categoryName: localItems.find(
+              (item) => item.itemId === transaction.itemId,
+            )?.categoryName,
           });
         }
       });
@@ -54,373 +65,396 @@ export class MockApiClient {
         .map(([itemId, data]) => ({ itemId, ...data }))
         .sort((a, b) => b.totalUsed - a.totalUsed)
         .slice(0, 10);
-      return { data: mostUsed as T }
+      return { data: mostUsed as T };
     }
 
     // Categories endpoints
-    if (endpoint === '/categories') {
-      return { data: MOCK_CATEGORIES as T }
+    if (endpoint === "/categories") {
+      return { data: localCategories as T };
     }
 
     // Warehouses endpoints
-    if (endpoint === '/warehouses') {
-      return { data: MOCK_WAREHOUSES as T }
+    if (endpoint === "/warehouses") {
+      return { data: MOCK_WAREHOUSES as T };
     }
 
     // Suppliers endpoints
-    if (endpoint === '/suppliers') {
-      return { data: MOCK_SUPPLIERS as T }
+    if (endpoint === "/suppliers") {
+      return { data: MOCK_SUPPLIERS as T };
     }
 
     // Grades endpoints
-    if (endpoint === '/grades') {
-      return { data: MOCK_GRADES as T }
+    if (endpoint === "/grades") {
+      return { data: MOCK_GRADES as T };
     }
 
     // Employees endpoints
-    if (endpoint === '/employees') {
-      return { data: MOCK_EMPLOYEES as T }
+    if (endpoint === "/employees") {
+      return { data: localEmployees as T };
     }
 
     // Users endpoints
-    if (endpoint === '/users') {
-      return { data: MOCK_USERS as T }
+    if (endpoint === "/users") {
+      return { data: MOCK_USERS as T };
     }
 
     // Stock In endpoints
-    if (endpoint === '/stock/in/grouped') {
-      return { data: MOCK_STOCK_IN_TRANSACTIONS as T }
+    if (endpoint === "/stock/in/grouped") {
+      return { data: MOCK_STOCK_IN_TRANSACTIONS as T };
     }
-    if (endpoint.startsWith('/stock/in/')) {
-      const ref = endpoint.split('/').pop()
-      const details = MOCK_STOCK_IN_DETAILS.filter(d => d.createdAt.includes('2024-02-01') || d.createdAt.includes('2024-02-02') || d.createdAt.includes('2024-02-03'))
-      return { data: details as T }
+    if (endpoint.startsWith("/stock/in/")) {
+      const ref = endpoint.split("/").pop();
+      const details = MOCK_STOCK_IN_DETAILS.filter(
+        (d) =>
+          d.createdAt.includes("2024-02-01") ||
+          d.createdAt.includes("2024-02-02") ||
+          d.createdAt.includes("2024-02-03"),
+      );
+      return { data: details as T };
     }
 
     // Stock Out endpoints
-    if (endpoint === '/stock-outs' || endpoint === '/stock/out') {
-      return { data: MOCK_STOCK_OUT_TRANSACTIONS as T }
+    if (endpoint === "/stock-outs" || endpoint === "/stock/out") {
+      return { data: MOCK_STOCK_OUT_TRANSACTIONS as T };
     }
 
     // Purchase Orders endpoints
-    if (endpoint === '/purchase-orders') {
-      return { data: MOCK_PURCHASE_ORDERS as T }
+    if (endpoint === "/purchase-orders") {
+      return { data: MOCK_PURCHASE_ORDERS as T };
     }
 
     // Sales Orders endpoints
-    if (endpoint === '/sales-orders') {
-      return { data: MOCK_SALES_ORDERS as T }
+    if (endpoint === "/sales-orders") {
+      return { data: MOCK_SALES_ORDERS as T };
     }
 
     // Stock Transfers endpoints
-    if (endpoint === '/stock-transfers') {
-      return { data: MOCK_STOCK_TRANSFERS as T }
+    if (endpoint === "/stock-transfers") {
+      return { data: MOCK_STOCK_TRANSFERS as T };
     }
 
     // Demands endpoints
-    if (endpoint === '/demands') {
-      return { data: MOCK_DEMANDS as T }
+    if (endpoint === "/demands") {
+      return { data: MOCK_DEMANDS as T };
     }
 
     // Batches endpoints
-    if (endpoint === '/batches') {
-      return { data: MOCK_BATCHES as T }
+    if (endpoint === "/batches") {
+      return { data: MOCK_BATCHES as T };
     }
 
     // Stock Out Reasons endpoints
-    if (endpoint === '/reports/stock-out-reasons') {
-      return { data: MOCK_STOCK_OUT_REASONS as T }
+    if (endpoint === "/reports/stock-out-reasons") {
+      return { data: MOCK_STOCK_OUT_REASONS as T };
     }
 
     // Stock Movements endpoints
-    if (endpoint === '/reports/stock-movements') {
-      return { data: MOCK_STOCK_MOVEMENTS as T }
+    if (endpoint === "/reports/stock-movements") {
+      return { data: MOCK_STOCK_MOVEMENTS as T };
     }
 
-    console.warn(`Mock GET endpoint not found: ${endpoint}`)
-    return { data: [] as T }
+    console.warn(`Mock GET endpoint not found: ${endpoint}`);
+    return { data: [] as T };
   }
 
   async post<T>(endpoint: string, data?: any): Promise<{ data: T }> {
-    await delay()
+    await delay();
 
     // Stock In Batch
-    if (endpoint === '/stock/in/batch') {
-      const referenceNumber = `SI-${Date.now()}`
+    if (endpoint === "/stock/in/batch") {
+      const referenceNumber = `SI-${Date.now()}`;
       return {
         data: {
           referenceNumber,
           count: data?.items?.length || 0,
         } as T,
-      }
+      };
     }
 
     // Stock Out Batch
-    if (endpoint === '/stock-outs/batch' || endpoint === '/stock/out/batch') {
-      const referenceNumber = `SO-${Date.now()}`
+    if (endpoint === "/stock-outs/batch" || endpoint === "/stock/out/batch") {
+      const referenceNumber = `SO-${Date.now()}`;
       return {
         data: {
           referenceNumber,
           count: data?.items?.length || 0,
         } as T,
-      }
+      };
     }
 
     // Create endpoints
-    if (endpoint === '/items') {
-      return {
-        data: {
-          itemId: Math.floor(Math.random() * 10000),
-          ...data,
-          createdAt: new Date().toISOString(),
-        } as T,
-      }
+    if (endpoint === "/items") {
+      const newItem = {
+        itemId: Math.floor(Math.random() * 10000),
+        ...data,
+        createdAt: new Date().toISOString(),
+      };
+      localItems = [newItem, ...localItems];
+      return { data: newItem as T };
     }
 
-    if (endpoint === '/categories') {
-      return {
-        data: {
-          id: Math.floor(Math.random() * 10000),
-          ...data,
-          createdAt: new Date().toISOString(),
-        } as T,
-      }
+    if (endpoint === "/categories") {
+      const newCategory = {
+        id: Math.floor(Math.random() * 10000),
+        ...data,
+        createdAt: new Date().toISOString(),
+      };
+      localCategories = [...localCategories, newCategory];
+      return { data: newCategory as T };
     }
 
-    if (endpoint === '/warehouses') {
+    if (endpoint === "/warehouses") {
       return {
         data: {
           warehouseId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/suppliers') {
+    if (endpoint === "/suppliers") {
       return {
         data: {
           supplierId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/employees') {
-      return {
-        data: {
-          employeeId: Math.floor(Math.random() * 10000),
-          ...data,
-          createdAt: new Date().toISOString(),
-        } as T,
-      }
+    if (endpoint === "/employees") {
+      const newEmployee = {
+        employeeId: Math.floor(Math.random() * 10000),
+        ...data,
+        createdAt: new Date().toISOString(),
+      };
+      localEmployees = [newEmployee, ...localEmployees];
+      return { data: newEmployee as T };
     }
 
-    if (endpoint === '/users') {
+    if (endpoint === "/users") {
       return {
         data: {
           userId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/grades') {
+    if (endpoint === "/grades") {
       return {
         data: {
           id: Math.floor(Math.random() * 10000),
           ...data,
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/purchase-orders') {
+    if (endpoint === "/purchase-orders") {
       return {
         data: {
           purchaseOrderId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/sales-orders') {
+    if (endpoint === "/sales-orders") {
       return {
         data: {
           salesOrderId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/stock-transfers') {
+    if (endpoint === "/stock-transfers") {
       return {
         data: {
           transferId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/demands') {
+    if (endpoint === "/demands") {
       return {
         data: {
           demandId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint === '/batches') {
+    if (endpoint === "/batches") {
       return {
         data: {
           batchId: Math.floor(Math.random() * 10000),
           ...data,
           createdAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    console.warn(`Mock POST endpoint not found: ${endpoint}`)
-    return { data: {} as T }
+    console.warn(`Mock POST endpoint not found: ${endpoint}`);
+    return { data: {} as T };
   }
 
   async put<T>(endpoint: string, data?: any): Promise<{ data: T }> {
-    await delay()
+    await delay();
 
     // Update endpoints
-    if (endpoint.includes('/items/')) {
+    if (endpoint.includes("/items/")) {
+      const id = parseInt(endpoint.split("/").pop() || "0");
+      localItems = localItems.map((item) =>
+        item.itemId === id
+          ? { ...item, ...data, updatedAt: new Date().toISOString() }
+          : item,
+      );
+      const updated = localItems.find((item) => item.itemId === id);
+      return { data: updated as T };
+    }
+
+    if (endpoint.includes("/categories/")) {
+      const id = parseInt(endpoint.split("/").pop() || "0");
+      localCategories = localCategories.map((cat) =>
+        cat.id === id
+          ? { ...cat, ...data, updatedAt: new Date().toISOString() }
+          : cat,
+      );
+      const updated = localCategories.find((cat) => cat.id === id);
+      return { data: updated as T };
+    }
+
+    if (endpoint.includes("/warehouses/")) {
       return {
         data: {
           ...data,
           updatedAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint.includes('/categories/')) {
+    if (endpoint.includes("/suppliers/")) {
       return {
         data: {
           ...data,
           updatedAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint.includes('/warehouses/')) {
+    if (endpoint.includes("/employees/")) {
+      const id = parseInt(endpoint.split("/").pop() || "0");
+      localEmployees = localEmployees.map((emp) =>
+        emp.employeeId === id
+          ? { ...emp, ...data, updatedAt: new Date().toISOString() }
+          : emp,
+      );
+      const updated = localEmployees.find((emp) => emp.employeeId === id);
+      return { data: updated as T };
+    }
+
+    if (endpoint.includes("/users/")) {
       return {
         data: {
           ...data,
           updatedAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint.includes('/suppliers/')) {
+    if (endpoint.includes("/stock/in/")) {
       return {
         data: {
-          ...data,
-          updatedAt: new Date().toISOString(),
-        } as T,
-      }
-    }
-
-    if (endpoint.includes('/employees/')) {
-      return {
-        data: {
-          ...data,
-          updatedAt: new Date().toISOString(),
-        } as T,
-      }
-    }
-
-    if (endpoint.includes('/users/')) {
-      return {
-        data: {
-          ...data,
-          updatedAt: new Date().toISOString(),
-        } as T,
-      }
-    }
-
-    if (endpoint.includes('/stock/in/')) {
-      return {
-        data: {
-          referenceNumber: endpoint.split('/').pop(),
+          referenceNumber: endpoint.split("/").pop(),
           count: data?.items?.length || 0,
         } as T,
-      }
+      };
     }
 
-    if (endpoint.includes('/purchase-orders/')) {
+    if (endpoint.includes("/purchase-orders/")) {
       return {
         data: {
           ...data,
           updatedAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint.includes('/sales-orders/')) {
+    if (endpoint.includes("/sales-orders/")) {
       return {
         data: {
           ...data,
           updatedAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    if (endpoint.includes('/demands/')) {
+    if (endpoint.includes("/demands/")) {
       return {
         data: {
           ...data,
           updatedAt: new Date().toISOString(),
         } as T,
-      }
+      };
     }
 
-    console.warn(`Mock PUT endpoint not found: ${endpoint}`)
-    return { data: {} as T }
+    console.warn(`Mock PUT endpoint not found: ${endpoint}`);
+    return { data: {} as T };
   }
 
   async delete<T>(endpoint: string): Promise<{ data: T }> {
-    await delay()
-    return { data: { success: true } as T }
+    await delay();
+    if (endpoint.includes("/categories/")) {
+      const id = parseInt(endpoint.split("/").pop() || "0");
+      localCategories = localCategories.filter((cat) => cat.id !== id);
+    }
+    if (endpoint.includes("/employees/")) {
+      const id = parseInt(endpoint.split("/").pop() || "0");
+      localEmployees = localEmployees.filter((emp) => emp.employeeId !== id);
+    }
+    if (endpoint.includes("/items/")) {
+      const id = parseInt(endpoint.split("/").pop() || "0");
+      localItems = localItems.filter((item) => item.itemId !== id);
+    }
+    return { data: { success: true } as T };
   }
 
   async patch<T>(endpoint: string, data?: any): Promise<{ data: T }> {
-    await delay()
+    await delay();
     return {
       data: {
         ...data,
         updatedAt: new Date().toISOString(),
       } as T,
-    }
+    };
   }
 
   // Special methods for specific operations
   async addStock<T>(request: any): Promise<T> {
-    await delay()
+    await delay();
     return {
       id: Math.floor(Math.random() * 10000),
       ...request,
       createdAt: new Date().toISOString(),
-    } as T
+    } as T;
   }
 
   async removeStock<T>(request: any): Promise<T> {
-    await delay()
+    await delay();
     return {
       id: Math.floor(Math.random() * 10000),
       ...request,
       createdAt: new Date().toISOString(),
-    } as T
+    } as T;
   }
 }
 
-export const mockApiClient = new MockApiClient()
+export const mockApiClient = new MockApiClient();

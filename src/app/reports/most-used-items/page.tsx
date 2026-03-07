@@ -7,6 +7,9 @@ import { ItemService } from '@/lib/services/itemService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import { TrendingUp, Package } from 'lucide-react'
+import { PDFExportService } from '@/lib/services/pdfExportService'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { Button } from '@/components/ui/button'
 
 interface MostUsedItem {
   itemId: string
@@ -22,6 +25,19 @@ export default function MostUsedItemsPage() {
   const [items, setItems] = useState<MostUsedItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const handleExportPDF = async () => {
+    try {
+      await PDFExportService.generateMostUsedPDF(items, {
+        filename: `most_used_items_${new Date().toISOString().split('T')[0]}.pdf`,
+        title: 'Most Used Items Report',
+        timestamp: new Date(),
+      })
+    } catch (err) {
+      console.error('Export failed:', err)
+      setError('Failed to export PDF')
+    }
+  }
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -80,9 +96,17 @@ export default function MostUsedItemsPage() {
         {/* Header Section */}
         <div className="mb-8 animate-slide-down">
           <div className="flex flex-col gap-4">
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Most Used Items</h1>
-              <p className="mt-2 text-muted-foreground">Items ranked by total usage quantity</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Most Used Items</h1>
+                <p className="mt-2 text-muted-foreground">Items ranked by total usage quantity</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <ExportButton
+                  onClick={handleExportPDF}
+                  label="Export PDF"
+                />
+              </div>
             </div>
           </div>
         </div>

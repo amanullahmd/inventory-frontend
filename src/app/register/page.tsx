@@ -168,9 +168,19 @@ export default function RegisterPage() {
     return (
         <div className="min-h-screen bg-background">
             <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-                <div className="animate-slide-down">
-                    <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Register</h1>
-                    <p className="text-muted-foreground mt-1">Combined view of Stock In and Stock Out records</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-slide-down">
+                    <div>
+                        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Register</h1>
+                        <p className="text-muted-foreground mt-1">Combined view of Stock In and Stock Out records</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <ExportButton
+                            onClick={handleExport}
+                            disabled={filteredTransactions.length === 0}
+                            loading={exportLoading}
+                            label="Export"
+                        />
+                    </div>
                 </div>
 
                 {success && (
@@ -186,31 +196,25 @@ export default function RegisterPage() {
 
                 {/* Filters and Export */}
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 animate-slide-up">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
                             <DateRangePicker onDateRangeChange={(start, end) => setSelectedDateRange({ start, end })} label="Filter by Date" />
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-semibold text-foreground mb-2">Transaction Type</label>
-                            <select
-                                value={filterType}
-                                onChange={(e) => setFilterType(e.target.value as any)}
-                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-                            >
-                                <option value="ALL">All Types</option>
-                                <option value="IN">Stock In</option>
-                                <option value="OUT">Stock Out</option>
-                            </select>
-                        </div>
-
-                        <div className="flex flex-col justify-end">
-                            <ExportButton
-                                onClick={handleExport}
-                                disabled={filteredTransactions.length === 0}
-                                loading={exportLoading}
-                                label="Export to PDF"
-                            />
+                        <div className="space-y-3">
+                            <label className="block text-base font-semibold text-foreground">Transaction Type</label>
+                            <div>
+                                <label className="block text-sm font-medium text-muted-foreground mb-1">Select Type</label>
+                                <select
+                                    value={filterType}
+                                    onChange={(e) => setFilterType(e.target.value as any)}
+                                    className="w-full h-10 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring transition-all"
+                                >
+                                    <option value="ALL">All Types</option>
+                                    <option value="IN">Stock In</option>
+                                    <option value="OUT">Stock Out</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -254,8 +258,8 @@ export default function RegisterPage() {
                                         <tr key={t.id} className="hover:bg-accent/40 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${t.type === 'IN'
-                                                        ? 'border-chart-2/30 bg-chart-2/10 text-chart-2'
-                                                        : 'border-destructive/30 bg-destructive/10 text-destructive'
+                                                    ? 'border-chart-2/30 bg-chart-2/10 text-chart-2'
+                                                    : 'border-destructive/30 bg-destructive/10 text-destructive'
                                                     }`}>
                                                     {t.type}
                                                 </span>

@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SuccessMessage } from '@/components/ui/SuccessMessage'
 import { formatDateDMY } from '@/lib/utils/date'
+import { PDFExportService } from '@/lib/services/pdfExportService'
+import { ExportButton } from '@/components/ui/ExportButton'
 
 interface Category {
   id: string
@@ -41,6 +43,19 @@ export default function CategoriesPage() {
   const [editName, setEditName] = useState('')
   const [editDescription, setEditDescription] = useState('')
   const [editCode, setEditCode] = useState('')
+
+  const handleExportPDF = async () => {
+    try {
+      await PDFExportService.generateCategoryPDF(categories, {
+        filename: `categories_${new Date().toISOString().split('T')[0]}.pdf`,
+        title: 'Inventory Categories Report',
+        timestamp: new Date(),
+      })
+    } catch (err) {
+      console.error('Export failed:', err)
+      setError('Failed to export PDF')
+    }
+  }
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -181,6 +196,10 @@ export default function CategoriesPage() {
               <p className="mt-2 text-muted-foreground">Manage and browse inventory categories</p>
             </div>
             <div className="flex items-center gap-3">
+              <ExportButton
+                onClick={handleExportPDF}
+                label="Export PDF"
+              />
               <Button onClick={() => setShowCreate(true)} className="h-10 px-4 rounded-xl shadow-md hover:shadow-lg transition-all">+ Create Category</Button>
             </div>
           </div>

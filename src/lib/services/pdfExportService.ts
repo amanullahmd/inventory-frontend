@@ -511,4 +511,59 @@ export class PDFExportService {
     this.addSignatures(doc, finalY, signature);
     this.downloadPDF(doc, options.filename);
   }
+
+  static async generateCategoryPDF(
+    categories: any[],
+    options: ExportOptions,
+  ): Promise<void> {
+    const columns = ["Name", "ID", "Description", "Items", "Created"];
+    const data = categories.map((cat) => [
+      cat.name,
+      cat.code || "—",
+      cat.description || "—",
+      cat.itemCount || 0,
+      new Date(cat.createdAt).toLocaleDateString(),
+    ]);
+    await this.generateReusableTablePDF(columns, data, options);
+  }
+
+  static async generateMostUsedPDF(
+    items: any[],
+    options: ExportOptions,
+  ): Promise<void> {
+    const columns = ["Rank", "Item Name", "SKU", "Category", "Total Used"];
+    const data = items.map((item, index) => [
+      index + 1,
+      item.name,
+      item.sku,
+      item.categoryName || "—",
+      item.totalUsed,
+    ]);
+    await this.generateReusableTablePDF(columns, data, options);
+  }
+
+  static async generateEmployeePDF(
+    employees: any[],
+    options: ExportOptions,
+  ): Promise<void> {
+    const columns = [
+      "ID",
+      "Name",
+      "Grade",
+      "Position",
+      "Branch",
+      "Mobile",
+      "Email",
+    ];
+    const data = employees.map((emp) => [
+      emp.employeeCode,
+      emp.name,
+      emp.grade || "—",
+      emp.position || "—",
+      emp.branchName || "—",
+      emp.mobileNumber || "—",
+      emp.email || "—",
+    ]);
+    await this.generateReusableTablePDF(columns, data, options);
+  }
 }

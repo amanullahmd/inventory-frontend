@@ -7,6 +7,8 @@ import ErrorMessage from '@/components/ui/ErrorMessage'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import { EmployeeService, Employee, CreateEmployeeRequest, UpdateEmployeeRequest } from '@/lib/services/employeeService'
 import { WarehouseService } from '@/lib/services/warehouseService'
+import { PDFExportService } from '@/lib/services/pdfExportService'
+import { ExportButton } from '@/components/ui/ExportButton'
 
 export default function EmployeesPage() {
   const { data: session, status } = useSession()
@@ -21,6 +23,19 @@ export default function EmployeesPage() {
     dateOfBirth: '', gender: '', nationality: ''
   })
   const [employeeCode, setEmployeeCode] = useState<string>('')
+
+  const handleExportPDF = async () => {
+    try {
+      await PDFExportService.generateEmployeePDF(employees, {
+        filename: `employees_${new Date().toISOString().split('T')[0]}.pdf`,
+        title: 'Employee Profiles Report',
+        timestamp: new Date(),
+      })
+    } catch (err) {
+      console.error('Export failed:', err)
+      setError('Failed to export PDF')
+    }
+  }
 
   const fetchAll = async () => {
     try {
@@ -71,6 +86,12 @@ export default function EmployeesPage() {
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Employees</h1>
             <p className="mt-2 text-muted-foreground">Manage employee profiles</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <ExportButton
+              onClick={handleExportPDF}
+              label="Export PDF"
+            />
           </div>
         </div>
 
