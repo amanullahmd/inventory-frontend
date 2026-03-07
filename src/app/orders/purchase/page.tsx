@@ -20,11 +20,11 @@ export default function PurchaseOrdersPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState<CreatePurchaseOrderRequest>({ supplierId: 0, warehouseId: 0, orderDate: new Date().toISOString().slice(0,10) })
+  const [form, setForm] = useState<CreatePurchaseOrderRequest>({ supplierId: 0, warehouseId: 0, orderDate: new Date().toISOString().slice(0, 10) })
   const [items, setItems] = useState<any[]>([])
   const [lines, setLines] = useState<Array<{ itemId: string; quantity: string; unitPrice: string }>>([{ itemId: '', quantity: '', unitPrice: '' }])
   const [editingId, setEditingId] = useState<number | null>(null)
-  const STATUSES = ['DRAFT','APPROVED','PARTIAL_RECEIVED','RECEIVED','CLOSED','CANCELLED']
+  const STATUSES = ['DRAFT', 'APPROVED', 'PARTIAL_RECEIVED', 'RECEIVED', 'CLOSED', 'CANCELLED']
   const [formStatus, setFormStatus] = useState<string>('DRAFT')
   const [rangeStart, setRangeStart] = useState<string>('')
   const [rangeEnd, setRangeEnd] = useState<string>('')
@@ -73,7 +73,7 @@ export default function PurchaseOrdersPage() {
     const s = rangeStart ? new Date(rangeStart) : null
     const e = rangeEnd ? new Date(rangeEnd) : null
     if (s && d < s) return false
-    if (e) { const ed = new Date(e); ed.setHours(23,59,59,999); if (d > ed) return false }
+    if (e) { const ed = new Date(e); ed.setHours(23, 59, 59, 999); if (d > ed) return false }
     return true
   })
   const rangeTotal = filtered.reduce((acc, o) => acc + (Number(o.totalAmount ?? 0) || 0), 0)
@@ -102,14 +102,14 @@ export default function PurchaseOrdersPage() {
       } as UpdatePurchaseOrderRequest)
       setOrders(prev => prev.map(o => o.purchaseOrderId === updatedHeader.purchaseOrderId ? updatedHeader : o))
       setShowForm(false)
-      setForm({ supplierId: 0, warehouseId: 0, orderDate: new Date().toISOString().slice(0,10) })
+      setForm({ supplierId: 0, warehouseId: 0, orderDate: new Date().toISOString().slice(0, 10) })
       setLines([{ itemId: '', quantity: '', unitPrice: '' }])
       setFormStatus('DRAFT')
     } catch (err: any) {
       setError(err.message || 'Failed to create purchase order')
     }
   }
-  
+
   const saveEdits = async () => {
     try {
       const payloadItems = lines.filter(l => l.itemId && l.quantity && l.unitPrice).map(l => ({
@@ -172,11 +172,11 @@ export default function PurchaseOrdersPage() {
             <div className="mt-2 grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs mb-1">Start</label>
-                <input type="date" value={rangeStart} onChange={e=>setRangeStart(e.target.value)} className="w-full rounded-md border border-border bg-background px-2 py-1" />
+                <input type="date" value={rangeStart} onChange={e => setRangeStart(e.target.value)} className="w-full rounded-md border border-border bg-background px-2 py-1" />
               </div>
               <div>
                 <label className="block text-xs mb-1">End</label>
-                <input type="date" value={rangeEnd} onChange={e=>setRangeEnd(e.target.value)} className="w-full rounded-md border border-border bg-background px-2 py-1" />
+                <input type="date" value={rangeEnd} onChange={e => setRangeEnd(e.target.value)} className="w-full rounded-md border border-border bg-background px-2 py-1" />
               </div>
             </div>
           </div>
@@ -217,13 +217,13 @@ export default function PurchaseOrdersPage() {
               <div className="space-y-3">
                 {lines.map((line, idx) => (
                   <div key={idx} className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <select value={line.itemId} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,itemId:e.target.value}:l))} className="w-full rounded-lg border border-border px-3 py-2">
+                    <select value={line.itemId} onChange={e => setLines(lines.map((l, i) => i === idx ? { ...l, itemId: e.target.value } : l))} className="w-full rounded-lg border border-border px-3 py-2">
                       <option value="">Choose an item</option>
                       {items.map(it => (<option key={it.id} value={it.id}>{it.name} ({it.sku})</option>))}
                     </select>
-                    <input type="number" min="1" value={line.quantity} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,quantity:e.target.value}:l))} placeholder="Qty" className="w-full rounded-lg border border-border px-3 py-2" />
-                    <input type="number" step="0.01" min="0.01" value={line.unitPrice} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,unitPrice:e.target.value}:l))} placeholder="Unit Price" className="w-full rounded-lg border border-border px-3 py-2" />
-                    <button type="button" onClick={() => setLines(lines.filter((_,i)=>i!==idx))} className="rounded-lg border border-border px-3 py-2">Remove</button>
+                    <input type="number" min="1" value={line.quantity} onChange={e => setLines(lines.map((l, i) => i === idx ? { ...l, quantity: e.target.value } : l))} placeholder="Qty" className="w-full rounded-lg border border-border px-3 py-2" />
+                    <input type="number" step="0.01" min="0.01" value={line.unitPrice} onChange={e => setLines(lines.map((l, i) => i === idx ? { ...l, unitPrice: e.target.value } : l))} placeholder="Unit Price" className="w-full rounded-lg border border-border px-3 py-2" />
+                    <button type="button" onClick={() => setLines(lines.filter((_, i) => i !== idx))} className="rounded-lg border border-border px-3 py-2">Remove</button>
                   </div>
                 ))}
                 <button type="button" onClick={() => setLines([...lines, { itemId: '', quantity: '', unitPrice: '' }])} className="rounded-lg border border-border px-3 py-2">+ Add Item</button>
@@ -264,7 +264,7 @@ export default function PurchaseOrdersPage() {
                   <tr key={o.purchaseOrderId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
                       <button
-                        className="text-primary hover:underline"
+                        className="text-primary-foreground hover:underline"
                         onClick={async () => {
                           try {
                             const detail = await PurchaseOrderService.getPurchaseOrderDetail(o.purchaseOrderId)

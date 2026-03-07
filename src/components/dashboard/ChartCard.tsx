@@ -21,7 +21,7 @@ const ChartCard = memo(({
     return (
         <div className={`rounded-2xl border border-border bg-card p-6 shadow-sm flex flex-col h-[400px] ${className}`}>
             <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary-foreground">
                     <Icon size={20} />
                 </div>
                 <div>

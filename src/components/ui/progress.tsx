@@ -24,7 +24,7 @@ interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantClasses = {
-  primary: 'bg-blue-500 dark:bg-blue-600',
+  primary: 'bg-primary',
   success: 'bg-green-500 dark:bg-green-600',
   warning: 'bg-amber-500 dark:bg-amber-600',
   error: 'bg-red-500 dark:bg-red-600',
@@ -99,7 +99,7 @@ const StepProgress = React.forwardRef<HTMLDivElement, StepProgressProps>(
                 index < currentStep
                   ? 'bg-green-500 text-white'
                   : index === currentStep
-                    ? 'bg-blue-500 text-white'
+                    ? 'bg-primary text-secondary-foreground'
                     : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
               )}
             >

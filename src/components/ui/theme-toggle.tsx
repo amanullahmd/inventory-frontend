@@ -34,7 +34,7 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
             'text-gray-700 dark:text-gray-300',
             'hover:bg-gray-100 dark:hover:bg-gray-800',
             'transition-colors duration-200',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500',
+            'focus:outline-none focus:ring-2 focus:ring-ring/40',
             className
           )}
           aria-label={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}
@@ -80,7 +80,7 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
           'text-gray-700 dark:text-gray-300',
           'hover:bg-gray-50 dark:hover:bg-gray-700',
           'transition-colors duration-200',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500',
+          'focus:outline-none focus:ring-2 focus:ring-ring/40',
           className
         )}
         aria-label={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}

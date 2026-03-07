@@ -48,18 +48,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Primary: Gradient background, white text, shadow
+        // Primary: Green background (user request)
         primary:
-          'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-md hover:shadow-lg hover:scale-102 active:shadow-inner active:scale-100 disabled:opacity-50 dark:from-blue-500 dark:to-blue-700',
-        // Secondary: Solid secondary color, white text
+          'bg-secondary text-secondary-foreground shadow-md hover:shadow-lg hover:scale-102 active:shadow-inner active:scale-100 disabled:opacity-50',
+        // Secondary: Shadowed accent color
         secondary:
-          'bg-purple-600 text-white shadow-md hover:shadow-lg hover:scale-102 active:shadow-inner active:scale-100 disabled:opacity-50 dark:bg-purple-700',
-        // Outline: Transparent background, colored border, colored text
+          'bg-accent text-accent-foreground shadow-md hover:shadow-lg hover:scale-102 active:shadow-inner active:scale-100 disabled:opacity-50',
+        // Outline: Cyan border and text
         outline:
-          'border-2 border-blue-600 bg-transparent text-blue-600 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950 dark:active:bg-blue-900',
-        // Ghost: Transparent background, colored text on hover
+          'border-2 border-primary bg-transparent text-primary-foreground hover:bg-primary/10 active:bg-primary/20 disabled:opacity-50',
+        // Ghost: Cyan text on hover
         ghost:
-          'bg-transparent text-gray-700 hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-800 dark:active:bg-gray-700',
+          'bg-transparent text-gray-700 hover:bg-primary/10 active:bg-primary/20 disabled:opacity-50 dark:text-gray-300 dark:hover:bg-primary/20 dark:active:bg-primary/30',
       },
       size: {
         // sm: 10px 16px padding
@@ -79,7 +79,7 @@ const buttonVariants = cva(
 
 interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean
   loading?: boolean
   icon?: React.ReactNode

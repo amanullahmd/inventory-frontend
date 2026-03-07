@@ -66,7 +66,7 @@ export default function TopHeader() {
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               />
             </div>
           </div>
@@ -111,7 +111,7 @@ export default function TopHeader() {
                   {session.roles?.join(', ').replace(/ROLE_/g, '')}
                 </p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center shrink-0 cursor-pointer text-white shadow-sm ring-2 ring-white dark:ring-gray-900">
+              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0 cursor-pointer text-white shadow-sm ring-2 ring-white dark:ring-gray-900">
                 <span className="text-sm font-bold">
                   {session.user?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>

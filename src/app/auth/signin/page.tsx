@@ -6,58 +6,58 @@ import Image from "next/image"
 import { Shield, Lock, Building2, MapPin, School, Crown, User } from "lucide-react"
 
 const DEMO_CREDENTIALS = [
-  { 
-    email: 'admin@example.com', 
-    password: 'Admin@123456', 
-    role: 'Admin', 
+  {
+    email: 'admin@example.com',
+    password: 'Admin@123456',
+    role: 'Admin',
     level: 'Demo Account',
     icon: Shield,
     description: 'Demo admin account'
   },
-  { 
-    email: 'user@example.com', 
-    password: 'User@123456', 
-    role: 'User', 
+  {
+    email: 'user@example.com',
+    password: 'User@123456',
+    role: 'User',
     level: 'Demo Account',
     icon: User,
     description: 'Demo user account'
   },
-  { 
-    email: 'main@dpe.gov.bd', 
-    password: 'main123', 
-    role: 'Main Branch Admin', 
+  {
+    email: 'main@dpe.gov.bd',
+    password: 'main123',
+    role: 'Main Branch Admin',
     level: 'প্রাথমিক শিক্ষা অধিদপ্তর (Main)',
     icon: Crown,
     description: 'Can see all branches and manage entire system'
   },
-  { 
-    email: 'admin@dpe.gov.bd', 
-    password: 'admin123', 
-    role: 'Division Admin', 
+  {
+    email: 'admin@dpe.gov.bd',
+    password: 'admin123',
+    role: 'Division Admin',
     level: 'ঢাকা বিভাগ',
     icon: Shield,
     description: 'Can see all lower branches'
   },
-  { 
-    email: 'district.dhaka@dpe.gov.bd', 
-    password: 'district123', 
-    role: 'District Manager', 
+  {
+    email: 'district.dhaka@dpe.gov.bd',
+    password: 'district123',
+    role: 'District Manager',
     level: 'ঢাকা জেলা',
     icon: Building2,
     description: 'Can see upazilas and schools'
   },
-  { 
-    email: 'upazila.dhanmondi@dpe.gov.bd', 
-    password: 'upazila123', 
-    role: 'Upazila Manager', 
+  {
+    email: 'upazila.dhanmondi@dpe.gov.bd',
+    password: 'upazila123',
+    role: 'Upazila Manager',
     level: 'ধানমন্ডি উপজেলা',
     icon: MapPin,
     description: 'Can see schools in this upazila'
   },
-  { 
-    email: 'school.dhanmondi@dpe.gov.bd', 
-    password: 'school123', 
-    role: 'School Principal', 
+  {
+    email: 'school.dhanmondi@dpe.gov.bd',
+    password: 'school123',
+    role: 'School Principal',
     level: 'ধানমন্ডি প্রাথমিক বিদ্যালয়',
     icon: School,
     description: 'Can request supplies only'
@@ -82,10 +82,10 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex">
+    <div className="min-h-screen bg-neutral flex">
       {/* Left Panel - Government Branding */}
       {isLargeScreen && (
-        <div className="w-1/2 relative overflow-hidden flex-col justify-between bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex">
+        <div className="w-1/2 relative overflow-hidden flex-col justify-between bg-primary flex">
           {/* Decorative Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
@@ -103,8 +103,8 @@ export default function SignIn() {
             {/* Government Text */}
             <div className="text-center space-y-4 mb-12">
               <p className="text-white text-2xl font-bold tracking-wide">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
-              <p className="text-blue-100 text-xl font-semibold">প্রাথমিক শিক্ষা অধিদপ্তর</p>
-              <div className="h-1 w-24 bg-blue-300 mx-auto rounded-full"></div>
+              <p className="text-primary-foreground text-xl font-semibold opacity-90">প্রাথমিক শিক্ষা অধিদপ্তর</p>
+              <div className="h-1 w-24 bg-white/30 mx-auto rounded-full"></div>
             </div>
 
             {/* Cover Photo */}
@@ -118,7 +118,7 @@ export default function SignIn() {
               />
             </div>
           </div>
-          
+
           <div className="relative z-10 px-8 pb-8 text-white/70 text-xs text-center">
             <p>© 2026 প্রাথমিক শিক্ষা অধিদপ্তর</p>
           </div>
@@ -140,10 +140,10 @@ export default function SignIn() {
           </div>
 
           {/* Demo Credentials Section */}
-          <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-50 p-6">
+          <div className="rounded-2xl border border-border bg-accent/30 p-6">
             <div className="flex items-center gap-2 mb-5">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Lock size={18} className="text-blue-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Lock size={18} className="text-primary-foreground" />
               </div>
               <h3 className="text-sm font-bold text-gray-900">Demo Credentials</h3>
             </div>
@@ -156,19 +156,18 @@ export default function SignIn() {
                   <button
                     key={idx}
                     onClick={() => handleCredentialClick(cred.email, cred.password)}
-                    className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                      isSelected
-                        ? 'bg-blue-100 border-blue-400 shadow-md'
-                        : 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                    }`}
+                    className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${isSelected
+                      ? 'bg-primary/10 border-primary/40 shadow-md'
+                      : 'bg-white border-border hover:border-primary/30 hover:bg-primary/5'
+                      }`}
                   >
-                    <div className={`p-2 rounded-lg flex-shrink-0 ${isSelected ? 'bg-blue-200 text-blue-700' : 'bg-blue-100 text-blue-600'}`}>
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${isSelected ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary/80'}`}>
                       <Icon size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-semibold text-gray-900">{cred.role}</span>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap">{cred.level}</span>
+                        <span className="text-xs bg-primary/10 text-primary-foreground px-2 py-0.5 rounded-full whitespace-nowrap">{cred.level}</span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">{cred.description}</p>
                       <div className="mt-2 space-y-0.5">

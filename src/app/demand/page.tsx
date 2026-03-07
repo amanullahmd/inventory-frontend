@@ -20,9 +20,9 @@ export default function DemandPage() {
   const [form, setForm] = useState<CreateDemandRequest>({ employeeId: undefined, unit: '', status: 'DRAFT', note: '' })
   const [editingId, setEditingId] = useState<number | null>(null)
   const [demandCode, setDemandCode] = useState<string>('')
-  const STATUSES = ['DRAFT','APPROVED','RECEIVED','REJECTED']
+  const STATUSES = ['DRAFT', 'APPROVED', 'RECEIVED', 'REJECTED']
   const [lines, setLines] = useState<Array<{ itemId: string; units: string }>>([{ itemId: '', units: '1' }])
-  
+
   const fetchAll = async () => {
     try {
       setLoading(true)
@@ -42,9 +42,9 @@ export default function DemandPage() {
       setLoading(false)
     }
   }
-  
+
   useEffect(() => { if (status === 'authenticated') fetchAll() }, [status])
-  
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const payloadItems = lines.filter(l => l.itemId && l.units).map(l => ({ itemId: parseInt(l.itemId), units: parseInt(l.units) }))
@@ -60,10 +60,10 @@ export default function DemandPage() {
       setError(err.message || 'Failed to submit demand')
     }
   }
-  
+
   if (status === 'loading') { return <div className="p-6"><LoadingSpinner size="medium" text="Loading..." /></div> }
   if (!session) { return <div className="p-10 text-center">Please sign in to view demands.</div> }
-  
+
   return (
     <div className="min-h-screen bg-background">
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
@@ -73,10 +73,10 @@ export default function DemandPage() {
             <p className="mt-2 text-muted-foreground">Staff demand form and recent requests</p>
           </div>
         </div>
-        
+
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchAll} />}
-        
+
         <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
           {editingId && (
             <div>
@@ -102,12 +102,12 @@ export default function DemandPage() {
             <div className="space-y-3">
               {lines.map((line, idx) => (
                 <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <select value={line.itemId} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,itemId:e.target.value}:l))} className="w-full rounded-lg border border-border px-3 py-2">
+                  <select value={line.itemId} onChange={e => setLines(lines.map((l, i) => i === idx ? { ...l, itemId: e.target.value } : l))} className="w-full rounded-lg border border-border px-3 py-2">
                     <option value="">Choose an item</option>
                     {items.map(it => (<option key={it.id} value={it.id}>{it.name} ({it.sku})</option>))}
                   </select>
-                  <input type="number" min="1" value={line.units} onChange={e => setLines(lines.map((l,i)=> i===idx?{...l,units:e.target.value}:l))} placeholder="Unit" className="w-full rounded-lg border border-border px-3 py-2" />
-                  <button type="button" onClick={() => setLines(lines.filter((_,i)=>i!==idx))} className="rounded-lg border border-border px-3 py-2">Remove</button>
+                  <input type="number" min="1" value={line.units} onChange={e => setLines(lines.map((l, i) => i === idx ? { ...l, units: e.target.value } : l))} placeholder="Unit" className="w-full rounded-lg border border-border px-3 py-2" />
+                  <button type="button" onClick={() => setLines(lines.filter((_, i) => i !== idx))} className="rounded-lg border border-border px-3 py-2">Remove</button>
                 </div>
               ))}
               <button type="button" onClick={() => setLines([...lines, { itemId: '', units: '1' }])} className="rounded-lg border border-border px-3 py-2">+ Add Item</button>
@@ -154,7 +154,7 @@ export default function DemandPage() {
             )}
           </div>
         </form>
-        
+
         <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
@@ -177,14 +177,14 @@ export default function DemandPage() {
                 ) : demands.map(d => (
                   <tr key={d.demandId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
-                      <button className="text-primary hover:underline" onClick={async () => {
+                      <button className="text-primary-foreground hover:underline" onClick={async () => {
                         try {
                           const detail = await DemandService.getDemand(d.demandId)
                           setError(null); setSuccess(null)
                           setEditingId(detail.demandId)
                           setDemandCode(detail.demandCode || `DM-${detail.demandId}`)
                           setForm({ employeeId: detail.employeeId, unit: '', status: detail.status || 'DRAFT', note: detail.note || '' })
-                          const mapped = (detail.items || []).map((it:any)=> ({ itemId: String(it.itemId), units: String(it.units) }))
+                          const mapped = (detail.items || []).map((it: any) => ({ itemId: String(it.itemId), units: String(it.units) }))
                           setLines(mapped.length > 0 ? mapped : [{ itemId: String(detail.itemId || ''), units: '1' }])
                         } catch (err: any) {
                           setError(err.message || 'Failed to open demand')
@@ -197,7 +197,7 @@ export default function DemandPage() {
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.status || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.note || '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {d.items && d.items.length > 0 ? `${d.items[0].name} (${d.items[0].sku})${d.items.length > 1 ? ` +${d.items.length-1} more` : ''}` : `${d.itemName} (${d.sku})`}
+                      {d.items && d.items.length > 0 ? `${d.items[0].name} (${d.items[0].sku})${d.items.length > 1 ? ` +${d.items.length - 1} more` : ''}` : `${d.itemName} (${d.sku})`}
                     </td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.items && d.items.length > 0 ? d.items[0].units : '-'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{d.requestedByName || '-'}</td>

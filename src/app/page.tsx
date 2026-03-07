@@ -38,16 +38,16 @@ interface Stats {
 
 // Vibrant color palette for "random" look
 const VIBRANT_COLORS = [
-  '#3b82f6', // blue
-  '#10b981', // green
-  '#8b5cf6', // purple
-  '#f59e0b', // orange
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#f43f5e', // rose
-  '#6366f1', // indigo
-  '#14b8a6', // teal
-  '#f97316', // orange-500
+  '#d5e6ba', // Primary Cyan
+  '#a1cf8a', // Button Green
+  '#0088a3', // Contrast Cyan
+  '#10b981', // Green
+  '#f59e0b', // Orange
+  '#06b6d4', // Cyan
+  '#8b5cf6', // Purple
+  '#ec4899', // Pink
+  '#f43f5e', // Rose
+  '#6366f1', // Indigo
 ]
 
 export default function Home() {

@@ -118,7 +118,7 @@ export default function MostUsedItemsPage() {
                     <tr key={item.itemId || `item-${index}`} className="border-b border-border hover:bg-muted/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary-foreground font-semibold text-sm">
                             {index + 1}
                           </div>
                         </div>
@@ -126,7 +126,7 @@ export default function MostUsedItemsPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                            <Package size={18} className="text-primary" />
+                            <Package size={18} className="text-primary-foreground" />
                           </div>
                           <div>
                             <p className="font-medium text-foreground">{item.name}</p>

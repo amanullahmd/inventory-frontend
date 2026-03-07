@@ -81,7 +81,7 @@ export default function CategoriesPage() {
       setLoading(false)
     }
   }
-  
+
   const openEdit = (cat: Category) => {
     setEditCategory(cat)
     setEditName(cat.name)
@@ -89,7 +89,7 @@ export default function CategoriesPage() {
     setEditCode(cat.code || '')
     setShowCreate(false)
   }
-  
+
   const saveEdit = async () => {
     if (!editCategory) return
     if (!editCode.trim()) { setError('Category ID is required'); return }
@@ -219,7 +219,7 @@ export default function CategoriesPage() {
             </div>
           </div>
         )}
-        
+
         {/* Edit Form */}
         {editCategory && (
           <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up">
@@ -275,7 +275,7 @@ export default function CategoriesPage() {
                 className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group card-hover"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
                     style={{ backgroundColor: category.color }}
                   >
@@ -290,18 +290,18 @@ export default function CategoriesPage() {
                     </span>
                   </div>
                 </div>
-                
-                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+
+                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary-foreground transition-colors">
                   {category.name}
                 </h3>
-                
+
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                   {category.description || 'No description available'}
                 </p>
-                
+
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Created {formatDateDMY(category.createdAt)}</span>
-                  <span className="group-hover:text-primary transition-colors">
+                  <span className="group-hover:text-primary-foreground transition-colors">
                     <button onClick={(e) => { e.stopPropagation(); openEdit(category) }} className="rounded-md border border-border px-2 py-1 text-xs">Edit</button>
                   </span>
                 </div>

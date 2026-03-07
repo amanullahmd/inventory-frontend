@@ -36,7 +36,7 @@ export default function ItemsPage() {
   const { data: session, status } = useSession()
   const { can } = usePermissions()
   const router = useRouter()
-  
+
   const [items, setItems] = useState<ItemWithCategory[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -121,12 +121,12 @@ export default function ItemsPage() {
 
   const handleCreateInlineCategory = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!can('create_category')) {
       setError('You do not have permission to create categories')
       return
     }
-    
+
     if (!newCategoryName.trim()) {
       setError('Category name is required')
       return
@@ -311,7 +311,7 @@ export default function ItemsPage() {
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.sku.toLowerCase().includes(searchTerm.toLowerCase())
+      item.sku.toLowerCase().includes(searchTerm.toLowerCase())
     return matchesSearch
   })
 
@@ -321,7 +321,7 @@ export default function ItemsPage() {
     return (item.currentStock ?? 0) < threshold
   }).length
   const outOfStockItems = items.filter(item => item.currentStock === 0).length
-  
+
   const searchParams = useSearchParams()
   const filter = (searchParams?.get('filter') || 'all') as 'all' | 'low_stock' | 'out_of_stock'
   const filteredByStatus = items.filter(item => {
@@ -413,14 +413,14 @@ export default function ItemsPage() {
                 <p className="mt-2 text-3xl font-bold text-foreground">{items.length}</p>
               </div>
               <div className="rounded-lg bg-primary/10 p-3">
-                <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10M8 7v10m8-10v10" />
                 </svg>
               </div>
             </div>
           </div>
 
-          
+
 
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
@@ -514,8 +514,8 @@ export default function ItemsPage() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Item Name</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">SKU</th>
-                        
-                        
+
+
                         <th className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
@@ -527,7 +527,7 @@ export default function ItemsPage() {
                             <button
                               type="button"
                               onClick={() => router.push(`/categories/${item.categoryId}`)}
-                              className="text-primary hover:text-primary/80 hover:underline transition-colors"
+                              className="text-primary-foreground hover:text-primary/80 hover:underline transition-colors"
                             >
                               {item.categoryName}
                             </button>
@@ -535,8 +535,8 @@ export default function ItemsPage() {
                           <td className="px-6 py-4">
                             <span className="inline-flex rounded-md bg-muted/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.sku}</span>
                           </td>
-                          
-                          
+
+
                           <td className="px-6 py-4 text-sm">
                             <PermissionGuard permission="create_item">
                               <button
@@ -707,7 +707,7 @@ export default function ItemsPage() {
                     )}
                   </div>
 
-                  
+
 
                   <div>
                     <label className="block text-sm font-medium mb-2">Min Stock Level</label>
@@ -731,7 +731,7 @@ export default function ItemsPage() {
                     />
                   </div>
 
-                  
+
                 </div>
 
                 <div>
@@ -852,9 +852,9 @@ export default function ItemsPage() {
                     />
                   </div>
 
-                  
 
-                  
+
+
                 </div>
 
                 <div>

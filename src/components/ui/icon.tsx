@@ -29,11 +29,11 @@ const sizeMap = {
 }
 
 const colorMap = {
-  primary: 'text-blue-600 dark:text-blue-400',
-  secondary: 'text-purple-600 dark:text-purple-400',
-  success: 'text-green-600 dark:text-green-400',
-  warning: 'text-amber-600 dark:text-amber-400',
-  error: 'text-red-600 dark:text-red-400',
+  primary: 'text-(--color-primary)',
+  secondary: 'text-(--color-secondary)',
+  success: 'text-(--color-success)',
+  warning: 'text-(--color-warning)',
+  error: 'text-(--color-error)',
   muted: 'text-gray-400 dark:text-gray-600',
   inherit: 'text-current',
 }
@@ -54,7 +54,7 @@ const Icon = React.forwardRef<SVGSVGElement, IconProps>(
       className={cn(
         sizeMap[size],
         colorMap[color],
-        interactive && 'transition-colors duration-200 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer',
+        interactive && 'transition-colors duration-200 hover:text-primary-foreground cursor-pointer',
         className
       )}
       {...props}

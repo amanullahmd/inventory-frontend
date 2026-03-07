@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details for debugging
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo,
@@ -61,12 +61,12 @@ export class ErrorBoundary extends Component<Props, State> {
                 An unexpected error occurred. Please try refreshing the page.
               </p>
             </div>
-            
+
             <ErrorMessage
               message={this.state.error?.message || 'An unexpected error occurred'}
               onRetry={this.handleRetry}
             />
-            
+
             {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
               <details className="mt-4 p-4 bg-gray-100 rounded-md">
                 <summary className="cursor-pointer font-medium text-gray-700">
@@ -78,11 +78,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 </pre>
               </details>
             )}
-            
+
             <div className="text-center">
               <button
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-secondary-foreground bg-secondary hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring transition-all"
               >
                 Refresh Page
               </button>

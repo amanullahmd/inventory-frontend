@@ -47,9 +47,7 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
 
 Header.displayName = 'Header'
 
-interface HeaderNavProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-const HeaderNav = React.forwardRef<HTMLDivElement, HeaderNavProps>(
+const HeaderNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <nav
       ref={ref}
@@ -72,7 +70,7 @@ const HeaderNavItem = React.forwardRef<HTMLAnchorElement, HeaderNavItemProps>(
       className={cn(
         'rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200',
         active
-          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
+          ? 'bg-primary/20 text-primary-foreground dark:bg-primary/40 dark:text-primary'
           : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
       )}
       {...props}
@@ -82,9 +80,7 @@ const HeaderNavItem = React.forwardRef<HTMLAnchorElement, HeaderNavItemProps>(
 
 HeaderNavItem.displayName = 'HeaderNavItem'
 
-interface HeaderActionsProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-const HeaderActions = React.forwardRef<HTMLDivElement, HeaderActionsProps>(
+const HeaderActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
@@ -111,7 +107,7 @@ const HeaderUserMenu = React.forwardRef<HTMLDivElement, HeaderUserMenuProps>(
       )}
       {...props}
     >
-      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600" />
+      <div className="h-8 w-8 rounded-full bg-linear-to-br from-primary to-accent" />
       <div className="leading-tight">
         {userName && (
           <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">

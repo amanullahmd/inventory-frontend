@@ -115,14 +115,14 @@ export default function Sidebar() {
       <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-4 py-5 border-b border-sidebar-border`}>
         {!collapsed && (
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Package size={18} className="text-primary-foreground" />
             </div>
             <span className="font-bold text-lg text-sidebar-foreground">DPE Inventory</span>
           </Link>
         )}
         {collapsed && (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Package size={18} className="text-primary-foreground" />
           </div>
         )}
@@ -179,7 +179,7 @@ export default function Sidebar() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-background border-b border-border flex items-center justify-between px-4" suppressHydrationWarning>
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Package size={18} className="text-primary-foreground" />
           </div>
           <span className="font-bold text-lg">DPE Inventory</span>

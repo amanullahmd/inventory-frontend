@@ -93,7 +93,7 @@ export default function SignupPage() {
       {/* Left Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
-        
+
         <div className="relative z-10">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
@@ -102,7 +102,7 @@ export default function SignupPage() {
             <span className="text-2xl font-bold text-white">Inventory</span>
           </div>
         </div>
-        
+
         <div className="relative z-10 space-y-6">
           <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight">
             Join our store management platform
@@ -121,7 +121,7 @@ export default function SignupPage() {
             <p className="text-white/80 text-sm">Join 500+ users already using our platform</p>
           </div>
         </div>
-        
+
         <div className="relative z-10 text-white/60 text-sm">
           © 2024 Store Management System
         </div>
@@ -230,7 +230,7 @@ export default function SignupPage() {
 
               <div className="text-center text-sm text-muted-foreground pt-2">
                 Already have an account?{' '}
-                <Link href="/auth/signin" className="font-semibold text-primary hover:underline">
+                <Link href="/auth/signin" className="font-semibold text-primary-foreground hover:underline">
                   Sign in
                 </Link>
               </div>

@@ -43,13 +43,13 @@ export function SyncStatus({ isOffline, className = '' }: SyncStatusProps) {
   // Manual sync trigger
   const handleSync = async () => {
     if (isSyncing || isOffline) return;
-    
+
     setIsSyncing(true);
     try {
       const result = await processQueue();
       setLastSyncResult({ success: result.success, failed: result.failed });
       await refreshCounts();
-      
+
       // Clear result after 3 seconds
       setTimeout(() => setLastSyncResult(null), 3000);
     } catch (error) {
@@ -84,7 +84,7 @@ export function SyncStatus({ isOffline, className = '' }: SyncStatusProps) {
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d={showDetails ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
             </svg>
           </button>
@@ -100,7 +100,7 @@ export function SyncStatus({ isOffline, className = '' }: SyncStatusProps) {
               </span>
             </div>
           )}
-          
+
           {failedCount > 0 && (
             <div className="flex items-center gap-2 text-sm">
               <span className="w-2 h-2 bg-red-500 rounded-full" />
@@ -112,11 +112,11 @@ export function SyncStatus({ isOffline, className = '' }: SyncStatusProps) {
 
           {isSyncing && (
             <div className="flex items-center gap-2 text-sm">
-              <svg className="w-4 h-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 animate-spin text-primary-foreground" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              <span className="text-blue-600 dark:text-blue-400">Syncing...</span>
+              <span className="text-primary-foreground">Syncing...</span>
             </div>
           )}
 
@@ -134,7 +134,7 @@ export function SyncStatus({ isOffline, className = '' }: SyncStatusProps) {
             <button
               onClick={handleSync}
               disabled={isSyncing || isOffline || pendingCount === 0}
-              className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-primary rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Sync Now
             </button>

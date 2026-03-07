@@ -16,12 +16,12 @@ export default function EmployeesPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [form, setForm] = useState<CreateEmployeeRequest>({ 
+  const [form, setForm] = useState<CreateEmployeeRequest>({
     name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '',
-    dateOfBirth: '', gender: '', nationality: '' 
+    dateOfBirth: '', gender: '', nationality: ''
   })
   const [employeeCode, setEmployeeCode] = useState<string>('')
-  
+
   const fetchAll = async () => {
     try {
       setLoading(true); setError(null)
@@ -37,9 +37,9 @@ export default function EmployeesPage() {
       setLoading(false)
     }
   }
-  
+
   useEffect(() => { if (status === 'authenticated') fetchAll() }, [status])
-  
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name) { setError('Name is required'); return }
@@ -60,10 +60,10 @@ export default function EmployeesPage() {
       setError(err.message || 'Failed to submit')
     }
   }
-  
+
   if (status === 'loading') return <div className="p-6"><LoadingSpinner size="medium" text="Loading..." /></div>
   if (!session) return <div className="p-10 text-center">Please sign in to view employees.</div>
-  
+
   return (
     <div className="min-h-screen bg-background">
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
@@ -73,10 +73,10 @@ export default function EmployeesPage() {
             <p className="mt-2 text-muted-foreground">Manage employee profiles</p>
           </div>
         </div>
-        
+
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchAll} />}
-        
+
         <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 animate-slide-up">
           <div className="md:col-span-3">
             <label className="block text-sm font-medium mb-2">Name</label>
@@ -161,7 +161,7 @@ export default function EmployeesPage() {
             )}
           </div>
         </form>
-        
+
         <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
@@ -186,7 +186,7 @@ export default function EmployeesPage() {
                 ) : employees.map(emp => (
                   <tr key={emp.employeeId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
-                      <button className="text-primary hover:underline" onClick={async () => {
+                      <button className="text-primary-foreground hover:underline" onClick={async () => {
                         try {
                           const detail = await EmployeeService.getEmployee(emp.employeeId)
                           setEditingId(detail.employeeId); setEmployeeCode(detail.employeeCode)

@@ -1,9 +1,21 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { cssVariables } from '@/lib/design-system/config';
 
 type ThemeMode = 'light' | 'dark';
+
+// Apply theme to DOM - Hoisted to top level
+function applyTheme(theme: ThemeMode) {
+  if (typeof window === 'undefined') return;
+  const root = document.documentElement;
+
+  // Update class
+  if (theme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+}
 
 interface ThemeContextType {
   mode: ThemeMode;
@@ -27,35 +39,19 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     // Check localStorage for saved preference
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
-    
+
     // Check OS-level dark mode preference
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     // Determine initial theme
     const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-    
+
     setMode(initialTheme);
     applyTheme(initialTheme);
     setMounted(true);
   }, []);
 
-  // Apply theme to DOM
-  const applyTheme = (theme: ThemeMode) => {
-    const root = document.documentElement;
-    
-    // Update class
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    
-    // Apply CSS variables
-    const variables = cssVariables[theme];
-    Object.entries(variables).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-  };
+
 
   const toggleTheme = () => {
     const newTheme = mode === 'light' ? 'dark' : 'light';

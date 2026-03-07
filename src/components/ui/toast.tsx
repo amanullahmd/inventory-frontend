@@ -52,6 +52,10 @@ interface ToastProviderProps {
 export const ToastProvider = ({ children }: ToastProviderProps) => {
   const [toasts, setToasts] = React.useState<Toast[]>([])
 
+  const removeToast = React.useCallback((id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id))
+  }, [])
+
   const addToast = React.useCallback(
     (toast: Omit<Toast, 'id'>) => {
       const id = Math.random().toString(36).substr(2, 9)
@@ -61,18 +65,14 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
       // Auto-dismiss
       const duration = toast.duration || 4000
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         removeToast(id)
       }, duration)
 
       return id
     },
-    []
+    [removeToast]
   )
-
-  const removeToast = React.useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id))
-  }, [])
 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
@@ -105,11 +105,11 @@ const variantConfig = {
     iconBg: 'bg-amber-100 dark:bg-amber-800',
   },
   info: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800',
-    text: 'text-blue-800 dark:text-blue-200',
+    bg: 'bg-primary/10 dark:bg-primary/20',
+    border: 'border-primary/20 dark:border-primary/80',
+    text: 'text-primary-foreground dark:text-primary-foreground',
     icon: 'ℹ',
-    iconBg: 'bg-blue-100 dark:bg-blue-800',
+    iconBg: 'bg-primary/20 dark:bg-primary/80',
   },
 }
 
@@ -137,7 +137,7 @@ const ToastItem = ({ toast, onClose }: ToastItemProps) => {
         {/* Icon */}
         <div
           className={cn(
-            'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full font-semibold text-sm',
+            'flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-semibold text-sm',
             config.iconBg
           )}
         >
@@ -153,7 +153,7 @@ const ToastItem = ({ toast, onClose }: ToastItemProps) => {
         {toast.action && (
           <button
             onClick={toast.action.onClick}
-            className="flex-shrink-0 text-sm font-medium underline hover:no-underline"
+            className="shrink-0 text-sm font-medium underline hover:no-underline"
           >
             {toast.action.label}
           </button>
@@ -162,7 +162,7 @@ const ToastItem = ({ toast, onClose }: ToastItemProps) => {
         {/* Close Button */}
         <button
           onClick={() => onClose(toast.id)}
-          className="flex-shrink-0 text-lg leading-none opacity-70 hover:opacity-100 transition-opacity"
+          className="shrink-0 text-lg leading-none opacity-70 hover:opacity-100 transition-opacity"
           aria-label="Close notification"
         >
           ×

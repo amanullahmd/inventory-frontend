@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 
 // Viewport configuration for PWA
 export const viewport: Viewport = {
-  themeColor: "#3b82f6",
+  themeColor: "#d5e6ba",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -80,28 +80,28 @@ export default async function RootLayout({
         {/* Preconnect to critical resources */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || ""} crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || ""} />
-        
+
         {/* PWA Meta Tags */}
         <meta name="application-name" content="DPE Inventory" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="DPE Inventory" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
+        <meta name="msapplication-TileColor" content="#d5e6ba" />
         <meta name="msapplication-tap-highlight" content="no" />
-        
+
         {/* Prefetch critical routes */}
         <link rel="prefetch" href="/items" as="fetch" crossOrigin="anonymous" />
         <link rel="prefetch" href="/stock-in" as="fetch" crossOrigin="anonymous" />
         <link rel="prefetch" href="/stock-out" as="fetch" crossOrigin="anonymous" />
-        
+
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.svg" />
-        
+
         {/* Preload critical SVG icons */}
         <link rel="preload" href="/icons/icon-192x192.svg" as="image" type="image/svg+xml" />
         <link rel="preload" href="/icons/icon-512x512.svg" as="image" type="image/svg+xml" />
-        
+
         {/* Splash screens for iOS */}
         <link
           rel="apple-touch-startup-image"

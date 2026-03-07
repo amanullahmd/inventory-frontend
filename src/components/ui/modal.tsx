@@ -79,7 +79,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
 
 Modal.displayName = 'Modal'
 
-interface ModalContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface ModalContentProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const ModalContent = React.forwardRef<HTMLDivElement, ModalContentProps>(
   ({ className, ...props }, ref) => (
@@ -105,7 +105,7 @@ const ModalContent = React.forwardRef<HTMLDivElement, ModalContentProps>(
 
 ModalContent.displayName = 'ModalContent'
 
-interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const ModalHeader = React.forwardRef<HTMLDivElement, ModalHeaderProps>(
   ({ className, ...props }, ref) => (
@@ -119,7 +119,7 @@ const ModalHeader = React.forwardRef<HTMLDivElement, ModalHeaderProps>(
 
 ModalHeader.displayName = 'ModalHeader'
 
-interface ModalTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
+interface ModalTitleProps extends React.HTMLAttributes<HTMLHeadingElement> { }
 
 const ModalTitle = React.forwardRef<HTMLHeadingElement, ModalTitleProps>(
   ({ className, ...props }, ref) => (
@@ -136,7 +136,7 @@ const ModalTitle = React.forwardRef<HTMLHeadingElement, ModalTitleProps>(
 
 ModalTitle.displayName = 'ModalTitle'
 
-interface ModalCloseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+interface ModalCloseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
 
 const ModalCloseButton = React.forwardRef<HTMLButtonElement, ModalCloseButtonProps>(
   ({ className, onClick, ...props }, ref) => {
@@ -154,7 +154,7 @@ const ModalCloseButton = React.forwardRef<HTMLButtonElement, ModalCloseButtonPro
           'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
           'hover:bg-gray-100 dark:hover:bg-gray-800',
           'transition-colors duration-200',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500',
+          'focus:outline-none focus:ring-2 focus:ring-ring',
           className
         )}
         aria-label="Close modal"
@@ -180,7 +180,7 @@ const ModalCloseButton = React.forwardRef<HTMLButtonElement, ModalCloseButtonPro
 
 ModalCloseButton.displayName = 'ModalCloseButton'
 
-interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const ModalBody = React.forwardRef<HTMLDivElement, ModalBodyProps>(
   ({ className, ...props }, ref) => (
@@ -194,7 +194,7 @@ const ModalBody = React.forwardRef<HTMLDivElement, ModalBodyProps>(
 
 ModalBody.displayName = 'ModalBody'
 
-interface ModalFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface ModalFooterProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const ModalFooter = React.forwardRef<HTMLDivElement, ModalFooterProps>(
   ({ className, ...props }, ref) => (

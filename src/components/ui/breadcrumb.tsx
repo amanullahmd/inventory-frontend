@@ -40,7 +40,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
             {item.href && !item.current ? (
               <Link
                 href={item.href}
-                className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                className="text-sm font-medium text-primary-foreground hover:text-primary/80 transition-colors"
               >
                 {item.label}
               </Link>

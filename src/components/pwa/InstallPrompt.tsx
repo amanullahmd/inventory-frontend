@@ -27,10 +27,10 @@ export function InstallPrompt({ isVisible, onInstall, onDismiss }: InstallPrompt
       </button>
 
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-          <Download className="h-5 w-5 text-blue-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
+          <Download className="h-5 w-5 text-primary-foreground" />
         </div>
-        
+
         <div className="flex-1">
           <h3 id="install-prompt-title" className="font-semibold text-gray-900">
             Install App
@@ -50,7 +50,7 @@ export function InstallPrompt({ isVisible, onInstall, onDismiss }: InstallPrompt
         </button>
         <button
           onClick={onInstall}
-          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           Install
         </button>

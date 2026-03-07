@@ -28,13 +28,13 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
     // Track online/offline status
     useEffect(() => {
         setIsOffline(!navigator.onLine);
-        
+
         const handleOnline = () => setIsOffline(false);
         const handleOffline = () => setIsOffline(true);
-        
+
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
-        
+
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
@@ -43,12 +43,12 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (isOffline) {
             setError('You are offline. Please check your internet connection.');
             return;
         }
-        
+
         setLoading(true);
         setError(null);
 
@@ -76,21 +76,21 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
         <form onSubmit={handleSubmit} className="space-y-5">
             {isOffline && (
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20 text-warning animate-slide-down">
-                    <WifiOff className="h-5 w-5 flex-shrink-0" />
+                    <WifiOff className="h-5 w-5 shrink-0" />
                     <div>
                         <p className="text-sm font-medium">You&apos;re offline</p>
                         <p className="text-xs text-muted-foreground mt-0.5">Sign in requires an internet connection</p>
                     </div>
                 </div>
             )}
-            
+
             {error && !isOffline && (
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive animate-slide-down">
-                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                    <AlertCircle className="h-5 w-5 shrink-0" />
                     <p className="text-sm font-medium">{error}</p>
                 </div>
             )}
-            
+
             <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-foreground">
                     Email or Username
@@ -111,7 +111,7 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
                     />
                 </div>
             </div>
-            
+
             <div className="space-y-2">
                 <label htmlFor="password" className="block text-sm font-medium text-foreground">
                     Password
@@ -153,10 +153,10 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
 
             <p className="text-center text-sm text-muted-foreground">
                 Don&apos;t have an account?{' '}
-                <Link href="/auth/signup" className="text-primary font-semibold hover:underline">
+                <Link href="/auth/signup" className="text-primary-foreground font-semibold hover:underline">
                     Sign up
                 </Link>
             </p>
-        </form>
+        </form >
     );
 }

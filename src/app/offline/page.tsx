@@ -22,7 +22,7 @@ export default function OfflinePage() {
         </div>
 
         <h1 className="mb-3 text-2xl font-bold text-gray-900">You&apos;re Offline</h1>
-        
+
         <p className="mb-6 text-gray-600">
           It looks like you&apos;ve lost your internet connection. Some features may not be
           available until you&apos;re back online.
@@ -30,7 +30,7 @@ export default function OfflinePage() {
 
         <button
           onClick={() => window.location.reload()}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors hover:opacity-90"
         >
           <RefreshCw className="h-5 w-5" />
           Try Again
@@ -42,15 +42,15 @@ export default function OfflinePage() {
           </h2>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-start gap-2">
-              <span className="text-blue-500">•</span>
+              <span className="text-primary-foreground">•</span>
               Previously viewed pages may still be available
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-blue-500">•</span>
+              <span className="text-primary-foreground">•</span>
               Changes you make will sync when you&apos;re back online
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-blue-500">•</span>
+              <span className="text-primary-foreground">•</span>
               Check your Wi-Fi or mobile data connection
             </li>
           </ul>

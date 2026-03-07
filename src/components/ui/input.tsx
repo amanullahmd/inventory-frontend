@@ -25,7 +25,6 @@ interface InputProps extends React.ComponentProps<'input'> {
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, error, label, helperText, icon, ...props }, ref) => {
-    const [isFocused, setIsFocused] = React.useState(false)
 
     return (
       <div className="w-full">
@@ -56,7 +55,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // Default state
               'border-gray-300 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100',
               // Focus state
-              'focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:shadow-md',
+              'focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/20 focus:shadow-md',
               // Error state
               error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
               // Icon padding
@@ -66,11 +65,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-invalid={!!error}
             aria-describedby={error ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined}
             onFocus={(e) => {
-              setIsFocused(true)
               props.onFocus?.(e)
             }}
             onBlur={(e) => {
-              setIsFocused(false)
               props.onBlur?.(e)
             }}
             {...props}

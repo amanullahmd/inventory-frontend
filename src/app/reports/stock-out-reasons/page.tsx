@@ -30,7 +30,7 @@ function PieChart({ reasons, totalCount }: { reasons: ReasonBreakdown[]; totalCo
   }
 
   const colors = [
-    '#3B82F6', // Blue
+    '#d5e6ba', // Primary Cyan
     '#10B981', // Green
     '#F59E0B', // Amber
     '#EF4444', // Red
@@ -45,17 +45,17 @@ function PieChart({ reasons, totalCount }: { reasons: ReasonBreakdown[]; totalCo
         {reasons.map((reason, index) => {
           const startAngle = reasons.slice(0, index).reduce((sum, r) => sum + (r.percentage / 100) * 360, 0)
           const endAngle = startAngle + (reason.percentage / 100) * 360
-          
+
           const startRad = (startAngle - 90) * (Math.PI / 180)
           const endRad = (endAngle - 90) * (Math.PI / 180)
-          
+
           const x1 = 100 + 80 * Math.cos(startRad)
           const y1 = 100 + 80 * Math.sin(startRad)
           const x2 = 100 + 80 * Math.cos(endRad)
           const y2 = 100 + 80 * Math.sin(endRad)
-          
+
           const largeArc = endAngle - startAngle > 180 ? 1 : 0
-          
+
           return (
             <path
               key={index}
@@ -178,191 +178,191 @@ export default function StockOutReasonsReportPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="animate-slide-down">
-        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Stock-out Reasons</h1>
-        <p className="text-muted-foreground mt-1">Analyze why inventory is leaving your warehouse</p>
-      </div>
-
-      {/* Messages */}
-      {success ? (
-        <div className="fixed right-4 top-4 z-50 w-[min(420px,calc(100vw-2rem))]">
-          <SuccessMessage 
-            message={success} 
-            onDismiss={() => setSuccess(null)}
-            autoHide
-          />
+        {/* Header */}
+        <div className="animate-slide-down">
+          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Stock-out Reasons</h1>
+          <p className="text-muted-foreground mt-1">Analyze why inventory is leaving your warehouse</p>
         </div>
-      ) : null}
-      {error ? (
-        <div className="fixed right-4 top-4 z-50 w-[min(420px,calc(100vw-2rem))]">
-          <ErrorMessage 
-            message={error} 
-            onRetry={() => setError(null)}
-          />
-        </div>
-      ) : null}
 
-      {/* Filters and Export */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 animate-slide-up">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Date Range Filter */}
-          <div className="lg:col-span-2">
-            <DateRangePicker
-              onDateRangeChange={handleDateRangeChange}
-              label="Filter by Date Range"
+        {/* Messages */}
+        {success ? (
+          <div className="fixed right-4 top-4 z-50 w-[min(420px,calc(100vw-2rem))]">
+            <SuccessMessage
+              message={success}
+              onDismiss={() => setSuccess(null)}
+              autoHide
             />
           </div>
-
-          {/* Filter Type */}
-          <div>
-            <label className="block text-xs font-semibold text-foreground mb-2">
-              Filter Type
-            </label>
-            <select
-              value={filterType}
-              onChange={(e) => {
-                setFilterType(e.target.value as any)
-                setFilterId('')
-              }}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="ALL">All Items</option>
-              <option value="ITEM">Specific Item</option>
-              <option value="CATEGORY">Specific Category</option>
-            </select>
-          </div>
-
-          {/* Export Button */}
-          <div className="flex items-end">
-            <ExportButton
-              onClick={handleExport}
-              disabled={reasons.length === 0}
-              loading={exportLoading}
-              exportType="report"
-              label="Export to PDF"
+        ) : null}
+        {error ? (
+          <div className="fixed right-4 top-4 z-50 w-[min(420px,calc(100vw-2rem))]">
+            <ErrorMessage
+              message={error}
+              onRetry={() => setError(null)}
             />
           </div>
-        </div>
-      </div>
+        ) : null}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-slide-up" style={{ animationDelay: '50ms' }}>
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
-          <div className="text-sm font-medium text-muted-foreground">Total stock-outs</div>
-          <div className="mt-2 text-3xl font-bold text-foreground">{totalCount}</div>
+        {/* Filters and Export */}
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 animate-slide-up">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Date Range Filter */}
+            <div className="lg:col-span-2">
+              <DateRangePicker
+                onDateRangeChange={handleDateRangeChange}
+                label="Filter by Date Range"
+              />
+            </div>
+
+            {/* Filter Type */}
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-2">
+                Filter Type
+              </label>
+              <select
+                value={filterType}
+                onChange={(e) => {
+                  setFilterType(e.target.value as any)
+                  setFilterId('')
+                }}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="ALL">All Items</option>
+                <option value="ITEM">Specific Item</option>
+                <option value="CATEGORY">Specific Category</option>
+              </select>
+            </div>
+
+            {/* Export Button */}
+            <div className="flex items-end">
+              <ExportButton
+                onClick={handleExport}
+                disabled={reasons.length === 0}
+                loading={exportLoading}
+                exportType="report"
+                label="Export to PDF"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
-          <div className="text-sm font-medium text-muted-foreground">Unique reasons</div>
-          <div className="mt-2 text-3xl font-bold text-foreground">{reasons.length}</div>
-        </div>
-
-        {topReason && (
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
-            <div className="text-sm font-medium text-muted-foreground">Top reason</div>
-            <div className="mt-2 text-lg font-semibold text-foreground">{topReason.reasonLabel}</div>
-            <div className="mt-1 text-sm text-muted-foreground">{topReason.count} occurrences ({topReason.percentage}%)</div>
-          </div>
-        )}
-      </div>
-
-      {/* Pie Chart Visualization */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '100ms' }}>
-        <h2 className="text-sm font-semibold text-foreground mb-6">Reason distribution</h2>
-        
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Chart */}
-          <div className="flex-1 flex items-center justify-center">
-            <PieChart reasons={reasons} totalCount={totalCount} />
+            <div className="text-sm font-medium text-muted-foreground">Total stock-outs</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">{totalCount}</div>
           </div>
 
-          {/* Legend */}
-          <div className="flex-1 space-y-3">
-            {reasons.map((reason, index) => {
-              const colors = [
-                'bg-blue-500',
-                'bg-green-500',
-                'bg-amber-500',
-                'bg-red-500',
-                'bg-purple-500',
-                'bg-cyan-500',
-                'bg-pink-500',
-              ]
-              return (
-                <div key={index} className="flex items-center gap-3">
-                  <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]}`}></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">{reason.reasonLabel}</p>
-                    <p className="text-xs text-muted-foreground">{reason.count} ({reason.percentage}%)</p>
-                  </div>
-                </div>
-              )
-            })}
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
+            <div className="text-sm font-medium text-muted-foreground">Unique reasons</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">{reasons.length}</div>
           </div>
+
+          {topReason && (
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
+              <div className="text-sm font-medium text-muted-foreground">Top reason</div>
+              <div className="mt-2 text-lg font-semibold text-foreground">{topReason.reasonLabel}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{topReason.count} occurrences ({topReason.percentage}%)</div>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Detailed Table */}
-      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '150ms' }}>
-        <div className="px-6 py-5 border-b border-border">
-          <h2 className="text-xl font-bold text-foreground">Detailed Breakdown</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Reason</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Count</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Percentage</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Trend</th>
-              </tr>
-            </thead>
-            <tbody className="bg-card divide-y divide-border">
-              {reasons.map((reason, index) => (
-                <tr key={index} className="hover:bg-accent/40 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getReasonBadgeColor(reason.reasonType)}`}>
-                      {reason.reasonLabel}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-muted text-foreground">
-                      {reason.count}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 bg-muted rounded-full h-2">
-                        <div
-                          className="bg-chart-1 h-2 rounded-full"
-                          style={{ width: `${reason.percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium text-foreground">{reason.percentage}%</span>
+        {/* Pie Chart Visualization */}
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <h2 className="text-sm font-semibold text-foreground mb-6">Reason distribution</h2>
+
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Chart */}
+            <div className="flex-1 flex items-center justify-center">
+              <PieChart reasons={reasons} totalCount={totalCount} />
+            </div>
+
+            {/* Legend */}
+            <div className="flex-1 space-y-3">
+              {reasons.map((reason, index) => {
+                const colors = [
+                  'bg-primary',
+                  'bg-green-500',
+                  'bg-amber-500',
+                  'bg-red-500',
+                  'bg-purple-500',
+                  'bg-cyan-500',
+                  'bg-pink-500',
+                ]
+                return (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]}`}></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{reason.reasonLabel}</p>
+                      <p className="text-xs text-muted-foreground">{reason.count} ({reason.percentage}%)</p>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                    {index === 0 ? 'Highest' : index === reasons.length - 1 ? 'Lowest' : 'Stable'}
-                  </td>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Table */}
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-slide-up" style={{ animationDelay: '150ms' }}>
+          <div className="px-6 py-5 border-b border-border">
+            <h2 className="text-xl font-bold text-foreground">Detailed Breakdown</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Reason</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Count</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Percentage</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Trend</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-card divide-y divide-border">
+                {reasons.map((reason, index) => (
+                  <tr key={index} className="hover:bg-accent/40 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getReasonBadgeColor(reason.reasonType)}`}>
+                        {reason.reasonLabel}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-muted text-foreground">
+                        {reason.count}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 bg-muted rounded-full h-2">
+                          <div
+                            className="bg-chart-1 h-2 rounded-full"
+                            style={{ width: `${reason.percentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-foreground">{reason.percentage}%</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                      {index === 0 ? 'Highest' : index === reasons.length - 1 ? 'Lowest' : 'Stable'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Info Card */}
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <h3 className="text-sm font-semibold text-foreground">Insights</h3>
+          <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+            <li>• Track the most common reasons for stock-out to identify patterns</li>
+            <li>• Use this data to improve store management and reduce losses</li>
+            <li>• Monitor damaged and lost items to prevent future occurrences</li>
+            <li>• Analyze transfers to optimize branch distribution</li>
+          </ul>
         </div>
       </div>
-
-      {/* Info Card */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up" style={{ animationDelay: '200ms' }}>
-        <h3 className="text-sm font-semibold text-foreground">Insights</h3>
-        <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-          <li>• Track the most common reasons for stock-out to identify patterns</li>
-          <li>• Use this data to improve store management and reduce losses</li>
-          <li>• Monitor damaged and lost items to prevent future occurrences</li>
-          <li>• Analyze transfers to optimize branch distribution</li>
-        </ul>
-      </div>
-    </div>
     </div>
   )
 }

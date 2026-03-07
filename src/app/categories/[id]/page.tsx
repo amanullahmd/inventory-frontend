@@ -91,7 +91,7 @@ export default function CategoryDetailPage() {
     }
   }
 
-  const filteredItems = items.filter(item => 
+  const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.sku.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -134,8 +134,8 @@ export default function CategoryDetailPage() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-          <ErrorMessage 
-            message={error || 'Category not found'} 
+          <ErrorMessage
+            message={error || 'Category not found'}
             onRetry={() => router.push('/items')}
           />
         </div>
@@ -163,7 +163,7 @@ export default function CategoryDetailPage() {
               <p className="mt-2 text-base text-muted-foreground">{category.description || 'No description available'}</p>
             </div>
             <div className="flex items-center gap-3">
-              <div 
+              <div
                 className="w-4 h-4 rounded-full"
                 style={{ backgroundColor: category.color }}
               />
@@ -198,7 +198,7 @@ export default function CategoryDetailPage() {
                 <p className="mt-2 text-3xl font-bold text-foreground">{items.length}</p>
               </div>
               <div className="rounded-lg bg-primary/10 p-3">
-                <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10M8 7v10m8-10v10" />
                 </svg>
               </div>
@@ -284,13 +284,12 @@ export default function CategoryDetailPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-foreground">{item.unit || '-'}</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
-                          item.currentStock === 0
+                        <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${item.currentStock === 0
                             ? 'border-destructive/30 bg-destructive/10 text-destructive'
                             : item.currentStock < 10
-                            ? 'border-chart-3/30 bg-chart-3/10 text-chart-3'
-                            : 'border-chart-2/30 bg-chart-2/10 text-chart-2'
-                        }`}>
+                              ? 'border-chart-3/30 bg-chart-3/10 text-chart-3'
+                              : 'border-chart-2/30 bg-chart-2/10 text-chart-2'
+                          }`}>
                           {item.currentStock}
                         </span>
                       </td>

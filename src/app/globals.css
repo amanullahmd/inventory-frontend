@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
@@ -8,21 +8,21 @@
 /* Design System CSS Variables - Light Mode */
 :root {
   /* Colors */
-  --color-primary: #3B82F6;
-  --color-secondary: #8B5CF6;
-  --color-accent: #EC4899;
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-neutral: #F3F4F6;
-  --color-text: #1F2937;
-  --color-background: #FFFFFF;
-  --color-surface: #F3F4F6;
-  --color-border: #E5E7EB;
-  --color-disabled: #D1D5DB;
+  --color-primary: #d5e6ba;
+  --color-secondary: #a1cf8a;
+  --color-accent: #0088a3;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-neutral: #f3f4f6;
+  --color-text: #1f2937;
+  --color-background: #ffffff;
+  --color-surface: #f3f4f6;
+  --color-border: #e5e7eb;
+  --color-disabled: #d1d5db;
 
   /* Typography */
-  --typography-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --typography-font-family: "Inter", system-ui, -apple-system, sans-serif;
   --typography-h1-size: 32px;
   --typography-h1-weight: 700;
   --typography-h1-line-height: 1.2;
@@ -81,14 +81,14 @@
   --card-foreground: oklch(0.145 0.025 264);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0.025 264);
-  --primary: oklch(0.55 0.22 262);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.965 0.008 264);
-  --secondary-foreground: oklch(0.205 0 0);
+  --primary: #d5e6baba;
+  --primary-foreground: #0088a3;
+  --secondary: #a1cf8a;
+  --secondary-foreground: #111827;
   --muted: oklch(0.965 0.008 264);
   --muted-foreground: oklch(0.52 0.035 264);
-  --accent: oklch(0.965 0.008 264);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: #00b8c9;
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.65 0.18 145);
@@ -97,41 +97,42 @@
   --warning-foreground: oklch(0.25 0.05 75);
   --border: oklch(0.91 0.006 264);
   --input: oklch(0.91 0.006 264);
-  --ring: oklch(0.55 0.22 262);
-  --chart-1: oklch(0.55 0.22 262);
-  --chart-2: oklch(0.65 0.18 145);
-  --chart-3: oklch(0.75 0.18 75);
-  --chart-4: oklch(0.62 0.24 304);
-  --chart-5: oklch(0.64 0.22 16);
+  --ring: #d5e6baba;
+  --chart-1: #d5e6baba;
+  --chart-2: #a1cf8a;
+  --chart-3: #0088a3;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
   --radius: 0.75rem;
   --sidebar: oklch(0.995 0 0);
   --sidebar-foreground: oklch(0.145 0.025 264);
-  --sidebar-primary: oklch(0.55 0.22 262);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.965 0.008 264);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.93 0.004 264);
-  --sidebar-ring: oklch(0.55 0.22 262);
+  --sidebar-primary: #d5e6baba;
+  --sidebar-primary-foreground: #1f2937;
+  --sidebar-accent: #f3f4f6;
+  --sidebar-accent-foreground: #1f2937;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #d5e6baba;
+  --ring: #d5e6baba;
 }
 
 /* Design System CSS Variables - Dark Mode */
 .dark {
   /* Colors */
-  --color-primary: #60A5FA;
-  --color-secondary: #A78BFA;
-  --color-accent: #F472B6;
-  --color-success: #34D399;
-  --color-warning: #FBBF24;
-  --color-error: #F87171;
-  --color-neutral: #1F2937;
-  --color-text: #F3F4F6;
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
+  --color-primary: #d5e6ba;
+  --color-secondary: #a1cf8a;
+  --color-accent: #0088a3;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-neutral: #1f2937;
+  --color-text: #f3f4f6;
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
   --color-border: #334155;
-  --color-disabled: #64748B;
+  --color-disabled: #64748b;
 
   /* Typography (same as light mode) */
-  --typography-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --typography-font-family: "Inter", system-ui, -apple-system, sans-serif;
   --typography-h1-size: 32px;
   --typography-h1-weight: 700;
   --typography-h1-line-height: 1.2;
@@ -190,14 +191,12 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.17 0.03 264);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.6 0.2 262);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.22 0.04 264);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.22 0.04 264);
-  --muted-foreground: oklch(0.68 0.025 264);
-  --accent: oklch(0.22 0.04 264);
-  --accent-foreground: oklch(0.985 0 0);
+  --primary: #d5e6baba;
+  --primary-foreground: #0088a3;
+  --secondary: #a1cf8a;
+  --secondary-foreground: #111827;
+  --accent: #00b8c9;
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.5 0.18 25);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.55 0.16 145);
@@ -214,12 +213,13 @@
   --chart-5: oklch(0.6 0.2 16);
   --sidebar: oklch(0.15 0.02 264);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.6 0.2 262);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.22 0.04 264);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.26 0.04 264);
-  --sidebar-ring: oklch(0.55 0.18 262);
+  --sidebar-primary: #d5e6baba;
+  --sidebar-primary-foreground: #f3f4f6;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f3f4f6;
+  --sidebar-border: #334155;
+  --sidebar-ring: #d5e6baba;
+  --ring: #d5e6baba;
 }
 
 @theme inline {
@@ -268,7 +268,11 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 /* Smooth scrolling */
@@ -311,33 +315,64 @@ html {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes spin-smooth {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-fade-in {
@@ -408,14 +443,23 @@ html {
 
 /* Skeleton loading */
 .skeleton {
-  background: linear-gradient(90deg, var(--muted) 25%, var(--accent) 50%, var(--muted) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    var(--accent) 50%,
+    var(--muted) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
 }
 
 @keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Date picker styling for dark mode */
