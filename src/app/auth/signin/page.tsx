@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import LoginForm from "@/components/auth/LoginForm"
-import Image from "next/image"
+import AuthSlider from "@/components/auth/AuthSlider"
 import { Shield, Lock, Building2, MapPin, School, Crown, User } from "lucide-react"
 
 const DEMO_CREDENTIALS = [
@@ -107,16 +107,8 @@ export default function SignIn() {
               <div className="h-1 w-24 bg-white/30 mx-auto rounded-full"></div>
             </div>
 
-            {/* Cover Photo */}
-            <div className="relative w-80 h-64 rounded-3xl overflow-hidden shadow-2xl border-8 border-white/20 backdrop-blur-sm">
-              <Image
-                src="/DPE_cover.webp"
-                alt="DPE Cover"
-                fill
-                className="object-contain"
-                quality={90}
-              />
-            </div>
+            {/* Cover Photo / Slider */}
+            <AuthSlider />
           </div>
 
           <div className="relative z-10 px-8 pb-8 text-white/70 text-xs text-center">
@@ -129,7 +121,7 @@ export default function SignIn() {
       <div className={`flex items-center justify-center p-6 lg:p-12 bg-white overflow-y-auto ${isLargeScreen ? 'flex-1' : 'w-full'}`}>
         <div className="w-full max-w-md">
           {/* Header */}
-          <div className="mb-10">
+          <div className="mb-6">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome</h1>
             <p className="text-gray-600 text-lg">Sign in to your account</p>
           </div>
@@ -140,15 +132,15 @@ export default function SignIn() {
           </div>
 
           {/* Demo Credentials Section */}
-          <div className="rounded-2xl border border-border bg-accent/30 p-6">
-            <div className="flex items-center gap-2 mb-5">
+          <div className="rounded-2xl border border-border bg-accent/30 p-3">
+            <div className="flex items-center gap-2 mb-2">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Lock size={18} className="text-primary-foreground" />
               </div>
               <h3 className="text-sm font-bold text-gray-900">Demo Credentials</h3>
             </div>
             <p className="text-xs text-gray-600 mb-4">Click any account to auto-fill credentials</p>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
+            <div className="space-y-2 max-h-60 overflow-y-auto">
               {DEMO_CREDENTIALS.map((cred, idx) => {
                 const Icon = cred.icon
                 const isSelected = selectedEmail === cred.email;
@@ -157,8 +149,8 @@ export default function SignIn() {
                     key={idx}
                     onClick={() => handleCredentialClick(cred.email, cred.password)}
                     className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${isSelected
-                      ? 'bg-primary/10 border-primary/40 shadow-md'
-                      : 'bg-white border-border hover:border-primary/30 hover:bg-primary/5'
+                      ? 'border-primary shadow-md bg-white'
+                      : 'bg-white border-border hover:border-primary'
                       }`}
                   >
                     <div className={`p-2 rounded-lg flex-shrink-0 ${isSelected ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary/80'}`}>
