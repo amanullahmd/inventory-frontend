@@ -22,7 +22,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  ClipboardList
+  ClipboardList,
+  Car
 } from 'lucide-react'
 
 interface NavItem {
@@ -50,6 +51,7 @@ const managementItems: NavItem[] = [
   { name: 'Division', href: '/warehouses', icon: <Building2 size={20} /> },
   { name: 'Employees', href: '/employees', icon: <Users size={20} /> },
   { name: 'Users', href: '/users', icon: <Users size={20} />, adminOnly: true },
+  { name: 'Vehicle', href: '/vehicle-management', icon: <Car size={20} /> },
   { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
 ]
 
