@@ -1,16 +1,16 @@
 /**
  * Permission system for RBAC (Role-Based Access Control)
  * Defines all permissions and their role mappings
- * 
+ *
  * @module lib/auth/permissions
  * @example
  * import { hasPermission, usePermissions } from '@/lib/auth/permissions';
- * 
+ *
  * // Check permission directly
  * if (hasPermission('ADMIN', 'create_item')) {
  *   // User can create items
  * }
- * 
+ *
  * // Use in React component
  * const { can, isAdmin } = usePermissions();
  * if (can('create_item')) {
@@ -19,49 +19,71 @@
  */
 
 export type Permission =
-  | 'create_category'
-  | 'create_user'
-  | 'view_users'
-  | 'view_audit_logs'
-  | 'manage_system'
-  | 'create_item'
-  | 'stock_in'
-  | 'stock_out'
-  | 'create_order'
-  | 'view_reports'
-  | 'update_category'
-  | 'delete_category';
+  | "create_category"
+  | "create_user"
+  | "view_users"
+  | "view_audit_logs"
+  | "manage_system"
+  | "create_item"
+  | "stock_in"
+  | "stock_out"
+  | "create_order"
+  | "view_reports"
+  | "update_category"
+  | "delete_category";
 
-export type UserRole = 'ADMIN' | 'USER';
+export type UserRole = "ADMIN" | "CENTRAL" | "DIVISION_ADMIN" | "DIVISION_USER";
 
 /**
  * Maps each user role to their allowed permissions
  * ADMIN has all permissions, USER has limited permissions
  */
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  'ADMIN': [
-    'create_category',
-    'create_user',
-    'view_users',
-    'view_audit_logs',
-    'manage_system',
-    'create_item',
-    'stock_in',
-    'stock_out',
-    'create_order',
-    'view_reports',
-    'update_category',
-    'delete_category'
+  ADMIN: [
+    "create_category",
+    "create_user",
+    "view_users",
+    "view_audit_logs",
+    "manage_system",
+    "create_item",
+    "stock_in",
+    "stock_out",
+    "create_order",
+    "view_reports",
+    "update_category",
+    "delete_category",
   ],
-  'USER': [
-    'create_item',
-    'stock_in',
-    'stock_out',
-    'create_order',
-    'view_reports',
-    'update_category',
-    'delete_category'
-  ]
+  CENTRAL: [
+    "create_category",
+    "view_audit_logs",
+    "manage_system",
+    "create_item",
+    "stock_in",
+    "stock_out",
+    "create_order",
+    "view_reports",
+    "update_category",
+    "delete_category",
+  ],
+  DIVISION_ADMIN: [
+    "create_category",
+    "create_item",
+    "stock_in",
+    "stock_out",
+    "create_order",
+    "view_reports",
+    "update_category",
+    "delete_category",
+  ],
+  DIVISION_USER: [
+    "create_item",
+    "stock_in",
+    "stock_out",
+    "create_order",
+    "view_reports",
+    "update_category",
+    "delete_category",
+  ],
 };
 
 /**
@@ -72,7 +94,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
  */
 export const hasPermission = (
   userRole: UserRole | undefined,
-  permission: Permission
+  permission: Permission,
 ): boolean => {
   if (!userRole) return false;
   return ROLE_PERMISSIONS[userRole]?.includes(permission) ?? false;
@@ -86,10 +108,10 @@ export const hasPermission = (
  */
 export const hasAnyPermission = (
   userRole: UserRole | undefined,
-  permissions: Permission[]
+  permissions: Permission[],
 ): boolean => {
   if (!userRole) return false;
-  return permissions.some(p => hasPermission(userRole, p));
+  return permissions.some((p) => hasPermission(userRole, p));
 };
 
 /**
@@ -100,10 +122,10 @@ export const hasAnyPermission = (
  */
 export const hasAllPermissions = (
   userRole: UserRole | undefined,
-  permissions: Permission[]
+  permissions: Permission[],
 ): boolean => {
   if (!userRole) return false;
-  return permissions.every(p => hasPermission(userRole, p));
+  return permissions.every((p) => hasPermission(userRole, p));
 };
 
 /**
@@ -112,5 +134,5 @@ export const hasAllPermissions = (
  * @returns true if user is ADMIN, false otherwise
  */
 export const isAdmin = (userRole: UserRole | undefined): boolean => {
-  return userRole === 'ADMIN';
+  return userRole === "ADMIN" || userRole === "CENTRAL";
 };

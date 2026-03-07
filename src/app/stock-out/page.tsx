@@ -23,7 +23,6 @@ interface GroupedStockOut {
 
 export default function StockOutPage() {
   const { data: session, status } = useSession()
-  const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
   const [items, setItems] = useState<Item[]>([])
   const [warehouses, setWarehouses] = useState<any[]>([])
   const [employees, setEmployees] = useState<any[]>([])
@@ -227,21 +226,6 @@ export default function StockOutPage() {
     )
   }
 
-  if (isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
-        <div className="rounded-xl border border-border bg-card p-8 max-w-md w-full text-center shadow-sm">
-          <h1 className="text-xl font-semibold text-foreground mb-2">Access denied</h1>
-          <p className="text-muted-foreground mb-6">
-            Admins cannot perform stock operations. Only regular users can manage stock in/out.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Your role: <span className="font-semibold text-foreground">Admin</span>
-          </p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-background">

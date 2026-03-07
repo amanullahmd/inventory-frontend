@@ -9,18 +9,42 @@ const DEMO_CREDENTIALS = [
   {
     email: 'admin@example.com',
     password: 'Admin@123456',
-    role: 'Admin',
-    level: 'Demo Account',
+    role: 'Superior Admin',
+    level: 'System Admin',
+    icon: Crown,
+    description: 'Manage everything superior'
+  },
+  {
+    email: 'central@example.com',
+    password: 'Central@123456',
+    role: 'Central Manager',
+    level: 'Central Office',
     icon: Shield,
-    description: 'Demo admin account'
+    description: 'Can do everything except user create'
+  },
+  {
+    email: 'divadmin@example.com',
+    password: 'Division@123456',
+    role: 'Division Admin',
+    level: 'Division Level',
+    icon: Building2,
+    description: 'Manage division operations'
+  },
+  {
+    email: 'divuser@example.com',
+    password: 'User@123456',
+    role: 'Division User',
+    level: 'Can create demand',
+    icon: User,
+    description: 'Daily stock operations'
   },
   {
     email: 'user@example.com',
     password: 'User@123456',
-    role: 'User',
+    role: 'Demo User',
     level: 'Demo Account',
     icon: User,
-    description: 'Demo user account'
+    description: 'Legacy demo account'
   },
   {
     email: 'main@dpe.gov.bd',
@@ -33,7 +57,7 @@ const DEMO_CREDENTIALS = [
   {
     email: 'admin@dpe.gov.bd',
     password: 'admin123',
-    role: 'Division Admin',
+    role: 'Division Admin (DPE)',
     level: 'ঢাকা বিভাগ',
     icon: Shield,
     description: 'Can see all lower branches'

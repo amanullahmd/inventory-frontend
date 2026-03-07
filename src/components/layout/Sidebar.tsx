@@ -1,36 +1,37 @@
 'use client'
 
+import { usePermissions } from '@/hooks/usePermissions'
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Building2,
+  Car,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  LayoutDashboard,
+  Menu,
+  Package,
+  ShoppingCart,
+  Tags,
+  TrendingUp,
+  Truck,
+  Users,
+  X
+} from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, memo, useMemo } from 'react'
-import { usePermissions } from '@/hooks/usePermissions'
-import {
-  LayoutDashboard,
-  Package,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  History,
-  ShoppingCart,
-  TrendingUp,
-  Users,
-  Building2,
-  Tags,
-  Truck,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Menu,
-  X,
-  ClipboardList,
-  Car
-} from 'lucide-react'
+import { memo, useMemo, useState } from 'react'
+
+import { Permission } from '@/lib/auth/permissions'
 
 interface NavItem {
   name: string
   href: string
   icon: React.ReactNode
   adminOnly?: boolean
+  permission?: Permission
 }
 
 const navItems: NavItem[] = [
@@ -38,7 +39,7 @@ const navItems: NavItem[] = [
   { name: 'Items', href: '/items', icon: <Package size={20} /> },
   { name: 'Stock In', href: '/stock-in', icon: <ArrowDownToLine size={20} /> },
   { name: 'Stock Out', href: '/stock-out', icon: <ArrowUpFromLine size={20} /> },
-  { name: 'Movements', href: '/stock-movements', icon: <History size={20} /> },
+  // { name: 'Movements', href: '/stock-movements', icon: <History size={20} /> },
   { name: 'Register', href: '/register', icon: <ClipboardList size={20} /> },
   { name: 'Most Used', href: '/reports/most-used-items', icon: <TrendingUp size={20} /> },
   { name: 'Purchase Orders', href: '/orders/purchase', icon: <ShoppingCart size={20} /> },
@@ -50,20 +51,22 @@ const managementItems: NavItem[] = [
   { name: 'Suppliers', href: '/suppliers', icon: <Truck size={20} /> },
   { name: 'Division', href: '/warehouses', icon: <Building2 size={20} /> },
   { name: 'Employees', href: '/employees', icon: <Users size={20} /> },
-  { name: 'Users', href: '/users', icon: <Users size={20} />, adminOnly: true },
+  { name: 'Users', href: '/users', icon: <Users size={20} />, permission: 'view_users' },
   { name: 'Vehicle', href: '/vehicle-management', icon: <Car size={20} /> },
-  { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
+  // { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
 ]
 
 // Memoized nav link component
-const NavLink = memo(({ item, collapsed, isActive, isAdmin, onNavigate }: {
+const NavLink = memo(({ item, collapsed, isActive, isAdmin, can, onNavigate }: {
   item: NavItem
   collapsed: boolean
   isActive: boolean
   isAdmin: boolean
+  can: (p: Permission) => boolean
   onNavigate: () => void
 }) => {
   if (item.adminOnly && !isAdmin) return null
+  if (item.permission && !can(item.permission)) return null
 
   return (
     <Link
@@ -89,20 +92,28 @@ NavLink.displayName = 'NavLink'
 
 export default function Sidebar() {
   const { data: session } = useSession()
-  const { isAdmin } = usePermissions()
+  const { isAdmin, can } = usePermissions()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   // Memoize filtered nav items
   const filteredNavItems = useMemo(() =>
-    navItems.filter(item => !item.adminOnly || isAdmin()),
-    [isAdmin]
+    navItems.filter(item => {
+      if (item.adminOnly && !isAdmin()) return false
+      if (item.permission && !can(item.permission)) return false
+      return true
+    }),
+    [isAdmin, can]
   )
 
   const filteredManagementItems = useMemo(() =>
-    managementItems.filter(item => !item.adminOnly || isAdmin()),
-    [isAdmin]
+    managementItems.filter(item => {
+      if (item.adminOnly && !isAdmin()) return false
+      if (item.permission && !can(item.permission)) return false
+      return true
+    }),
+    [isAdmin, can]
   )
 
   if (!session) return null
@@ -148,6 +159,7 @@ export default function Sidebar() {
               collapsed={collapsed}
               isActive={isActive(item.href)}
               isAdmin={isAdmin()}
+              can={can}
               onNavigate={() => setMobileOpen(false)}
             />
           ))}
@@ -168,6 +180,7 @@ export default function Sidebar() {
               collapsed={collapsed}
               isActive={isActive(item.href)}
               isAdmin={isAdmin()}
+              can={can}
               onNavigate={() => setMobileOpen(false)}
             />
           ))}
