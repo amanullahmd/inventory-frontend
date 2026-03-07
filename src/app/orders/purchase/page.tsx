@@ -24,8 +24,6 @@ export default function PurchaseOrdersPage() {
   const [items, setItems] = useState<any[]>([])
   const [lines, setLines] = useState<Array<{ itemId: string; quantity: string; unitPrice: string }>>([{ itemId: '', quantity: '', unitPrice: '' }])
   const [editingId, setEditingId] = useState<number | null>(null)
-  const STATUSES = ['DRAFT', 'APPROVED', 'PARTIAL_RECEIVED', 'RECEIVED', 'CLOSED', 'CANCELLED']
-  const [formStatus, setFormStatus] = useState<string>('DRAFT')
   const [rangeStart, setRangeStart] = useState<string>('')
   const [rangeEnd, setRangeEnd] = useState<string>('')
 
@@ -98,13 +96,11 @@ export default function PurchaseOrdersPage() {
       const updatedHeader = await PurchaseOrderService.updatePurchaseOrder(created.purchaseOrderId, {
         expectedDeliveryDate: form.expectedDeliveryDate,
         notes: form.notes,
-        status: formStatus
       } as UpdatePurchaseOrderRequest)
       setOrders(prev => prev.map(o => o.purchaseOrderId === updatedHeader.purchaseOrderId ? updatedHeader : o))
       setShowForm(false)
       setForm({ supplierId: 0, warehouseId: 0, orderDate: new Date().toISOString().slice(0, 10) })
       setLines([{ itemId: '', quantity: '', unitPrice: '' }])
-      setFormStatus('DRAFT')
     } catch (err: any) {
       setError(err.message || 'Failed to create purchase order')
     }
@@ -120,7 +116,6 @@ export default function PurchaseOrdersPage() {
       const updatedHeader = await PurchaseOrderService.updatePurchaseOrder(editingId, {
         expectedDeliveryDate: form.expectedDeliveryDate,
         notes: form.notes,
-        status: formStatus
       } as UpdatePurchaseOrderRequest)
       const updatedItems = await PurchaseOrderService.replaceItems(editingId, { items: payloadItems })
       const merged = { ...updatedHeader, totalAmount: updatedItems.totalAmount }
@@ -206,12 +201,6 @@ export default function PurchaseOrdersPage() {
               <label className="block text-sm font-medium mb-2">Expected Delivery</label>
               <input type="date" className="w-full rounded-lg border border-border px-3 py-2" value={form.expectedDeliveryDate || ''} onChange={e => setForm({ ...form, expectedDeliveryDate: e.target.value })} />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Status</label>
-              <select className="w-full rounded-lg border border-border px-3 py-2" value={formStatus} onChange={e => setFormStatus(e.target.value)}>
-                {STATUSES.map(s => (<option key={s} value={s}>{s}</option>))}
-              </select>
-            </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-2">Items</label>
               <div className="space-y-3">
@@ -252,7 +241,6 @@ export default function PurchaseOrdersPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">PO ID</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Supplier</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Branch</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Order Date</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">Total</th>
                 </tr>
@@ -275,7 +263,6 @@ export default function PurchaseOrdersPage() {
                             setLines(detail.items.map(it => ({ itemId: String(it.itemId), quantity: String(it.quantity), unitPrice: String(it.unitPrice) })))
                             // Open inline editor by reusing form with prefilled values
                             setEditingId(detail.purchaseOrderId)
-                            setFormStatus(detail.status || 'DRAFT')
                             setShowForm(true)
                           } catch (err: any) {
                             setError(err.message || 'Failed to open purchase order')
@@ -287,7 +274,6 @@ export default function PurchaseOrdersPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-foreground">{o.supplierName || `#${o.supplierId}`}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{o.warehouseName || `#${o.warehouseId}`}</td>
-                    <td className="px-6 py-4 text-sm text-foreground">{o.status}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateDMY(o.orderDate)}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{o.totalAmount !== undefined ? `$${o.totalAmount?.toFixed?.(2) ?? o.totalAmount}` : '-'}</td>
                   </tr>
