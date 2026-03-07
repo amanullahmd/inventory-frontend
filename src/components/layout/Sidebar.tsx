@@ -1,9 +1,9 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect, memo, useMemo } from 'react'
+import { useState, memo, useMemo } from 'react'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
   LayoutDashboard,
@@ -12,14 +12,12 @@ import {
   ArrowUpFromLine,
   History,
   ShoppingCart,
-  Receipt,
   TrendingUp,
   Users,
   Building2,
   Tags,
   Truck,
   Settings,
-  LogOut,
   ChevronLeft,
   ChevronRight,
   Menu,
@@ -54,7 +52,7 @@ const managementItems: NavItem[] = [
 ]
 
 // Memoized nav link component
-const NavLink = memo(({ item, collapsed, isActive, isAdmin, onNavigate }: { 
+const NavLink = memo(({ item, collapsed, isActive, isAdmin, onNavigate }: {
   item: NavItem
   collapsed: boolean
   isActive: boolean
@@ -62,15 +60,15 @@ const NavLink = memo(({ item, collapsed, isActive, isAdmin, onNavigate }: {
   onNavigate: () => void
 }) => {
   if (item.adminOnly && !isAdmin) return null
-  
+
   return (
     <Link
       href={item.href}
       onClick={onNavigate}
       className={`
         flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-        ${isActive 
-          ? 'bg-primary text-primary-foreground shadow-md' 
+        ${isActive
+          ? 'bg-primary text-primary-foreground shadow-md'
           : 'text-muted-foreground hover:bg-accent hover:text-foreground'
         }
         ${collapsed ? 'justify-center' : ''}
@@ -92,18 +90,19 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  if (!session) return null
-
   // Memoize filtered nav items
-  const filteredNavItems = useMemo(() => 
+  const filteredNavItems = useMemo(() =>
     navItems.filter(item => !item.adminOnly || isAdmin()),
     [isAdmin]
   )
 
-  const filteredManagementItems = useMemo(() => 
+  const filteredManagementItems = useMemo(() =>
     managementItems.filter(item => !item.adminOnly || isAdmin()),
     [isAdmin]
   )
+
+  if (!session) return null
+
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
@@ -139,8 +138,8 @@ export default function Sidebar() {
       <div className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-1">
           {filteredNavItems.map(item => (
-            <NavLink 
-              key={item.href} 
+            <NavLink
+              key={item.href}
               item={item}
               collapsed={collapsed}
               isActive={isActive(item.href)}
@@ -156,11 +155,11 @@ export default function Sidebar() {
           </div>
         )}
         {collapsed && <div className="my-4 border-t border-sidebar-border" />}
-        
+
         <div className="space-y-1">
           {filteredManagementItems.map(item => (
-            <NavLink 
-              key={item.href} 
+            <NavLink
+              key={item.href}
               item={item}
               collapsed={collapsed}
               isActive={isActive(item.href)}
@@ -171,35 +170,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* User Section */}
-      <div className="border-t border-sidebar-border p-3">
-        <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-semibold text-primary-foreground">
-              {session.user?.name?.charAt(0).toUpperCase() || 'U'}
-            </span>
-          </div>
-          {!collapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{session.user?.name}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {session.roles?.join(', ').replace(/ROLE_/g, '')}
-              </p>
-            </div>
-          )}
-        </div>
 
-        <div className={`flex ${collapsed ? 'flex-col' : ''} gap-2 mt-3`}>
-          <button
-            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors ${collapsed ? 'w-full' : 'flex-1'}`}
-            title="Sign out"
-          >
-            <LogOut size={16} />
-            {!collapsed && <span className="text-sm">Sign out</span>}
-          </button>
-        </div>
-      </div>
     </>
   )
 
@@ -223,7 +194,7 @@ export default function Sidebar() {
 
       {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
           onClick={() => setMobileOpen(false)}
         />
