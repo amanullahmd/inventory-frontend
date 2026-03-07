@@ -288,7 +288,7 @@ export default function ItemsPage() {
       }
 
       const filename = `inventory-${DateFilterService.formatDateForFilename(new Date())}.pdf`
-      PDFExportService.generateInventoryPDF(items, categories, {
+      await PDFExportService.generateInventoryPDF(items, categories, {
         filename,
         title: 'Inventory Snapshot',
         timestamp: new Date(),

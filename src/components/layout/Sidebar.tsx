@@ -21,7 +21,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X
+  X,
+  ClipboardList
 } from 'lucide-react'
 
 interface NavItem {
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
   { name: 'Stock In', href: '/stock-in', icon: <ArrowDownToLine size={20} /> },
   { name: 'Stock Out', href: '/stock-out', icon: <ArrowUpFromLine size={20} /> },
   { name: 'Movements', href: '/stock-movements', icon: <History size={20} /> },
+  { name: 'Register', href: '/register', icon: <ClipboardList size={20} /> },
   { name: 'Most Used', href: '/reports/most-used-items', icon: <TrendingUp size={20} /> },
   { name: 'Purchase Orders', href: '/orders/purchase', icon: <ShoppingCart size={20} /> },
   { name: 'Demand', href: '/demand', icon: <TrendingUp size={20} /> },

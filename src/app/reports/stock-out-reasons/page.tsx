@@ -118,7 +118,7 @@ export default function StockOutReasonsReportPage() {
     setExportLoading(true)
     try {
       const filename = `stock-out-reasons-${DateFilterService.formatDateForFilename(new Date())}.pdf`
-      PDFExportService.generateReasonBreakdownPDF(reasons, {
+      await PDFExportService.generateReasonBreakdownPDF(reasons, {
         filename,
         title: 'Stock-Out Reasons Report',
         timestamp: new Date(),
