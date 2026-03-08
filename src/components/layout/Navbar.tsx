@@ -103,7 +103,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+            onClick={() => signOut({ callbackUrl: `${window.location.origin}/auth/signin` })}
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-base font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
           >
             Sign out

@@ -19,7 +19,7 @@ export const SessionExpirationHandler: React.FC<SessionExpirationHandlerProps> =
     warningThreshold: 300000, // Warn 5 minutes before expiry
     onExpired: () => {
       // Session expired - sign out immediately
-      signOut({ callbackUrl: '/auth/signin' });
+      signOut({ callbackUrl: `${window.location.origin}/auth/signin` });
     },
     onWarning: (timeLeft) => {
       setTimeLeft(timeLeft);
@@ -34,7 +34,7 @@ export const SessionExpirationHandler: React.FC<SessionExpirationHandlerProps> =
   };
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/auth/signin' });
+    signOut({ callbackUrl: `${window.location.origin}/auth/signin` });
   };
 
   const formatTimeLeft = (milliseconds: number) => {

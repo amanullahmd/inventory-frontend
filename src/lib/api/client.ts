@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
 import {
   ApiResponse,
   ApiError,
@@ -8,8 +8,8 @@ import {
   StockOutRequest,
   StockMovement,
   User,
-  CreateUserRequest
-} from '@/lib/types';
+  CreateUserRequest,
+} from "@/lib/types";
 
 export interface UpdateUserRequest {
   firstName: string;
@@ -22,8 +22,8 @@ export interface UpdateUserRequest {
   enabled?: boolean;
 }
 
-import { getSession, signOut } from 'next-auth/react';
-import { mockApiClient } from './mockClient';
+import { getSession, signOut } from "next-auth/react";
+import { mockApiClient } from "./mockClient";
 
 // Enable mock mode to disable database connections
 const USE_MOCK_API = true;
@@ -34,12 +34,12 @@ class ApiClient {
   private maxRetries = 3;
 
   constructor() {
-    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api";
     this.client = axios.create({
       baseURL: base,
       timeout: 20000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -47,18 +47,21 @@ class ApiClient {
     this.client.interceptors.request.use(
       async (config) => {
         // If auth header is not set in config and not set in defaults
-        if (!config.headers['Authorization'] && !this.client.defaults.headers.common['Authorization']) {
-            const session = await getSession();
-            if ((session as any)?.accessToken) {
-                const token = (session as any).accessToken;
-                config.headers['Authorization'] = `Bearer ${token}`;
-                // Cache it for future requests
-                this.setAuthToken(token);
-            }
+        if (
+          !config.headers["Authorization"] &&
+          !this.client.defaults.headers.common["Authorization"]
+        ) {
+          const session = await getSession();
+          if ((session as any)?.accessToken) {
+            const token = (session as any).accessToken;
+            config.headers["Authorization"] = `Bearer ${token}`;
+            // Cache it for future requests
+            this.setAuthToken(token);
+          }
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // Response interceptor for error handling
@@ -74,15 +77,15 @@ class ApiClient {
         // Handle 401 unauthorized - attempt token refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-          
+
           try {
             const session = await getSession();
             if (session?.refreshToken) {
               // Attempt to refresh the token
               const refreshRes = await fetch(`${base}/auth/refresh`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken: session.refreshToken })
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refreshToken: session.refreshToken }),
               });
 
               if (refreshRes.ok) {
@@ -95,15 +98,17 @@ class ApiClient {
               }
             }
           } catch (refreshError) {
-            console.error('Token refresh failed:', refreshError);
+            console.error("Token refresh failed:", refreshError);
           }
 
           // If refresh failed, sign out user
-          if (typeof window !== 'undefined') {
-            await signOut({ callbackUrl: '/auth/signin' });
+          if (typeof window !== "undefined") {
+            await signOut({
+              callbackUrl: `${window.location.origin}/auth/signin`,
+            });
           }
           const apiError: ApiError = {
-            message: 'Authentication required',
+            message: "Authentication required",
             status: 401,
             details: error.response?.data,
           };
@@ -112,12 +117,14 @@ class ApiClient {
 
         // Handle 403 forbidden - session expired, sign out user
         if (error.response?.status === 403) {
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             // Sign out and redirect to login
-            await signOut({ callbackUrl: '/auth/signin' });
+            await signOut({
+              callbackUrl: `${window.location.origin}/auth/signin`,
+            });
           }
           const apiError: ApiError = {
-            message: 'Session expired. Please sign in again.',
+            message: "Session expired. Please sign in again.",
             status: 403,
             details: error.response?.data,
           };
@@ -127,28 +134,33 @@ class ApiClient {
         // Handle network errors with retry logic
         if (!error.response && this.retryCount < this.maxRetries) {
           this.retryCount++;
-          console.log(`Retrying request (${this.retryCount}/${this.maxRetries})`);
+          console.log(
+            `Retrying request (${this.retryCount}/${this.maxRetries})`,
+          );
           return this.client.request(originalRequest!);
         }
 
         const apiError: ApiError = {
-          message: (error.response?.data as { message?: string })?.message || error.message || 'An error occurred',
+          message:
+            (error.response?.data as { message?: string })?.message ||
+            error.message ||
+            "An error occurred",
           status: error.response?.status || 500,
           details: error.response?.data,
         };
         return Promise.reject(apiError);
-      }
+      },
     );
   }
 
   // Method to set authorization token
   setAuthToken(token: string) {
-    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    this.client.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   }
 
   // Method to clear authorization token
   clearAuthToken() {
-    delete this.client.defaults.headers.common['Authorization'];
+    delete this.client.defaults.headers.common["Authorization"];
   }
 
   // Enhanced error handling methods
@@ -156,47 +168,51 @@ class ApiClient {
     if (error.response) {
       // Server responded with error status
       return {
-        message: (error.response.data as { message?: string })?.message || `Server error: ${error.response.status}`,
+        message:
+          (error.response.data as { message?: string })?.message ||
+          `Server error: ${error.response.status}`,
         status: error.response.status,
         details: error.response.data,
       };
     } else if (error.request) {
       // Network error
       return {
-        message: 'Network error - please check your connection',
+        message: "Network error - please check your connection",
         status: 0,
-        details: { type: 'network_error' },
+        details: { type: "network_error" },
       };
     } else {
       // Request setup error
       return {
-        message: error.message || 'Request configuration error',
+        message: error.message || "Request configuration error",
         status: 0,
-        details: { type: 'request_error' },
+        details: { type: "request_error" },
       };
     }
   }
 
   // Success response processing
-  private processSuccessResponse<T>(response: AxiosResponse<ApiResponse<T> | T>): ApiResponse<T> {
+  private processSuccessResponse<T>(
+    response: AxiosResponse<ApiResponse<T> | T>,
+  ): ApiResponse<T> {
     const payload = response.data as ApiResponse<T> | T;
 
     if (
       payload &&
-      typeof payload === 'object' &&
-      'data' in payload &&
+      typeof payload === "object" &&
+      "data" in payload &&
       !Array.isArray(payload)
     ) {
       const wrapped = payload as ApiResponse<T>;
       return {
         data: wrapped.data,
-        message: wrapped.message || 'Operation successful',
+        message: wrapped.message || "Operation successful",
       };
     }
 
     return {
       data: payload as T,
-      message: 'Operation successful',
+      message: "Operation successful",
     };
   }
 
@@ -207,7 +223,7 @@ class ApiClient {
         const response = await mockApiClient.get<T>(url);
         return {
           data: response.data,
-          message: 'Operation successful',
+          message: "Operation successful",
         };
       }
       const response = await this.client.get<ApiResponse<T> | T>(url);
@@ -223,7 +239,7 @@ class ApiClient {
         const response = await mockApiClient.post<T>(url, data);
         return {
           data: response.data,
-          message: 'Operation successful',
+          message: "Operation successful",
         };
       }
       const response = await this.client.post<ApiResponse<T> | T>(url, data);
@@ -239,7 +255,7 @@ class ApiClient {
         const response = await mockApiClient.put<T>(url, data);
         return {
           data: response.data,
-          message: 'Operation successful',
+          message: "Operation successful",
         };
       }
       const response = await this.client.put<ApiResponse<T> | T>(url, data);
@@ -255,7 +271,7 @@ class ApiClient {
         const response = await mockApiClient.patch<T>(url, data);
         return {
           data: response.data,
-          message: 'Operation successful',
+          message: "Operation successful",
         };
       }
       const response = await this.client.patch<ApiResponse<T> | T>(url, data);
@@ -271,7 +287,7 @@ class ApiClient {
         const response = await mockApiClient.delete<T>(url);
         return {
           data: response.data,
-          message: 'Operation successful',
+          message: "Operation successful",
         };
       }
       const response = await this.client.delete<ApiResponse<T> | T>(url);
@@ -283,12 +299,12 @@ class ApiClient {
 
   // Public API methods
   async getItems(): Promise<Item[]> {
-    const response = await this.get<Item[]>('/items');
+    const response = await this.get<Item[]>("/items");
     return response.data;
   }
 
   async createItem(item: CreateItemRequest): Promise<Item> {
-    const response = await this.post<Item>('/items', item);
+    const response = await this.post<Item>("/items", item);
     return response.data;
   }
 
@@ -296,7 +312,7 @@ class ApiClient {
     if (USE_MOCK_API) {
       return await mockApiClient.addStock<StockMovement>(request);
     }
-    const response = await this.post<StockMovement>('/stock/in', request);
+    const response = await this.post<StockMovement>("/stock/in", request);
     return response.data;
   }
 
@@ -304,17 +320,17 @@ class ApiClient {
     if (USE_MOCK_API) {
       return await mockApiClient.removeStock<StockMovement>(request);
     }
-    const response = await this.post<StockMovement>('/stock/out', request);
+    const response = await this.post<StockMovement>("/stock/out", request);
     return response.data;
   }
 
   async getUsers(): Promise<User[]> {
-    const response = await this.get<User[]>('/users');
+    const response = await this.get<User[]>("/users");
     return response.data;
   }
 
   async createUser(user: CreateUserRequest): Promise<User> {
-    const response = await this.post<User>('/auth/register', user);
+    const response = await this.post<User>("/auth/register", user);
     return response.data;
   }
 

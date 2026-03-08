@@ -221,7 +221,7 @@ export default function TopHeader() {
                 <button
                   onClick={() => {
                     setIsDropdownOpen(false)
-                    signOut({ callbackUrl: '/auth/signin' })
+                    signOut({ callbackUrl: `${window.location.origin}/auth/signin` })
                   }}
                   className="w-full text-left px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center transition-colors cursor-pointer outline-none group"
                   role="menuitem"

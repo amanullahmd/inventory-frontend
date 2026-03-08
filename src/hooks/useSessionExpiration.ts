@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
-import { signOut } from 'next-auth/react';
+import { useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 interface UseSessionExpirationOptions {
   checkInterval?: number; // in milliseconds
@@ -11,7 +11,9 @@ interface UseSessionExpirationOptions {
   onWarning?: (timeLeft: number) => void;
 }
 
-export const useSessionExpiration = (options: UseSessionExpirationOptions = {}) => {
+export const useSessionExpiration = (
+  options: UseSessionExpirationOptions = {},
+) => {
   const { data: session, status } = useSession();
   const {
     checkInterval = 60000, // Check every minute
@@ -29,12 +31,12 @@ export const useSessionExpiration = (options: UseSessionExpirationOptions = {}) 
 
     // Session has expired
     if (timeLeft <= 0) {
-      console.log('Session expired, signing out...');
+      console.log("Session expired, signing out...");
       if (onExpired) {
         onExpired();
       } else {
         // Default behavior: sign out and redirect to login
-        signOut({ callbackUrl: '/auth/signin' });
+        signOut({ callbackUrl: `${window.location.origin}/auth/signin` });
       }
       return;
     }
@@ -46,7 +48,7 @@ export const useSessionExpiration = (options: UseSessionExpirationOptions = {}) 
   }, [session, warningThreshold, onExpired, onWarning]);
 
   useEffect(() => {
-    if (status !== 'authenticated' || !session) {
+    if (status !== "authenticated" || !session) {
       return;
     }
 
@@ -64,7 +66,7 @@ export const useSessionExpiration = (options: UseSessionExpirationOptions = {}) 
   // Utility function to get time left until expiration
   const getTimeUntilExpiration = useCallback(() => {
     if (!session?.expires) return null;
-    
+
     const now = new Date().getTime();
     const expiryTime = new Date(session.expires).getTime();
     return Math.max(0, expiryTime - now);
