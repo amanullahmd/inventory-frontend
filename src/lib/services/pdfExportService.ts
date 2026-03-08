@@ -566,4 +566,77 @@ export class PDFExportService {
     ]);
     await this.generateReusableTablePDF(columns, data, options);
   }
+
+  static async generateDemandPDF(
+    demand: any,
+    options: ExportOptions,
+  ): Promise<void> {
+    const doc = new jsPDF();
+    const { logo, signature, fontBase64 } = await this.getCommonImages();
+
+    if (fontBase64) {
+      const cleanBase64 = fontBase64.replace(/^data:font\/\w+;base64,/, "");
+      doc.addFileToVFS("solaiman.ttf", cleanBase64);
+      doc.addFont("solaiman.ttf", "solaiman", "normal");
+      doc.setFont("solaiman", "normal");
+    }
+
+    const details = {
+      "Demand Code": demand.demandCode || `DM-${demand.demandId}`,
+      Status: (demand.status || "PENDING").replace(/_/g, " "),
+      "Requested By": demand.requestedByName || "N/A",
+      Role: (demand.requestedByRole || "N/A").replace(/_/g, " "),
+      "Created At": new Date(demand.createdAt).toLocaleString(),
+      ...(demand.note ? { Note: demand.note } : {}),
+    };
+
+    const yPosition = this.addReusableHeader(
+      doc,
+      options.title,
+      options.timestamp,
+      demand.items?.length || 1,
+      logo,
+      details,
+    );
+
+    const columns = ["Item Name", "SKU", "Units"];
+    let tableData: any[][] = [];
+
+    if (demand.items && demand.items.length > 0) {
+      tableData = demand.items.map((it: any) => [
+        it.name || it.itemName || "N/A",
+        it.sku || "N/A",
+        it.units.toString(),
+      ]);
+    } else {
+      tableData = [
+        [
+          demand.itemName || "N/A",
+          demand.sku || "N/A",
+          demand.unit || demand.units || "1",
+        ],
+      ];
+    }
+
+    autoTable(doc, {
+      head: [columns.map((c) => this.reshapeBengali(c))],
+      body: tableData.map((row) =>
+        row.map((r) => this.reshapeBengali(String(r || ""))),
+      ),
+      startY: yPosition,
+      margin: this.MARGIN,
+      styles: {
+        font: fontBase64 ? "solaiman" : "helvetica",
+      },
+      headStyles: {
+        font: fontBase64 ? "solaiman" : "helvetica",
+        fontStyle: fontBase64 ? "normal" : "bold",
+      },
+      didDrawPage: (pData) => this.addFooter(doc, pData),
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY || yPosition;
+    this.addSignatures(doc, finalY, signature);
+    this.downloadPDF(doc, options.filename);
+  }
 }
