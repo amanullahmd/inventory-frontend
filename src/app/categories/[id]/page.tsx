@@ -122,7 +122,7 @@ export default function CategoryDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-transparent text-foreground">
         <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
           <LoadingSpinner size="large" text="Loading category..." />
         </div>
@@ -132,7 +132,7 @@ export default function CategoryDetailPage() {
 
   if (error || !category) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-transparent text-foreground">
         <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
           <ErrorMessage
             message={error || 'Category not found'}
@@ -144,7 +144,7 @@ export default function CategoryDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="mb-8">

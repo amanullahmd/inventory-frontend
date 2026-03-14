@@ -132,7 +132,7 @@ export default function PurchaseOrdersPage() {
   if (!session) { return <div className="p-10 text-center">Please sign in to view purchase orders.</div> }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-down">
           <div>

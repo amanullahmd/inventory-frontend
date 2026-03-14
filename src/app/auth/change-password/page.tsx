@@ -93,7 +93,7 @@ export default function ChangePassword() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-12">
+    <div className="min-h-screen bg-transparent px-4 py-12">
       <div className="mx-auto w-full max-w-md">
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div>

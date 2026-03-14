@@ -72,7 +72,7 @@ export default function AuditLogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>

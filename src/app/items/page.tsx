@@ -368,7 +368,7 @@ export default function ItemsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="mb-8">

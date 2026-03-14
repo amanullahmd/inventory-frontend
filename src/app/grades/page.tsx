@@ -101,7 +101,7 @@ export default function GradesPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center animate-slide-down">
           <div className="flex items-center gap-2">

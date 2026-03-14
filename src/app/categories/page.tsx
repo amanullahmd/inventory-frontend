@@ -177,7 +177,7 @@ export default function CategoriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-transparent text-foreground">
         <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
           <LoadingSpinner size="large" text="Loading categories..." />
         </div>
@@ -186,7 +186,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8 animate-slide-down">
