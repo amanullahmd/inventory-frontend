@@ -123,16 +123,18 @@ export default function SignIn() {
           </div>
 
           {/* Content */}
-          <div className="relative z-10 px-8 pt-12 space-y-8 flex-1 flex flex-col items-center justify-center">
+          <div className="relative z-10 px-8 pt-12 md:pt-20 flex-1 flex flex-col items-center justify-start">
             {/* Government Text */}
-            <div className="text-center space-y-4 mb-12">
-              <p className="text-white text-2xl font-bold tracking-wide">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
-              <p className="text-primary-foreground text-xl font-semibold opacity-90">প্রাথমিক শিক্ষা অধিদপ্তর</p>
-              <div className="h-1 w-24 bg-white/30 mx-auto rounded-full"></div>
+            <div className="text-center space-y-4 mb-10 w-full">
+              <p className="text-white text-2xl md:text-3xl font-bold tracking-wide">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
+              <p className="text-primary-foreground text-xl md:text-2xl font-semibold opacity-90">প্রাথমিক শিক্ষা অধিদপ্তর</p>
+              <div className="h-1 w-24 bg-white/30 mx-auto rounded-full mt-4"></div>
             </div>
 
             {/* Cover Photo / Slider */}
-            <AuthSlider />
+            <div className="w-full max-w-3xl px-4 flex-1 flex items-start justify-center">
+              <AuthSlider />
+            </div>
           </div>
 
           <div className="relative z-10 px-8 pb-8 text-white/70 text-xs text-center">
