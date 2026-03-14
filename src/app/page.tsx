@@ -117,14 +117,12 @@ export default function Home() {
   ]
 
   const divisionData = [
-    { name: 'ঢাকা', items: 1200, value: 85000, lowStock: 45, outOfStock: 12 },
-    { name: 'চট্টগ্রাম', items: 950, value: 62000, lowStock: 30, outOfStock: 8 },
-    { name: 'রাজশাহী', items: 600, value: 38000, lowStock: 15, outOfStock: 5 },
-    { name: 'খুলনা', items: 550, value: 34000, lowStock: 12, outOfStock: 4 },
-    { name: 'বরিশাল', items: 400, value: 25000, lowStock: 8, outOfStock: 2 },
-    { name: 'সিলেট', items: 480, value: 31000, lowStock: 10, outOfStock: 3 },
-    { name: 'রংপুর', items: 350, value: 21000, lowStock: 7, outOfStock: 1 },
-    { name: 'ময়মনসিংহ', items: 320, value: 19000, lowStock: 5, outOfStock: 1 },
+    { name: 'DPE', items: 1200, value: 85000, lowStock: 45, outOfStock: 12 },
+    { name: 'Divisions', items: 950, value: 62000, lowStock: 30, outOfStock: 8 },
+    { name: 'Districts', items: 600, value: 38000, lowStock: 15, outOfStock: 5 },
+    { name: 'Upazilas', items: 550, value: 34000, lowStock: 12, outOfStock: 4 },
+    { name: 'PTI', items: 400, value: 25000, lowStock: 8, outOfStock: 2 },
+    { name: "URC's", items: 480, value: 31000, lowStock: 10, outOfStock: 3 },
   ]
 
   const customTooltip = {
