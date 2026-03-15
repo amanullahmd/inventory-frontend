@@ -10,8 +10,23 @@ import { ItemService } from '@/lib/services/itemService'
 import { formatDateDMY, formatDateTime } from '@/lib/utils/date'
 import { usePermissions } from '@/hooks/usePermissions'
 import { DemandStatus } from '@/lib/services/demandService'
-import { Check, X, AlertCircle, Clock, Trash2, Download } from 'lucide-react'
+import { Check, X, AlertCircle, Clock, Trash2, Download, AlertTriangle } from 'lucide-react'
 import { PDFExportService } from '@/lib/services/pdfExportService'
+
+// Example demo user to show in the demand list
+const DEMO_USER_DEMAND: Demand = {
+  demandId: 9999901,
+  demandCode: 'DEM-DEMO-001',
+  status: 'PENDING_DIVISION_ADMIN',
+  note: 'Monthly office supply requisition',
+  requestedByName: 'আব্দুল করিম (Abdul Karim)',
+  requestedByRole: 'DIVISION_USER',
+  itemId: 0,
+  itemName: 'A4 Paper',
+  sku: 'PAPER-A4-500',
+  createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  items: [{ demandItemId: 1, itemId: 1, sku: 'PAPER-A4-500', name: 'A4 Paper (500 Sheets)', units: 10 }],
+}
 
 export default function DemandPage() {
   const { data: session, status } = useSession()
@@ -26,8 +41,43 @@ export default function DemandPage() {
   const [demandCode, setDemandCode] = useState<string>('')
   const [showForm, setShowForm] = useState(false)
   const [rejectionModal, setRejectionModal] = useState<{ id: number; reason: string } | null>(null)
+  const [budgetWarning, setBudgetWarning] = useState<string | null>(null)
 
   const [lines, setLines] = useState<Array<{ itemId: string; units: string }>>([{ itemId: '', units: '1' }])
+
+  // Calculate how many units of each item have been demanded this month
+  const getMonthlyDemandedUnits = (itemId: number): number => {
+    const now = new Date()
+    const thisMonth = now.getMonth()
+    const thisYear = now.getFullYear()
+    return demands
+      .filter(d => {
+        const created = new Date(d.createdAt)
+        return created.getMonth() === thisMonth && created.getFullYear() === thisYear
+      })
+      .reduce((sum, d) => {
+        const itemLines = (d.items || []).filter(it => it.itemId === itemId)
+        return sum + itemLines.reduce((s, it) => s + it.units, 0)
+      }, 0)
+  }
+
+  const checkBudget = (newLines: Array<{ itemId: string; units: string }>) => {
+    for (const line of newLines) {
+      if (!line.itemId || !line.units) continue
+      const item = items.find((it: any) => it.id === line.itemId)
+      if (!item) continue
+      const maxStock = item.maximumStock || item.maximumDemand
+      if (!maxStock) continue
+      const alreadyDemanded = getMonthlyDemandedUnits(parseInt(line.itemId))
+      const newTotal = alreadyDemanded + parseInt(line.units || '0')
+      if (newTotal > maxStock) {
+        setBudgetWarning(`"${item.name}": monthly limit is ${maxStock} units. Already demanded: ${alreadyDemanded}. Requesting ${line.units} would exceed the budget.`)
+        return false
+      }
+    }
+    setBudgetWarning(null)
+    return true
+  }
 
   const getItemLabel = (itemId: number, name?: string, sku?: string) => {
     if (name && sku) return `${name} (${sku})`
@@ -44,7 +94,12 @@ export default function DemandPage() {
         DemandService.getDemands().catch(() => []),
         ItemService.getItems().catch(() => []),
       ])
-      setDemands(ds as any)
+      // Merge demo user demand if not already present
+      const allDemands = ds as Demand[]
+      if (!allDemands.find(d => d.demandId === DEMO_USER_DEMAND.demandId)) {
+        allDemands.unshift(DEMO_USER_DEMAND)
+      }
+      setDemands(allDemands)
       setItems(is as any)
     } catch (err: any) {
       setError(err.message || 'Failed to load demands')
@@ -60,8 +115,9 @@ export default function DemandPage() {
     e.preventDefault()
     const payloadItems = lines.filter(l => l.itemId && l.units).map(l => ({ itemId: parseInt(l.itemId), units: parseInt(l.units) }))
     if (payloadItems.length === 0) { setError('At least one item is required'); return }
+    if (!checkBudget(lines)) return
     try {
-      setError(null); setSuccess(null)
+      setError(null); setSuccess(null); setBudgetWarning(null)
       const created = await DemandService.createDemand({
         ...form,
         items: payloadItems,
@@ -173,6 +229,13 @@ export default function DemandPage() {
 
         {success && <SuccessMessage message={success} onDismiss={() => setSuccess(null)} autoHide />}
         {error && <ErrorMessage message={error} onRetry={fetchAll} />}
+        {budgetWarning && (
+          <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+            <span className="text-sm">{budgetWarning}</span>
+            <button onClick={() => setBudgetWarning(null)} className="ml-auto"><X size={14} /></button>
+          </div>
+        )}
 
         {rejectionModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -229,11 +292,28 @@ export default function DemandPage() {
                     {lines.map((line, idx) => (
                       <div key={idx} className="flex items-center gap-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1">
-                          <select value={line.itemId} onChange={e => setLines(lines.map((l, i) => i === idx ? { ...l, itemId: e.target.value } : l))} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground">
+                          <select value={line.itemId} onChange={e => {
+                            const updated = lines.map((l, i) => i === idx ? { ...l, itemId: e.target.value } : l)
+                            setLines(updated)
+                            checkBudget(updated)
+                          }} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground">
                             <option value="">Choose an item</option>
-                            {items.map((it: any) => (<option key={it.id} value={it.id}>{it.name} ({it.sku})</option>))}
+                            {items.map((it: any) => {
+                              const maxStock = it.maximumStock || it.maximumDemand
+                              const alreadyDemanded = getMonthlyDemandedUnits(parseInt(it.id))
+                              const remaining = maxStock ? maxStock - alreadyDemanded : null
+                              return (
+                                <option key={it.id} value={it.id} disabled={remaining !== null && remaining <= 0}>
+                                  {it.name} ({it.sku}){remaining !== null ? ` — ${remaining > 0 ? remaining + ' remaining' : 'BUDGET EXCEEDED'}` : ''}
+                                </option>
+                              )
+                            })}
                           </select>
-                          <input type="number" min="1" value={line.units} onChange={e => setLines(lines.map((l, i) => i === idx ? { ...l, units: e.target.value } : l))} placeholder="Units" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground" />
+                          <input type="number" min="1" value={line.units} onChange={e => {
+                            const updated = lines.map((l, i) => i === idx ? { ...l, units: e.target.value } : l)
+                            setLines(updated)
+                            checkBudget(updated)
+                          }} placeholder="Units" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground" />
                         </div>
                         {idx > 0 && (
                           <button
@@ -255,6 +335,12 @@ export default function DemandPage() {
                   <label className="block text-sm font-medium mb-2 text-foreground">Note</label>
                   <textarea className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground" rows={3} value={form.note || ''} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="Reason or additional info" />
                 </div>
+                {budgetWarning && (
+                  <div className="md:col-span-2 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                    <span className="text-xs">{budgetWarning}</span>
+                  </div>
+                )}
                 <div className="md:col-span-2 flex gap-3 justify-end mt-4">
                   {editingId ? (
                     <>
@@ -307,6 +393,7 @@ export default function DemandPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground whitespace-nowrap">Item</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground whitespace-nowrap">Unit</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground whitespace-nowrap">Added By</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground whitespace-nowrap">Approved By</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground whitespace-nowrap">Created</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground whitespace-nowrap">Approve Time</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground whitespace-nowrap">Actions</th>
@@ -319,7 +406,7 @@ export default function DemandPage() {
                   <tr key={d.demandId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
                       <button
-                        className={`font-bold hover:underline transition-colors ${!canEdit(d) ? 'text-muted-foreground cursor-not-allowed opacity-60' : 'text-primary'}`}
+                        className={`font-bold hover:underline transition-colors ${!canEdit(d) ? 'text-foreground/60 cursor-not-allowed' : 'text-foreground'}`}
                         disabled={!canEdit(d)}
                         onClick={async () => {
                           try {
@@ -351,33 +438,41 @@ export default function DemandPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{d.note || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                    <td className="px-6 py-4 text-sm text-foreground">{d.note || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-foreground">
                       <div className="flex flex-col">
-                        <span className="font-medium text-foreground">
+                        <span className="font-medium">
                           {d.items && d.items.length > 0
                             ? `${getItemLabel(d.items[0].itemId, d.items[0].name, d.items[0].sku)}${d.items.length > 1 ? ` +${d.items.length - 1} more` : ''}`
                             : getItemLabel(d.itemId, d.itemName, d.sku)}
                         </span>
-                        <span className="text-xs text-muted-foreground/60">{formatDateDMY(d.createdAt)}</span>
+                        <span className="text-xs text-muted-foreground">{formatDateDMY(d.createdAt)}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground font-semibold">{d.items && d.items.length > 0 ? d.items[0].units : (d.unit || '-')}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                    <td className="px-6 py-4 text-sm text-foreground font-semibold">{d.items && d.items.length > 0 ? d.items[0].units : (d.unit || '-')}</td>
+                    <td className="px-6 py-4 text-sm text-foreground">
                       {d.requestedByName ? (
                         <div className="flex flex-col">
-                          <span className="font-medium text-foreground">{d.requestedByName}</span>
+                          <span className="font-medium">{d.requestedByName}</span>
                           <span className="text-[10px] uppercase font-bold text-primary/70">{d.requestedByRole?.replace(/_/g, ' ') || 'User'}</span>
                         </div>
                       ) : '-'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm text-foreground">
+                      {d.approvedBy ? (
+                        <div className="flex flex-col">
+                          <span className="font-medium">{d.approvedBy}</span>
+                          <span className="text-[10px] uppercase font-bold text-emerald-600/70 dark:text-emerald-400/70">APPROVER</span>
+                        </div>
+                      ) : (d.status === 'APPROVED' ? <span className="font-medium">Admin</span> : '-')}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-foreground whitespace-nowrap">
                       <div className="flex flex-col">
                         <span>{formatDateDMY(d.createdAt)}</span>
-                        <span className="text-[10px]">{formatDateTime(d.createdAt).split(' ')[1]}</span>
+                        <span className="text-[10px] text-muted-foreground">{formatDateTime(d.createdAt).split(' ')[1]}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                    <td className="px-6 py-4 text-sm text-foreground">
                       {d.approvedAt ? (
                         <div className="flex flex-col">
                           <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">

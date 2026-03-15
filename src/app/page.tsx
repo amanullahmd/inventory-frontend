@@ -116,13 +116,20 @@ export default function Home() {
     { name: 'ডিসে', totalItems: 750, value: 5400, stockIn: 350, stockOut: 280, usage: 450 },
   ]
 
+  // DPE Administrative Divisions (দপ্তর) - 12 divisions
   const divisionData = [
-    { name: 'DPE', items: 1200, value: 85000, lowStock: 45, outOfStock: 12 },
-    { name: 'Divisions', items: 950, value: 62000, lowStock: 30, outOfStock: 8 },
-    { name: 'Districts', items: 600, value: 38000, lowStock: 15, outOfStock: 5 },
-    { name: 'Upazilas', items: 550, value: 34000, lowStock: 12, outOfStock: 4 },
-    { name: 'PTI', items: 400, value: 25000, lowStock: 8, outOfStock: 2 },
-    { name: "URC's", items: 480, value: 31000, lowStock: 10, outOfStock: 3 },
+    { name: "DG's Dept", items: 1100, value: 78000, lowStock: 40, outOfStock: 10 },
+    { name: "ADG's Dept", items: 850, value: 59000, lowStock: 28, outOfStock: 7 },
+    { name: 'ADG (PEDP)', items: 920, value: 64000, lowStock: 32, outOfStock: 9 },
+    { name: 'Admin Div', items: 750, value: 52000, lowStock: 25, outOfStock: 6 },
+    { name: 'Planning & Dev', items: 630, value: 43000, lowStock: 18, outOfStock: 4 },
+    { name: 'IMD', items: 580, value: 39000, lowStock: 16, outOfStock: 3 },
+    { name: 'Policy & Op', items: 490, value: 33000, lowStock: 12, outOfStock: 2 },
+    { name: 'Training Div', items: 720, value: 49000, lowStock: 22, outOfStock: 5 },
+    { name: 'Finance Div', items: 840, value: 58000, lowStock: 30, outOfStock: 8 },
+    { name: 'Procurement', items: 960, value: 67000, lowStock: 35, outOfStock: 11 },
+    { name: 'M&E Div', items: 670, value: 46000, lowStock: 20, outOfStock: 5 },
+    { name: 'Stipend Div', items: 1050, value: 73000, lowStock: 38, outOfStock: 9 },
   ]
 
   const customTooltip = {
@@ -237,10 +244,10 @@ export default function Home() {
         <section className="animate-slide-up" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center gap-2 mb-6">
             <div className="h-8 w-1.5 bg-success rounded-full" />
-            <h2 className="text-2xl font-bold text-foreground">বিভাগীয় বিশ্লেষণ</h2>
+            <h2 className="text-2xl font-bold text-foreground">দপ্তর ভিত্তিক বিশ্লেষণ (বিভাগীয় বিশ্লেষণ)</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ChartCard title="বিভাগ অনুযায়ী আইটেম" subtitle="ভৌগোলিক বন্টন" icon={Map}>
+            <ChartCard title="বিভাগ অনুযায়ী আইটেম" subtitle="১২টি প্রশাসনিক দপ্তর" icon={Map}>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={divisionData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
