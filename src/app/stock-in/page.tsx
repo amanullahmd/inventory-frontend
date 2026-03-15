@@ -9,6 +9,7 @@ import { StockService } from '@/lib/services/stockService'
 import { Item } from '@/lib/types'
 import { SupplierService } from '@/lib/services/supplierService'
 import { WarehouseService } from '@/lib/services/warehouseService'
+import Link from 'next/link'
 
 export default function StockInPage() {
   const { data: session, status } = useSession()
@@ -23,10 +24,7 @@ export default function StockInPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [groups, setGroups] = useState<Array<{ referenceNumber: string; count: number; createdBy?: string; createdAt: string; updatedAt?: string; supplierName?: string; sourceMode?: 'SUPPLIER' | 'NON_SUPPLIER' }>>([])
-  const [detailsRef, setDetailsRef] = useState<string | null>(null)
-  const [details, setDetails] = useState<Array<{ itemId: number; sku: string; name: string; quantity: number; createdAt: string; supplierId?: number; warehouseId?: number }>>([])
   const [editingRef, setEditingRef] = useState<string | null>(null)
-  const [editLines, setEditLines] = useState<Array<{ itemId: string; quantity: string }>>([])
   const isToday = (iso: string) => {
     const d = new Date(iso)
     const now = new Date()
@@ -273,21 +271,7 @@ export default function StockInPage() {
                 ) : groups.map((row) => (
                   <tr key={row.referenceNumber} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-base font-semibold text-foreground">
-                      <button onClick={async () => {
-                        try {
-                          const rows = await StockService.getStockInByReference(row.referenceNumber)
-                          setError(null)
-                          setEditingRef(row.referenceNumber)
-                          setLines(rows.map(d => ({ itemId: String(d.itemId), quantity: String(d.quantity) })))
-                          setSelectedSupplier(String(rows[0]?.supplierId || ''))
-                          setSelectedWarehouse(String(rows[0]?.warehouseId || ''))
-                        } catch (err) {
-                          const e = err as Error
-                          setEditingRef(row.referenceNumber)
-                          setLines([{ itemId: '', quantity: '' }])
-                          setError(e.message || 'Failed to open stock-in')
-                        }
-                      }} className="text-primary-foreground hover:underline">{row.referenceNumber}</button>
+                      <Link href={`/stock-in/${encodeURIComponent(row.referenceNumber)}`} className="text-foreground font-bold hover:underline hover:text-primary transition-colors">{row.referenceNumber}</Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">
                       <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs">{row.count}</span>
@@ -304,155 +288,6 @@ export default function StockInPage() {
           </div>
         </div>
 
-        {detailsRef && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-            <button aria-label="Close" className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setDetailsRef(null); setDetails([]); setEditingRef(null) }} />
-            <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-xl animate-scale-in">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <h3 className="text-xl font-bold text-foreground">Stock In ID: {detailsRef}</h3>
-                <button className="rounded-lg border border-border bg-background px-3 py-2 hover:bg-accent transition-colors" onClick={() => { setDetailsRef(null); setDetails([]); setEditingRef(null) }}>Close</button>
-              </div>
-              {details.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No items</p>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr>
-                      <th className="text-left py-2">Item</th>
-                      <th className="text-left py-2">SKU</th>
-                      <th className="text-left py-2">Qty</th>
-                      <th className="text-left py-2">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {details.map(r => (
-                      <tr key={`${r.itemId}-${r.sku}`}>
-                        <td className="py-1">{r.name}</td>
-                        <td className="py-1">{r.sku}</td>
-                        <td className="py-1">{r.quantity}</td>
-                        <td className="py-1">{new Date(r.createdAt).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              <div className="mt-4 flex gap-3">
-                <button
-                  className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:opacity-90 transition-all"
-                  onClick={() => {
-                    setEditingRef(detailsRef)
-                    setEditLines(details.map(d => ({ itemId: String(d.itemId), quantity: String(d.quantity) })))
-                    setSelectedSupplier(String(details[0].supplierId || ''))
-                    setSelectedWarehouse(String(details[0].warehouseId || ''))
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  className="rounded-lg border border-destructive/30 bg-destructive/10 text-destructive px-4 py-2 hover:bg-destructive/20 transition-colors"
-                  onClick={async () => {
-                    try {
-                      await StockService.deleteStockIn(detailsRef!)
-                      setSuccess('Stock-in deleted')
-                      setDetailsRef(null)
-                      setDetails([])
-                      const grouped = await StockService.getStockInTransactions().catch(() => [])
-                      setGroups(grouped)
-                    } catch (err) {
-                      const e = err as Error
-                      setError(e.message || 'Delete failed')
-                    }
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-
-              {editingRef && (
-                <div className="mt-6 border-t border-border pt-4">
-                  <h4 className="font-semibold mb-2">Edit Items</h4>
-                  <div className="md:col-span-3 mb-3">
-                    <label className="block text-sm mb-1">Stock In ID</label>
-                    <input value={editingRef || ''} onChange={e => setEditingRef(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                    <div className="md:col-span-3">
-                      <label className="block text-sm mb-1">Supplier (Optional)</label>
-                      <select value={selectedSupplier} onChange={e => setSelectedSupplier(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2">
-                        <option value="">No supplier</option>
-                        {suppliers.map(s => (<option key={s.supplierId} value={s.supplierId}>{s.name}</option>))}
-                      </select>
-                    </div>
-                    <div className="md:col-span-3">
-                      <label className="block text-sm mb-1">Warehouse *</label>
-                      <select value={selectedWarehouse} onChange={e => setSelectedWarehouse(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2">
-                        <option value="">Select a warehouse...</option>
-                        {warehouses.map(w => (<option key={w.warehouseId || w.id} value={w.warehouseId || w.id}>{w.name}</option>))}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="rounded-lg border border-border overflow-hidden mb-3">
-                    <table className="min-w-full divide-y divide-border">
-                      <thead className="bg-muted/50">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-muted-foreground">Item</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-muted-foreground">Qty</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-muted-foreground">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-card divide-y divide-border">
-                        {editLines.map((line, idx) => (
-                          <tr key={idx}>
-                            <td className="px-4 py-2">
-                              <select value={line.itemId} onChange={e => setEditLines(editLines.map((l, i) => i === idx ? { ...l, itemId: e.target.value } : l))} className="w-full rounded-lg border border-border bg-background px-3 py-2">
-                                <option value="">Choose an item...</option>
-                                {items.map(item => (<option key={item.id} value={item.id}>{item.name} (SKU: {item.sku})</option>))}
-                              </select>
-                            </td>
-                            <td className="px-4 py-2">
-                              <input type="number" min="1" value={line.quantity} onChange={e => setEditLines(editLines.map((l, i) => i === idx ? { ...l, quantity: e.target.value } : l))} className="w-full rounded-lg border border-border bg-background px-3 py-2" />
-                            </td>
-                            <td className="px-4 py-2">
-                              <button type="button" onClick={() => setEditLines(editLines.filter((_, i) => i !== idx))} className="rounded-lg border border-border px-3 py-2 hover:bg-accent transition-colors">Remove</button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <button type="button" onClick={() => setEditLines([...editLines, { itemId: '', quantity: '' }])} className="rounded-lg border border-border px-3 py-2 hover:bg-accent transition-colors">+ Add Item</button>
-                  <div className="flex gap-3 mt-3">
-                    <button
-                      className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:opacity-90 transition-all"
-                      onClick={async () => {
-                        if (!selectedWarehouse) { setError('Select warehouse'); return }
-                        const payloadItems = editLines.filter(l => l.itemId && l.quantity).map(l => ({ itemId: parseInt(l.itemId), quantity: parseInt(l.quantity) }))
-                        if (payloadItems.length === 0) { setError('Add at least one item'); return }
-                        try {
-                          const updatePayload: any = { warehouseId: parseInt(selectedWarehouse), items: payloadItems, notes, referenceNumber: editingRef! }
-                          if (selectedSupplier) updatePayload.supplierId = parseInt(selectedSupplier)
-                          await StockService.updateStockIn(detailsRef!, updatePayload)
-                          setSuccess('Stock-in updated')
-                          setDetailsRef(null)
-                          setEditingRef(null)
-                          setDetails([])
-                          const grouped = await StockService.getStockInTransactions().catch(() => [])
-                          setGroups(grouped)
-                        } catch (err) {
-                          const e = err as Error
-                          setError(e.message || 'Update failed')
-                        }
-                      }}
-                    >
-                      Save
-                    </button>
-                    <button className="rounded-lg border border-border px-4 py-2 hover:bg-accent transition-colors" onClick={() => setEditingRef(null)}>Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -9,6 +9,7 @@ import { stockOutService, StockOutResponse, StockOutType } from '@/lib/services/
 import { WarehouseService } from '@/lib/services/warehouseService'
 import { EmployeeService } from '@/lib/services/employeeService'
 import { Item } from '@/lib/types'
+import Link from 'next/link'
 
 interface GroupedStockOut {
   referenceNumber: string
@@ -42,9 +43,6 @@ export default function StockOutPage() {
   const [stockOuts, setStockOuts] = useState<StockOutResponse[]>([])
   const [groups, setGroups] = useState<GroupedStockOut[]>([])
 
-  // Details Modal State
-  const [detailsRef, setDetailsRef] = useState<string | null>(null)
-  const [details, setDetails] = useState<StockOutResponse[]>([])
 
   useEffect(() => {
     const loadAll = async () => {
@@ -193,16 +191,6 @@ export default function StockOutPage() {
       setStockOuts(updatedData);
       groupStockOuts(updatedData);
 
-      // Update details view if open
-      if (detailsRef) {
-        const remaining = updatedData.filter(s => s.referenceNumber === detailsRef);
-        if (remaining.length === 0) {
-          setDetailsRef(null);
-          setDetails([]);
-        } else {
-          setDetails(remaining);
-        }
-      }
     } catch (err) {
       setError('Failed to delete record');
     } finally {
@@ -411,19 +399,7 @@ export default function StockOutPage() {
                 ) : groups.map((row) => (
                   <tr key={row.referenceNumber} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-base font-semibold text-foreground">
-                      <button onClick={() => {
-                        if (row.referenceNumber.startsWith('ID-')) {
-                          // Single legacy record
-                          const id = parseInt(row.referenceNumber.split('-')[1]);
-                          const rec = stockOuts.find(s => s.id === id);
-                          setDetails(rec ? [rec] : []);
-                          setDetailsRef(row.referenceNumber);
-                        } else {
-                          // Group
-                          setDetails(stockOuts.filter(s => s.referenceNumber === row.referenceNumber));
-                          setDetailsRef(row.referenceNumber);
-                        }
-                      }} className="text-primary-foreground hover:underline">{row.referenceNumber}</button>
+                      <Link href={`/stock-out/${encodeURIComponent(row.referenceNumber)}`} className="text-foreground font-bold hover:underline hover:text-primary transition-colors">{row.referenceNumber}</Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                       {row.sourceWarehouseName || 'Main Inventory'}
@@ -453,50 +429,6 @@ export default function StockOutPage() {
           </div>
         </div>
 
-        {detailsRef && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-            <button aria-label="Close" className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setDetailsRef(null); setDetails([]) }} />
-            <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-xl animate-scale-in">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <h3 className="text-xl font-bold text-foreground">Stock Out Details: {detailsRef}</h3>
-                <button className="rounded-lg border border-border bg-background px-3 py-2 hover:bg-accent transition-colors" onClick={() => { setDetailsRef(null); setDetails([]) }}>Close</button>
-              </div>
-              {details.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No items</p>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr>
-                      <th className="text-left py-2">Item</th>
-                      <th className="text-left py-2">SKU</th>
-                      <th className="text-left py-2">Qty</th>
-                      <th className="text-left py-2">Date</th>
-                      <th className="text-right py-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {details.map(r => (
-                      <tr key={r.id} className="border-t border-border/50">
-                        <td className="py-2">{r.itemName}</td>
-                        <td className="py-2">{r.itemSku}</td>
-                        <td className="py-2">{r.quantity}</td>
-                        <td className="py-2">{new Date(r.stockOutDate).toLocaleString()}</td>
-                        <td className="py-2 text-right">
-                          <button
-                            onClick={() => handleDelete(r.id)}
-                            className="text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 bg-red-50 px-2 py-1 rounded"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        )}
 
       </div>
     </div>

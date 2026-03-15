@@ -1101,7 +1101,7 @@ export const MOCK_WAREHOUSES = [
   // Division Level Warehouse (Main Warehouse)
   {
     warehouseId: 1,
-    name: "প্রধান গুদাম - ঢাকা বিভাগ",
+    name: "প্রধান গুদাম - ঢাকা",
     warehouseCode: "WH-001",
     address: "প্রাথমিক শিক্ষা অধিদপ্তর, ঢাকা",
     level: "DIVISION",

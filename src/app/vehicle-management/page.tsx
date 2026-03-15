@@ -2,14 +2,16 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { Car, Fuel, Wrench, Droplets, PenTool, Plus, X } from 'lucide-react'
+import { Car, Fuel, Wrench, Droplets, PenTool, Plus, X, ExternalLink, FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SuccessMessage } from '@/components/ui/SuccessMessage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { formatDateDMY } from '@/lib/utils/date'
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalCloseButton, ModalBody } from '@/components/ui/modal'
+import { PDFExportService, ExportOptions } from '@/lib/services/pdfExportService'
+import { DateFilterService } from '@/lib/services/dateFilterService'
+import { useRouter } from 'next/navigation'
 
 interface VehicleRequisition {
     id: string
@@ -21,6 +23,7 @@ interface VehicleRequisition {
     details: string
     amount: number
     status: 'Pending' | 'Approved' | 'Completed' | 'Rejected'
+    approvedBy?: string
 }
 
 const DEMO_REQUISITIONS: VehicleRequisition[] = [
@@ -33,7 +36,8 @@ const DEMO_REQUISITIONS: VehicleRequisition[] = [
         type: 'Diesel',
         details: '50 Liters for Toyota Hiace',
         amount: 5500,
-        status: 'Completed'
+        status: 'Completed',
+        approvedBy: 'মোঃ রফিকুল ইসলাম (Md. Rafiqul Islam)'
     },
     {
         id: 'VR-002',
@@ -44,7 +48,8 @@ const DEMO_REQUISITIONS: VehicleRequisition[] = [
         type: 'Service',
         details: 'Brake pad replacement - Mitsubishi Pajero',
         amount: 12000,
-        status: 'Approved'
+        status: 'Approved',
+        approvedBy: 'নাজমুল হাসান (Nazmul Hasan)'
     },
     {
         id: 'VR-003',
@@ -66,17 +71,24 @@ const DEMO_REQUISITIONS: VehicleRequisition[] = [
         type: 'Other',
         details: 'Car wash and internal cleaning',
         amount: 800,
-        status: 'Completed'
+        status: 'Completed',
+        approvedBy: 'মোঃ রফিকুল ইসলাম (Md. Rafiqul Islam)'
     }
 ]
 
 export default function VehicleManagementPage() {
     const { data: session, status } = useSession()
+    const router = useRouter()
     const [requisitions, setRequisitions] = useState<VehicleRequisition[]>(DEMO_REQUISITIONS)
     const [showForm, setShowForm] = useState(false)
     const [successMsg, setSuccessMsg] = useState<string | null>(null)
-    const [selectedVehicle, setSelectedVehicle] = useState<VehicleRequisition | null>(null)
-    const [isModalOpen, setIsModalOpen] = useState(false)
+
+    const [showExportPanel, setShowExportPanel] = useState(false)
+    const [selectedCarModel, setSelectedCarModel] = useState<string>('all')
+    const [exportLoading, setExportLoading] = useState(false)
+    const [exportDateRange, setExportDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' })
+
+    const uniqueCarModels = Array.from(new Set(requisitions.map(r => r.carModel)))
 
     const [formData, setFormData] = useState({
         carNo: '',
@@ -140,9 +152,61 @@ export default function VehicleManagementPage() {
         }
     }
 
+    const handleExportVehicle = async () => {
+        let exportData = selectedCarModel === 'all'
+            ? [...requisitions]
+            : requisitions.filter(r => r.carModel === selectedCarModel)
+
+        if (exportDateRange.start && exportDateRange.end) {
+            const startDate = new Date(exportDateRange.start)
+            const endDate = new Date(exportDateRange.end)
+            endDate.setHours(23, 59, 59, 999)
+            exportData = exportData.filter(r => {
+                const d = new Date(r.date)
+                return d >= startDate && d <= endDate
+            })
+        }
+
+        if (exportData.length === 0) {
+            setSuccessMsg('No records found for the selected car model')
+            return
+        }
+
+        setExportLoading(true)
+        try {
+            const modelLabel = selectedCarModel === 'all' ? 'All Vehicles' : selectedCarModel
+            const filename = `vehicle-requisitions-${selectedCarModel === 'all' ? 'all' : selectedCarModel.replace(/\s+/g, '-').toLowerCase()}-${DateFilterService.formatDateForFilename(new Date())}.pdf`
+            const columns = ['Car Model', 'Car No', 'Date', 'Type', 'Details', 'Amount (BDT)', 'Approved By', 'Status']
+            const data: string[][] = exportData.map(r => [
+                r.carModel, r.carNo, formatDateDMY(r.date), r.type,
+                r.details, `৳${r.amount.toLocaleString()}`,
+                r.approvedBy || '-', r.status,
+            ])
+            const options: ExportOptions = {
+                filename,
+                title: `Vehicle Requisitions - ${modelLabel}`,
+                timestamp: new Date(),
+                details: {
+                    'Car Model': modelLabel,
+                    'Total Records': exportData.length.toString(),
+                    ...(exportDateRange.start && exportDateRange.end ? {
+                        'Period': `${new Date(exportDateRange.start).toLocaleDateString()} to ${new Date(exportDateRange.end).toLocaleDateString()}`
+                    } : {})
+                }
+            }
+            await PDFExportService.generateReusableTablePDF(columns, data, options)
+            setSuccessMsg(`Export successful: ${exportData.length} records for ${modelLabel}`)
+            setShowExportPanel(false)
+        } catch (err) {
+            console.error('Export error:', err)
+            setSuccessMsg('Failed to generate PDF export')
+        } finally {
+            setExportLoading(false)
+        }
+    }
+
     const handleCarClick = (vehicle: VehicleRequisition) => {
-        setSelectedVehicle(vehicle)
-        setIsModalOpen(true)
+        router.push(`/vehicle-management/${encodeURIComponent(vehicle.carModel)}`)
     }
 
     return (
@@ -157,17 +221,90 @@ export default function VehicleManagementPage() {
                         </h1>
                         <p className="mt-2 text-muted-foreground">Manage and track vehicle requisitions and maintenance</p>
                     </div>
-                    <Button
-                        onClick={() => setShowForm(!showForm)}
-                        className="rounded-xl shadow-md hover:shadow-lg transition-all h-11 px-6"
-                    >
-                        {showForm ? <><X className="mr-2" size={18} /> Close Form</> : <><Plus className="mr-2" size={18} /> New Requisition</>}
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => { setShowExportPanel(!showExportPanel); if (showForm) setShowForm(false) }}
+                            className="rounded-xl shadow-md hover:shadow-lg transition-all h-11 px-6"
+                        >
+                            {showExportPanel ? <><X className="mr-2" size={18} /> Close Export</> : <><FileDown className="mr-2" size={18} /> Export</>}
+                        </Button>
+                        <Button
+                            onClick={() => { setShowForm(!showForm); if (showExportPanel) setShowExportPanel(false) }}
+                            className="rounded-xl shadow-md hover:shadow-lg transition-all h-11 px-6"
+                        >
+                            {showForm ? <><X className="mr-2" size={18} /> Close Form</> : <><Plus className="mr-2" size={18} /> New Requisition</>}
+                        </Button>
+                    </div>
                 </div>
 
                 {successMsg && (
                     <div className="mb-6">
                         <SuccessMessage message={successMsg} onDismiss={() => setSuccessMsg(null)} autoHide />
+                    </div>
+                )}
+
+                {/* Export Panel */}
+                {showExportPanel && (
+                    <div className="mb-8 rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up">
+                        <h3 className="text-lg font-semibold text-foreground mb-4">Export Vehicle Requisitions</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                            <div className="space-y-2">
+                                <Label htmlFor="exportCarModel">Select Car Model</Label>
+                                <select
+                                    id="exportCarModel"
+                                    className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm text-foreground focus:ring-2 focus:ring-ring outline-none"
+                                    value={selectedCarModel}
+                                    onChange={(e) => setSelectedCarModel(e.target.value)}
+                                >
+                                    <option value="all">All Vehicles</option>
+                                    {uniqueCarModels.map(model => (
+                                        <option key={model} value={model}>{model}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="exportFromDate">From Date</Label>
+                                <input
+                                    id="exportFromDate"
+                                    type="date"
+                                    value={exportDateRange.start}
+                                    onChange={(e) => setExportDateRange({ ...exportDateRange, start: e.target.value })}
+                                    suppressHydrationWarning
+                                    className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm text-foreground focus:ring-2 focus:ring-ring outline-none dark:[color-scheme:dark]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="exportToDate">To Date</Label>
+                                <input
+                                    id="exportToDate"
+                                    type="date"
+                                    value={exportDateRange.end}
+                                    onChange={(e) => setExportDateRange({ ...exportDateRange, end: e.target.value })}
+                                    suppressHydrationWarning
+                                    className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm text-foreground focus:ring-2 focus:ring-ring outline-none dark:[color-scheme:dark]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Button
+                                    onClick={handleExportVehicle}
+                                    disabled={exportLoading}
+                                    className="w-full rounded-xl h-10"
+                                >
+                                    {exportLoading ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Generating PDF...
+                                        </>
+                                    ) : (
+                                        <><FileDown className="mr-2" size={16} /> Export to PDF</>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -264,19 +401,28 @@ export default function VehicleManagementPage() {
                             <thead>
                                 <tr className="bg-muted/50 border-b border-border">
                                     <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Car Model</th>
+                                    <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Car No</th>
                                     <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
                                     <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
                                     <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Details</th>
                                     <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
+                                    <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Approved By</th>
                                     <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
                                 {requisitions.map((req) => (
                                     <tr key={req.id} className="hover:bg-muted/20 transition-colors">
-                                        <td className="px-6 py-4 text-sm font-medium text-primary-foreground cursor-pointer hover:underline" onClick={() => handleCarClick(req)}>
-                                            {req.carModel}
+                                        <td className="px-6 py-4 text-sm font-medium">
+                                            <button
+                                                onClick={() => handleCarClick(req)}
+                                                className="flex items-center gap-1.5 text-foreground hover:underline font-semibold group"
+                                            >
+                                                {req.carModel}
+                                                <ExternalLink size={12} className="opacity-0 group-hover:opacity-70 transition-opacity" />
+                                            </button>
                                         </td>
+                                        <td className="px-6 py-4 text-sm text-muted-foreground">{req.carNo}</td>
                                         <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateDMY(req.date)}</td>
                                         <td className="px-6 py-4 text-sm">
                                             <div className="flex items-center gap-2 text-foreground font-medium">
@@ -286,6 +432,11 @@ export default function VehicleManagementPage() {
                                         </td>
                                         <td className="px-6 py-4 text-sm text-muted-foreground line-clamp-1">{req.details}</td>
                                         <td className="px-6 py-4 text-sm font-semibold text-foreground">৳{req.amount.toLocaleString()}</td>
+                                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                                            {req.approvedBy ? (
+                                                <span className="font-medium text-foreground">{req.approvedBy}</span>
+                                            ) : '-'}
+                                        </td>
                                         <td className="px-6 py-4 text-sm">
                                             <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${getStatusColor(req.status)}`}>
                                                 {req.status}
@@ -304,65 +455,6 @@ export default function VehicleManagementPage() {
                 </div>
             </div>
 
-            {/* Vehicle Cost Details Modal */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                <ModalContent className="bg-white dark:bg-slate-900 shadow-xl border-slate-200 dark:border-slate-800">
-                    <ModalHeader>
-                        <ModalTitle>Vehicle Cost Report</ModalTitle>
-                        <ModalCloseButton />
-                    </ModalHeader>
-                    <ModalBody>
-                        {selectedVehicle && (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-4 rounded-xl border border-border">
-                                    <div>
-                                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Car No</span>
-                                        <span className="font-semibold text-foreground">{selectedVehicle.carNo}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Car Model</span>
-                                        <span className="font-semibold text-foreground">{selectedVehicle.carModel}</span>
-                                    </div>
-                                    <div className="col-span-2">
-                                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Vehicle Type</span>
-                                        <span className="font-semibold text-foreground">{selectedVehicle.vehicleType}</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <h4 className="font-semibold text-foreground flex justify-between items-center pb-2 border-b">
-                                        <span>Monthly Cost</span>
-                                        <span className="text-xs text-muted-foreground font-normal">Current Year</span>
-                                    </h4>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                        {['Jan', 'Feb', 'Mar', 'Apr'].map((month, idx) => (
-                                            <div key={month} className="bg-background border border-border p-2 rounded-lg text-center shadow-sm">
-                                                <div className="text-[10px] font-medium text-primary-foreground uppercase tracking-wider">{month}</div>
-                                                <div className="font-bold text-sm text-foreground">৳{(5000 + idx * 1200).toLocaleString()}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <h4 className="font-semibold text-foreground flex justify-between items-center pb-2 border-b">
-                                        <span>Yearly Cost</span>
-                                        <span className="text-xs text-muted-foreground font-normal">Historical</span>
-                                    </h4>
-                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                        {[2022, 2023, 2024, 2025, 2026].map((year, idx) => (
-                                            <div key={year} className="bg-primary/5 border border-primary/20 p-3 rounded-lg text-center shadow-sm">
-                                                <div className="text-xs font-semibold text-primary-foreground/70 mb-1">{year}</div>
-                                                <div className="font-bold text-foreground">৳{(45000 + idx * 15000).toLocaleString()}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </ModalBody>
-                </ModalContent>
-            </Modal>
         </div>
     )
 }

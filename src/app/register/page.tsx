@@ -1,4 +1,5 @@
 'use client'
+// Updated export system v2
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -147,6 +148,9 @@ export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
     const [exportLoading, setExportLoading] = useState(false)
+    const [showExportPanel, setShowExportPanel] = useState(false)
+    const [exportType, setExportType] = useState<'stock-in' | 'stock-out'>('stock-in')
+    const [exportDateRange, setExportDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' })
 
     const [selectedDateRange, setSelectedDateRange] = useState<{ start: Date; end: Date } | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
@@ -265,59 +269,80 @@ export default function RegisterPage() {
         setFilteredStockOut(filteredOut)
     }, [stockIn, stockOut, selectedDateRange, searchTerm])
 
+    const getExportFilteredData = () => {
+        let startDate: Date | null = null
+        let endDate: Date | null = null
+
+        if (exportDateRange.start && exportDateRange.end) {
+            startDate = new Date(exportDateRange.start)
+            endDate = new Date(exportDateRange.end)
+            endDate.setHours(23, 59, 59, 999)
+        }
+
+        if (exportType === 'stock-in') {
+            let data = [...stockIn]
+            if (startDate && endDate) {
+                data = data.filter(t => {
+                    const d = new Date(t.date)
+                    return d >= startDate! && d <= endDate!
+                })
+            }
+            return { type: 'stock-in' as const, count: data.length, stockInData: data }
+        } else {
+            let data = [...stockOut]
+            if (startDate && endDate) {
+                data = data.filter(t => {
+                    const d = new Date(t.date)
+                    return d >= startDate! && d <= endDate!
+                })
+            }
+            return { type: 'stock-out' as const, count: data.length, stockOutData: data }
+        }
+    }
+
     const handleExport = async () => {
-        if (filteredStockIn.length === 0 && filteredStockOut.length === 0) {
-            setError('No data to export')
+        const result = getExportFilteredData()
+
+        if (result.count === 0) {
+            setError(`No ${exportType === 'stock-in' ? 'Stock In' : 'Stock Out'} records found for the selected date range`)
             return
         }
 
         setExportLoading(true)
         try {
-            const filename = `register-${DateFilterService.formatDateForFilename(new Date())}.pdf`
+            const periodDetails = exportDateRange.start && exportDateRange.end
+                ? { 'Period': `${new Date(exportDateRange.start).toLocaleDateString()} to ${new Date(exportDateRange.end).toLocaleDateString()}` }
+                : undefined
 
-            // Combined export with all columns grouped roughly
-            const columns = ['Table', 'Date', 'Reference', 'User', 'Details', 'Brought Fwd/Bal', 'Qty/Supply', 'Additional']
-            const data: string[][] = []
-
-            filteredStockIn.forEach(t => {
-                data.push([
-                    'Stock In',
-                    formatDateDMY(t.date),
-                    t.reference,
-                    t.user,
-                    t.details,
-                    t.broughtForward.toString(),
-                    t.presentReceipts.toString(),
-                    `${t.supplierName} (${t.challanNo})`
+            if (result.type === 'stock-in' && result.stockInData) {
+                const filename = `stock-in-${DateFilterService.formatDateForFilename(new Date())}.pdf`
+                const columns = ['Reference', 'Date', 'User', 'Details', 'Items/Qty', 'Brought Forward', 'Supplier', 'Challan No', 'Receipts']
+                const data: string[][] = result.stockInData.map(t => [
+                    t.reference, formatDateDMY(t.date), t.user, t.details,
+                    t.itemCount.toString(), t.broughtForward.toString(),
+                    t.supplierName, t.challanNo, t.presentReceipts.toString(),
                 ])
-            })
-
-            filteredStockOut.forEach(t => {
-                data.push([
-                    'Stock Out',
-                    formatDateDMY(t.date),
-                    t.reference,
-                    t.user,
-                    t.details,
-                    t.balance.toString(),
-                    t.quantitySupplied.toString(),
-                    `${t.divisionName} (${t.requisitionNo})`
+                await PDFExportService.generateReusableTablePDF(columns, data, {
+                    filename, title: 'Stock In Register', timestamp: new Date(), details: periodDetails
+                })
+                setSuccess(`Stock In export successful (${result.count} records)`)
+            } else if (result.type === 'stock-out' && result.stockOutData) {
+                const filename = `stock-out-${DateFilterService.formatDateForFilename(new Date())}.pdf`
+                const columns = ['Reference', 'Date', 'User', 'Details', 'Items/Qty', 'Division', 'Requisition No', 'Last Delivery', 'Qty Supplied', 'Balance', 'Remarks']
+                const data: string[][] = result.stockOutData.map(t => [
+                    t.reference, formatDateDMY(t.date), t.user, t.details,
+                    t.itemCount.toString(), t.divisionName, t.requisitionNo,
+                    formatDateDMY(t.lastDeliveryDate), t.quantitySupplied.toString(),
+                    t.balance.toString(), t.remarks,
                 ])
-            })
-
-            const options: ExportOptions = {
-                filename,
-                title: 'Inventory Register Report',
-                timestamp: new Date(),
-                details: selectedDateRange ? {
-                    'Period': `${selectedDateRange.start.toLocaleDateString()} to ${selectedDateRange.end.toLocaleDateString()}`
-                } : undefined
+                await PDFExportService.generateReusableTablePDF(columns, data, {
+                    filename, title: 'Stock Out Register', timestamp: new Date(), details: periodDetails
+                })
+                setSuccess(`Stock Out export successful (${result.count} records)`)
             }
-
-            await PDFExportService.generateReusableTablePDF(columns, data, options)
-            setSuccess(`Successfully exported records`)
+            setShowExportPanel(false)
         } catch (err) {
-            setError('Failed to generate PDF. Please try again.')
+            setError(`Failed to generate ${exportType === 'stock-in' ? 'Stock In' : 'Stock Out'} PDF.`)
             console.error('Export error:', err)
         } finally {
             setExportLoading(false)
@@ -344,10 +369,9 @@ export default function RegisterPage() {
                     </div>
                     <div className="flex items-center gap-3">
                         <ExportButton
-                            onClick={handleExport}
-                            disabled={filteredStockIn.length === 0 && filteredStockOut.length === 0}
-                            loading={exportLoading}
-                            label="Export"
+                            onClick={() => setShowExportPanel(!showExportPanel)}
+                            disabled={false}
+                            label={showExportPanel ? 'Close Export' : 'Export Register'}
                         />
                     </div>
                 </div>
@@ -360,6 +384,90 @@ export default function RegisterPage() {
                 {error && (
                     <div className="fixed right-4 top-4 z-50 w-[min(420px,calc(100vw-2rem))]">
                         <ErrorMessage message={error} onRetry={() => setError(null)} />
+                    </div>
+                )}
+
+                {/* Export Panel */}
+                {showExportPanel && (
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-slide-up">
+                        <h3 className="text-lg font-semibold text-foreground mb-4">Export Register</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                            {/* Export Type Selection */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-foreground">Export Type</label>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setExportType('stock-in')}
+                                        className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                                            exportType === 'stock-in'
+                                                ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                                                : 'bg-background text-foreground border-border hover:bg-muted'
+                                        }`}
+                                    >
+                                        Stock In
+                                    </button>
+                                    <button
+                                        onClick={() => setExportType('stock-out')}
+                                        className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                                            exportType === 'stock-out'
+                                                ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                                                : 'bg-background text-foreground border-border hover:bg-muted'
+                                        }`}
+                                    >
+                                        Stock Out
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Date Range for Export */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-foreground">From Date</label>
+                                <input
+                                    type="date"
+                                    value={exportDateRange.start}
+                                    onChange={(e) => setExportDateRange({ ...exportDateRange, start: e.target.value })}
+                                    suppressHydrationWarning
+                                    className="w-full h-10 px-3 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring outline-none dark:[color-scheme:dark]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-foreground">To Date</label>
+                                <input
+                                    type="date"
+                                    value={exportDateRange.end}
+                                    onChange={(e) => setExportDateRange({ ...exportDateRange, end: e.target.value })}
+                                    suppressHydrationWarning
+                                    className="w-full h-10 px-3 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring outline-none dark:[color-scheme:dark]"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Export Info & Button */}
+                        <div className="mt-5 flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">
+                                {exportDateRange.start && exportDateRange.end
+                                    ? `Exporting ${exportType === 'stock-in' ? 'Stock In' : 'Stock Out'} records from ${new Date(exportDateRange.start).toLocaleDateString()} to ${new Date(exportDateRange.end).toLocaleDateString()}`
+                                    : `Exporting all ${exportType === 'stock-in' ? 'Stock In' : 'Stock Out'} records (no date filter)`
+                                }
+                            </p>
+                            <button
+                                onClick={handleExport}
+                                disabled={exportLoading}
+                                className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {exportLoading ? (
+                                    <>
+                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Generating PDF...
+                                    </>
+                                ) : (
+                                    <>Export to PDF</>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 )}
 
