@@ -10,11 +10,3 @@ declare module "next-auth" {
     roles?: string[]
   }
 }
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    accessToken?: string
-    refreshToken?: string
-    roles?: string[]
-  }
-}
