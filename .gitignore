@@ -22,3 +22,7 @@ node_modules/
 
 # PDF files - may contain sensitive information
 *.pdf
+
+# AI assistant directories
+.claude/
+.qwen/
