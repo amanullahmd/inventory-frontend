@@ -1,3 +1,19 @@
+/**
+ * Format number with consistent locale to avoid hydration mismatches.
+ * Uses en-US locale which produces comma as thousands separator.
+ */
+export function formatNumber(value: number): string {
+  return value.toLocaleString('en-US')
+}
+
+/**
+ * Format currency amount with consistent locale to avoid hydration mismatches.
+ * Returns formatted number without currency symbol for flexibility.
+ */
+export function formatCurrency(value: number): string {
+  return value.toLocaleString('en-US')
+}
+
 export function formatDateDMY(input: string | Date): string {
   const d = typeof input === 'string' ? new Date(input) : input
   const day = String(d.getDate()).padStart(2, '0')

@@ -1,43 +1,56 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Car, ArrowLeft, Fuel, Wrench, Droplets, PenTool, TrendingUp, Calendar } from 'lucide-react'
-import { formatDateDMY } from '@/lib/utils/date'
+import {
+  Car,
+  ArrowLeft,
+  Fuel,
+  Wrench,
+  Droplets,
+  PenTool,
+  TrendingUp,
+  Calendar,
+  PieChart as PieChartIcon,
+  LayoutDashboard,
+  List,
+} from 'lucide-react'
+import Link from 'next/link'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie,
+  Legend,
+  Area,
+  AreaChart,
+} from 'recharts'
+import { formatDateDMY, formatCurrency } from '@/lib/utils/date'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-
-interface VehicleRequisition {
-  id: string
-  carNo: string
-  carModel: string
-  vehicleType: string
-  date: string
-  type: 'Oil' | 'Service' | 'Diesel' | 'Engine Oil' | 'Other'
-  details: string
-  amount: number
-  status: 'Pending' | 'Approved' | 'Completed' | 'Rejected'
-}
-
-// Same demo data as vehicle management page
-const ALL_REQUISITIONS: VehicleRequisition[] = [
-  { id: 'VR-001', carNo: 'DHA-11-2034', carModel: 'Toyota Hiace', vehicleType: 'Microbus', date: '2024-01-10T10:00:00Z', type: 'Diesel', details: '50 Liters for Toyota Hiace', amount: 5500, status: 'Completed' },
-  { id: 'VR-002', carNo: 'DHA-11-2034', carModel: 'Toyota Hiace', vehicleType: 'Microbus', date: '2024-02-05T14:30:00Z', type: 'Service', details: 'Regular service - Toyota Hiace', amount: 8000, status: 'Completed' },
-  { id: 'VR-003', carNo: 'DHA-11-2034', carModel: 'Toyota Hiace', vehicleType: 'Microbus', date: '2024-02-20T09:15:00Z', type: 'Diesel', details: '60 Liters for Toyota Hiace', amount: 6600, status: 'Completed' },
-  { id: 'VR-004', carNo: 'DHA-11-2034', carModel: 'Toyota Hiace', vehicleType: 'Microbus', date: '2024-03-01T10:00:00Z', type: 'Diesel', details: '50 Liters for Toyota Hiace', amount: 5500, status: 'Completed' },
-  { id: 'VR-005', carNo: 'DHA-11-2034', carModel: 'Toyota Hiace', vehicleType: 'Microbus', date: '2024-03-15T11:00:00Z', type: 'Engine Oil', details: 'Engine oil change', amount: 3200, status: 'Completed' },
-  { id: 'VR-006', carNo: 'DHA-12-3456', carModel: 'Mitsubishi Pajero', vehicleType: 'SUV', date: '2024-01-08T08:00:00Z', type: 'Diesel', details: '40 Liters diesel', amount: 4400, status: 'Completed' },
-  { id: 'VR-007', carNo: 'DHA-12-3456', carModel: 'Mitsubishi Pajero', vehicleType: 'SUV', date: '2024-02-12T14:00:00Z', type: 'Service', details: 'Monthly service', amount: 10000, status: 'Completed' },
-  { id: 'VR-008', carNo: 'DHA-12-3456', carModel: 'Mitsubishi Pajero', vehicleType: 'SUV', date: '2024-03-03T14:30:00Z', type: 'Service', details: 'Brake pad replacement', amount: 12000, status: 'Approved' },
-  { id: 'VR-009', carNo: 'DHA-13-5678', carModel: 'Nissan Patrol', vehicleType: 'SUV', date: '2024-01-20T10:00:00Z', type: 'Diesel', details: '55 Liters diesel', amount: 6050, status: 'Completed' },
-  { id: 'VR-010', carNo: 'DHA-13-5678', carModel: 'Nissan Patrol', vehicleType: 'SUV', date: '2024-02-18T09:00:00Z', type: 'Engine Oil', details: 'Engine oil + filter', amount: 5200, status: 'Completed' },
-  { id: 'VR-011', carNo: 'DHA-13-5678', carModel: 'Nissan Patrol', vehicleType: 'SUV', date: '2024-03-05T09:15:00Z', type: 'Engine Oil', details: 'Scheduled maintenance', amount: 4500, status: 'Pending' },
-  { id: 'VR-012', carNo: 'DHA-14-9012', carModel: 'Honda Civic', vehicleType: 'Sedan', date: '2024-01-25T11:00:00Z', type: 'Diesel', details: '30 Liters', amount: 3300, status: 'Completed' },
-  { id: 'VR-013', carNo: 'DHA-14-9012', carModel: 'Honda Civic', vehicleType: 'Sedan', date: '2024-02-22T10:00:00Z', type: 'Service', details: 'Regular service', amount: 5000, status: 'Completed' },
-  { id: 'VR-014', carNo: 'DHA-14-9012', carModel: 'Honda Civic', vehicleType: 'Sedan', date: '2024-03-06T11:45:00Z', type: 'Other', details: 'Car wash and cleaning', amount: 800, status: 'Completed' },
-]
+import ChartCard from '@/components/dashboard/ChartCard'
+import { VehicleService } from '@/lib/services/vehicleService'
+import type { VehicleRequisition } from '@/lib/types'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Diesel: '#0088a3',
+  Service: '#f59e0b',
+  'Engine Oil': '#a1cf8a',
+  Other: '#8b5cf6',
+}
+
+const VIBRANT_COLORS = [
+  '#0088a3', '#10b981', '#f59e0b', '#06b6d4',
+  '#8b5cf6', '#ec4899', '#f43f5e', '#6366f1',
+]
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -59,14 +72,32 @@ const getStatusColor = (status: string) => {
   }
 }
 
+const customTooltip = {
+  contentStyle: {
+    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+    borderRadius: '10px',
+    border: '1px solid rgba(148, 163, 184, 0.2)',
+    boxShadow: '0 8px 32px rgb(0 0 0 / 0.3)',
+    padding: '12px 16px',
+    color: '#f1f5f9',
+    fontSize: '12px',
+  },
+  wrapperStyle: { zIndex: 1000 },
+}
+
 export default function VehicleModelPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const params = useParams()
   const modelParam = decodeURIComponent(params?.model as string || '')
 
-  const [selectedYear, setSelectedYear] = useState(2024)
+  const [selectedYear, setSelectedYear] = useState(() => VehicleService.getAvailableYears()[0] || 2024)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   if (status === 'loading') {
     return <div className="p-8"><LoadingSpinner size="medium" text="Loading..." /></div>
@@ -74,13 +105,13 @@ export default function VehicleModelPage() {
 
   if (!session) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <p className="text-muted-foreground">Please sign in to view this page.</p>
       </div>
     )
   }
 
-  const vehicleRequisitions = ALL_REQUISITIONS.filter(r => r.carModel === modelParam)
+  const vehicleRequisitions = VehicleService.getRequisitionsByModel(modelParam)
   const vehicleInfo = vehicleRequisitions[0]
 
   if (!vehicleInfo) {
@@ -92,16 +123,10 @@ export default function VehicleModelPage() {
     )
   }
 
-  // Group by month for selected year
-  const monthlyData = MONTHS.map((month, idx) => {
-    const monthRecords = vehicleRequisitions.filter(r => {
-      const d = new Date(r.date)
-      return d.getFullYear() === selectedYear && d.getMonth() === idx
-    })
-    const total = monthRecords.reduce((sum, r) => sum + r.amount, 0)
-    return { month, records: monthRecords, total }
-  })
+  // Monthly data with category breakdown
+  const monthlyCosts = VehicleService.getMonthlyCosts(modelParam, selectedYear)
 
+  // Filtered records
   const filteredRecords = selectedMonth !== null
     ? vehicleRequisitions.filter(r => {
         const d = new Date(r.date)
@@ -109,46 +134,101 @@ export default function VehicleModelPage() {
       })
     : vehicleRequisitions.filter(r => new Date(r.date).getFullYear() === selectedYear)
 
-  const totalYearlyCost = vehicleRequisitions
-    .filter(r => new Date(r.date).getFullYear() === selectedYear)
-    .reduce((sum, r) => sum + r.amount, 0)
+  // Yearly totals
+  const yearlyRecords = vehicleRequisitions.filter(r => new Date(r.date).getFullYear() === selectedYear)
+  const totalYearlyCost = yearlyRecords.reduce((sum, r) => sum + r.amount, 0)
 
-  const maxMonthlyAmount = Math.max(...monthlyData.map(m => m.total), 1)
+  // Category breakdown for this vehicle
+  let dieselCost = 0, serviceCost = 0, engineOilCost = 0, otherCost = 0
+  yearlyRecords.forEach(r => {
+    switch (r.type) {
+      case 'Diesel': dieselCost += r.amount; break
+      case 'Service': serviceCost += r.amount; break
+      case 'Engine Oil':
+      case 'Oil': engineOilCost += r.amount; break
+      case 'Other': otherCost += r.amount; break
+    }
+  })
+
+  // Pie chart data
+  const pieData = [
+    { name: 'Diesel', value: dieselCost },
+    { name: 'Service', value: serviceCost },
+    { name: 'Engine Oil', value: engineOilCost },
+    { name: 'Other', value: otherCost },
+  ].filter(d => d.value > 0)
+
+  // Trend chart data
+  const trendData = monthlyCosts.map(m => ({
+    month: m.month,
+    Diesel: m.dieselCost,
+    Service: m.serviceCost,
+    'Engine Oil': m.engineOilCost,
+    Other: m.otherCost,
+    Total: m.totalCost,
+  }))
+
+  const maxMonthlyAmount = Math.max(...monthlyCosts.map(m => m.totalCost), 1)
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="p-4 lg:p-6 max-w-350 mx-auto">
         {/* Header */}
-        <div className="mb-8 animate-slide-down">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
-          >
-            <ArrowLeft size={16} /> Back to Vehicle Management
-          </button>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mb-6 animate-slide-down">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Car className="text-primary-foreground" size={28} />
+              <button
+                onClick={() => router.push('/vehicle-management/dashboard')}
+                className="w-10 h-10 rounded-xl bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors shrink-0"
+              >
+                <ArrowLeft size={18} className="text-muted-foreground" />
+              </button>
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                <Car size={22} className="text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">{vehicleInfo.carModel}</h1>
-                <p className="mt-1 text-muted-foreground">
+                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">{vehicleInfo.carModel}</h1>
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {vehicleInfo.carNo} · {vehicleInfo.vehicleType}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <select
-                value={selectedYear}
-                onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedMonth(null) }}
-                className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground"
-              >
-                {[2022, 2023, 2024, 2025, 2026].map(y => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5">
+                <Calendar size={14} className="text-muted-foreground" />
+                <select
+                  value={selectedYear}
+                  onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedMonth(null) }}
+                  className="bg-transparent text-sm text-foreground font-medium focus:outline-none cursor-pointer"
+                >
+                  {VehicleService.getAvailableYears().map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex items-center gap-1 border-b border-border">
+            <Link
+              href="/vehicle-management/dashboard"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent hover:border-border -mb-px transition-colors"
+            >
+              <LayoutDashboard size={16} />
+              Dashboard
+            </Link>
+            <Link
+              href="/vehicle-management/list"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent hover:border-border -mb-px transition-colors"
+            >
+              <List size={16} />
+              Vehicle List
+            </Link>
+            <span className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-400 -mb-px">
+              <Car size={16} />
+              {vehicleInfo.carModel}
+            </span>
           </div>
         </div>
 
@@ -156,32 +236,136 @@ export default function VehicleModelPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Records</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{vehicleRequisitions.filter(r => new Date(r.date).getFullYear() === selectedYear).length}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{yearlyRecords.length}</p>
             <p className="text-xs text-muted-foreground mt-1">{selectedYear}</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Cost</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">৳{totalYearlyCost.toLocaleString()}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">৳{formatCurrency(totalYearlyCost)}</p>
             <p className="text-xs text-muted-foreground mt-1">{selectedYear}</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Avg Monthly</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">৳{Math.round(totalYearlyCost / 12).toLocaleString()}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">৳{formatCurrency(Math.round(totalYearlyCost / 12))}</p>
             <p className="text-xs text-muted-foreground mt-1">Per month</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Months</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{monthlyData.filter(m => m.total > 0).length}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{monthlyCosts.filter(m => m.totalCost > 0).length}</p>
             <p className="text-xs text-muted-foreground mt-1">With records</p>
           </div>
         </div>
 
-        {/* Monthly Cost Bar Chart */}
-        <div className="rounded-2xl border border-border bg-card shadow-sm p-6 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+        {/* Category Breakdown Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up" style={{ animationDelay: '50ms' }}>
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Fuel size={16} className="text-blue-500" />
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Diesel</p>
+            </div>
+            <p className="text-xl font-bold text-foreground">৳{formatCurrency(dieselCost)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Diesel').length} records</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Wrench size={16} className="text-orange-500" />
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Service</p>
+            </div>
+            <p className="text-xl font-bold text-foreground">৳{formatCurrency(serviceCost)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Service').length} records</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Droplets size={16} className="text-amber-500" />
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Engine Oil</p>
+            </div>
+            <p className="text-xl font-bold text-foreground">৳{formatCurrency(engineOilCost)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Engine Oil' || r.type === 'Oil').length} records</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <PenTool size={16} className="text-purple-500" />
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Other</p>
+            </div>
+            <p className="text-xl font-bold text-foreground">৳{formatCurrency(otherCost)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Other').length} records</p>
+          </div>
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+          {/* Cost Trend Line Chart */}
+          <ChartCard
+            title="Monthly Cost Trend"
+            subtitle="Category-wise breakdown over months"
+            icon={TrendingUp}
+          >
+            <div className="h-75 w-full">
+              {isMounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                  <XAxis dataKey="month" fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `৳${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip {...customTooltip} formatter={(value: unknown) => typeof value === 'number' ? `৳${value.toLocaleString()}` : String(value)} />
+                  <Legend />
+                  <Area type="monotone" dataKey="Diesel" stackId="1" stroke={CATEGORY_COLORS.Diesel} fill={CATEGORY_COLORS.Diesel} fillOpacity={0.3} />
+                  <Area type="monotone" dataKey="Service" stackId="1" stroke={CATEGORY_COLORS.Service} fill={CATEGORY_COLORS.Service} fillOpacity={0.3} />
+                  <Area type="monotone" dataKey="Engine Oil" stackId="1" stroke={CATEGORY_COLORS['Engine Oil']} fill={CATEGORY_COLORS['Engine Oil']} fillOpacity={0.3} />
+                  <Area type="monotone" dataKey="Other" stackId="1" stroke={CATEGORY_COLORS.Other} fill={CATEGORY_COLORS.Other} fillOpacity={0.3} />
+                </AreaChart>
+              </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner size="small" />
+                </div>
+              )}
+            </div>
+          </ChartCard>
+
+          {/* Category Distribution Pie */}
+          <ChartCard
+            title="Cost Distribution"
+            subtitle="Category-wise spending share"
+            icon={PieChartIcon}
+          >
+            <div className="h-75 w-full">
+              {isMounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }: { name?: string; value?: number }) => `${name || ''}: ৳${(value || 0).toLocaleString()}`}
+                    outerRadius={100}
+                    innerRadius={45}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[entry.name] || VIBRANT_COLORS[index % VIBRANT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip {...customTooltip} formatter={(value: unknown) => typeof value === 'number' ? `৳${value.toLocaleString()}` : String(value)} />
+                </PieChart>
+              </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner size="small" />
+                </div>
+              )}
+            </div>
+          </ChartCard>
+        </div>
+
+        {/* Monthly Cost Bar Chart (existing CSS-style, now with recharts) */}
+        <div className="rounded-2xl border border-border bg-card shadow-sm p-6 mb-8 animate-slide-up" style={{ animationDelay: '150ms' }}>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <TrendingUp size={18} className="text-primary-foreground" />
+                <Calendar size={18} className="text-emerald-700 dark:text-emerald-400" />
                 Monthly Cost Breakdown — {selectedYear}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">Click a month to filter records below</p>
@@ -196,24 +380,24 @@ export default function VehicleModelPage() {
             )}
           </div>
           <div className="flex items-end gap-2 h-48 overflow-x-auto pb-2">
-            {monthlyData.map((m, idx) => {
-              const height = m.total > 0 ? Math.max((m.total / maxMonthlyAmount) * 100, 8) : 0
+            {monthlyCosts.map((m, idx) => {
+              const height = m.totalCost > 0 ? Math.max((m.totalCost / maxMonthlyAmount) * 100, 8) : 0
               const isSelected = selectedMonth === idx
               return (
                 <div
                   key={m.month}
-                  className="flex-1 min-w-[40px] flex flex-col items-center gap-1 cursor-pointer group"
+                  className="flex-1 min-w-10 flex flex-col items-center gap-1 cursor-pointer group"
                   onClick={() => setSelectedMonth(isSelected ? null : idx)}
                 >
                   <div className="w-full flex items-end justify-center" style={{ height: '140px' }}>
-                    {m.total > 0 ? (
+                    {m.totalCost > 0 ? (
                       <div
                         style={{ height: `${height}%` }}
                         className={`w-full rounded-t-lg transition-all ${isSelected
-                          ? 'bg-primary-foreground'
+                          ? 'bg-primary'
                           : 'bg-primary/60 group-hover:bg-primary/80'
                         }`}
-                        title={`৳${m.total.toLocaleString()}`}
+                        title={`৳${m.totalCost.toLocaleString()}`}
                       />
                     ) : (
                       <div className="w-full h-1 bg-border/40 rounded" />
@@ -223,7 +407,7 @@ export default function VehicleModelPage() {
                     {m.month}
                   </span>
                   <span className="text-[9px] text-muted-foreground">
-                    {m.total > 0 ? `৳${(m.total / 1000).toFixed(1)}k` : '—'}
+                    {m.totalCost > 0 ? `৳${(m.totalCost / 1000).toFixed(1)}k` : '—'}
                   </span>
                 </div>
               )
@@ -270,8 +454,8 @@ export default function VehicleModelPage() {
                           {req.type}
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-sm text-muted-foreground max-w-[220px] truncate" title={req.details}>{req.details}</td>
-                      <td className="px-5 py-3 text-sm font-semibold text-foreground">৳{req.amount.toLocaleString()}</td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground max-w-55 truncate" title={req.details}>{req.details}</td>
+                      <td className="px-5 py-3 text-sm font-semibold text-foreground">৳{formatCurrency(req.amount)}</td>
                       <td className="px-5 py-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${getStatusColor(req.status)}`}>
                           {req.status}
@@ -287,7 +471,7 @@ export default function VehicleModelPage() {
             <div className="border-t border-border px-5 py-3 bg-muted/20 flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Total for period</span>
               <span className="text-sm font-bold text-foreground">
-                ৳{filteredRecords.reduce((s, r) => s + r.amount, 0).toLocaleString()}
+                ৳{formatCurrency(filteredRecords.reduce((s, r) => s + r.amount, 0))}
               </span>
             </div>
           )}

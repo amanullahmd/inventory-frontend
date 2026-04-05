@@ -134,12 +134,13 @@ export default function Home() {
 
   const customTooltip = {
     contentStyle: {
-      backgroundColor: '#ffffff',
-      borderRadius: '8px',
-      border: '1px solid #e2e8f0',
-      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-      padding: '10px',
-      color: '#1e293b'
+      backgroundColor: 'rgba(15, 23, 42, 0.95)',
+      borderRadius: '10px',
+      border: '1px solid rgba(148, 163, 184, 0.2)',
+      boxShadow: '0 8px 32px rgb(0 0 0 / 0.3)',
+      padding: '12px 16px',
+      color: '#f1f5f9',
+      fontSize: '12px',
     },
     wrapperStyle: { zIndex: 1000 }
   }
@@ -176,9 +177,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="totalItems" radius={[4, 4, 0, 0]} name="আইটেম">
                       {monthlyData.map((_, index) => (
@@ -193,9 +194,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="value" radius={[4, 4, 0, 0]} name="মূল্য">
                       {monthlyData.map((_, index) => (
@@ -210,9 +211,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="stockIn" fill="#10b981" radius={[4, 4, 0, 0]} name="ইন" />
                     <Bar dataKey="stockOut" fill="#f43f5e" radius={[4, 4, 0, 0]} name="আউট" />
@@ -224,9 +225,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <YAxis fontSize={11} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                    <XAxis dataKey="name" fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis fontSize={11} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="usage" radius={[4, 4, 0, 0]} name="ব্যবহার">
                       {monthlyData.map((_, index) => (
@@ -251,9 +252,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={divisionData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(148,163,184,0.15)" />
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" fontSize={11} width={80} tick={{ fill: '#1e293b' }} axisLine={false} tickLine={false} />
+                    <YAxis dataKey="name" type="category" fontSize={11} width={80} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="items" radius={[0, 4, 4, 0]} name="আইটেম">
                       {divisionData.map((_, index) => (
@@ -268,9 +269,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={divisionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#1e293b' }} />
-                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
+                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="value" radius={[4, 4, 0, 0]} name="মূল্য">
                       {divisionData.map((_, index) => (
@@ -285,9 +286,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={divisionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#1e293b' }} />
-                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
+                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="lowStock" radius={[4, 4, 0, 0]} name="কম স্টক">
                       {divisionData.map((_, index) => (
@@ -302,9 +303,9 @@ export default function Home() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={divisionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#1e293b' }} />
-                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.15)" />
+                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
+                    <YAxis fontSize={11} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
                     <Tooltip {...customTooltip} />
                     <Bar dataKey="outOfStock" radius={[4, 4, 0, 0]} name="নেই">
                       {divisionData.map((_, index) => (

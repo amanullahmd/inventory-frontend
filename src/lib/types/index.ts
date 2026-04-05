@@ -131,3 +131,57 @@ export interface ApiError {
   status: number;
   details?: unknown;
 }
+
+// Vehicle Management types
+export type VehicleRequisitionType = 'Oil' | 'Service' | 'Diesel' | 'Engine Oil' | 'Other';
+export type VehicleRequisitionStatus = 'Pending' | 'Approved' | 'Completed' | 'Rejected';
+
+export interface VehicleRequisition {
+  id: string;
+  carNo: string;
+  carModel: string;
+  vehicleType: string;
+  date: string;
+  type: VehicleRequisitionType;
+  details: string;
+  amount: number;
+  status: VehicleRequisitionStatus;
+  approvedBy?: string;
+}
+
+export interface VehicleInfo {
+  carModel: string;
+  carNo: string;
+  vehicleType: string;
+}
+
+export interface VehicleCostSummary {
+  carModel: string;
+  carNo: string;
+  vehicleType: string;
+  dieselCost: number;
+  serviceCost: number;
+  engineOilCost: number;
+  otherCost: number;
+  totalCost: number;
+  recordCount: number;
+}
+
+export interface VehicleMonthlyCost {
+  month: string;
+  monthIndex: number;
+  year: number;
+  dieselCost: number;
+  serviceCost: number;
+  engineOilCost: number;
+  otherCost: number;
+  totalCost: number;
+  recordCount: number;
+}
+
+export interface VehicleCategoryCost {
+  category: VehicleRequisitionType;
+  totalCost: number;
+  percentage: number;
+  recordCount: number;
+}

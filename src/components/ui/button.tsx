@@ -56,7 +56,7 @@ const buttonVariants = cva(
           'bg-accent text-accent-foreground shadow-md hover:shadow-lg hover:scale-102 active:shadow-inner active:scale-100 disabled:opacity-50',
         // Outline: Cyan border and text
         outline:
-          'border-2 border-primary bg-transparent text-primary-foreground hover:bg-primary/10 active:bg-primary/20 disabled:opacity-50',
+          'border-2 border-primary bg-transparent text-foreground hover:bg-primary/10 active:bg-primary/20 disabled:opacity-50',
         // Ghost: Cyan text on hover
         ghost:
           'bg-transparent text-gray-700 hover:bg-primary/10 active:bg-primary/20 disabled:opacity-50 dark:text-gray-300 dark:hover:bg-primary/20 dark:active:bg-primary/30',
