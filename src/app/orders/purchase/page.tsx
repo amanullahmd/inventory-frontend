@@ -148,22 +148,22 @@ export default function PurchaseOrdersPage() {
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">Today</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">${todayTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">৳{todayTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value today</div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">This Month</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">${monthTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">৳{monthTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value this month</div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">This Year</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">${yearTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">৳{yearTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value this year</div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">Selected Range</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">${rangeTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-foreground">৳{rangeTotal.toFixed(2)}</div>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs mb-1">Start</label>
@@ -275,7 +275,7 @@ export default function PurchaseOrdersPage() {
                     <td className="px-6 py-4 text-sm text-foreground">{o.supplierName || `#${o.supplierId}`}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{o.warehouseName || `#${o.warehouseId}`}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateDMY(o.orderDate)}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{o.totalAmount !== undefined ? `$${o.totalAmount?.toFixed?.(2) ?? o.totalAmount}` : '-'}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{o.totalAmount !== undefined ? `৳${o.totalAmount?.toFixed?.(2) ?? o.totalAmount}` : '-'}</td>
                   </tr>
                 ))}
               </tbody>

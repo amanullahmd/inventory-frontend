@@ -437,9 +437,9 @@ export class PDFExportService {
       const tableData = categoryItems.map((item) => [
         item.name,
         item.sku,
-        `$${(item.unitCost ?? 0).toFixed(2)}`,
+        `৳${(item.unitCost ?? 0).toFixed(2)}`,
         item.currentStock.toString(),
-        `$${(item.currentStock * (item.unitCost ?? 0)).toFixed(2)}`,
+        `৳${(item.currentStock * (item.unitCost ?? 0)).toFixed(2)}`,
       ]);
 
       autoTable(doc, {
@@ -487,7 +487,7 @@ export class PDFExportService {
     doc.text(`Total Items: ${totalItems}`, this.MARGIN, yPosition, {});
     yPosition += 6;
     doc.text(
-      `Total Inventory Value: $${totalValue.toFixed(2)}`,
+      `Total Inventory Value: ৳${totalValue.toFixed(2)}`,
       this.MARGIN,
       yPosition,
       {},

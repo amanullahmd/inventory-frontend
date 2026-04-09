@@ -209,7 +209,7 @@ export default function CategoryDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">${totalValue.toFixed(2)}</p>
+                <p className="mt-2 text-3xl font-bold text-foreground">৳{totalValue.toFixed(2)}</p>
               </div>
               <div className="rounded-lg bg-chart-1/10 p-3">
                 <svg className="h-6 w-6 text-chart-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
