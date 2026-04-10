@@ -94,6 +94,8 @@ export default async function RootLayout({
         <link rel="prefetch" href="/items" as="fetch" crossOrigin="anonymous" />
         <link rel="prefetch" href="/stock-in" as="fetch" crossOrigin="anonymous" />
         <link rel="prefetch" href="/stock-out" as="fetch" crossOrigin="anonymous" />
+        <link rel="prefetch" href="/vehicle-management/dashboard" as="fetch" crossOrigin="anonymous" />
+        <link rel="prefetch" href="/vehicle-management/list" as="fetch" crossOrigin="anonymous" />
 
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.svg" />

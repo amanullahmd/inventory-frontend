@@ -74,29 +74,29 @@
   --transition-base: 200ms ease-in-out;
   --transition-slow: 300ms ease-in-out;
 
-  /* Legacy variables for compatibility */
-  --background: oklch(0.985 0.002 247);
-  --foreground: oklch(0.145 0.025 264);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0.025 264);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0.025 264);
+  /* Legacy variables for compatibility - hex values to avoid @supports override */
+  --background: #f9fafb;
+  --foreground: #1a1f2e;
+  --card: #ffffff;
+  --card-foreground: #1a1f2e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1f2e;
   --primary: #d5e6baba;
   --primary-foreground: #0088a3;
   --secondary: #a1cf8a;
   --secondary-foreground: #111827;
-  --muted: oklch(0.955 0.008 264);
-  --muted-foreground: oklch(0.38 0.035 264);
+  --muted: #eef0f4;
+  --muted-foreground: #5b6478;
   --accent: #00b8c9;
   --accent-foreground: #ffffff;
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.985 0 0);
-  --success: oklch(0.65 0.18 145);
-  --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.75 0.18 75);
-  --warning-foreground: oklch(0.25 0.05 75);
-  --border: oklch(0.91 0.006 264);
-  --input: oklch(0.91 0.006 264);
+  --destructive: #dc2626;
+  --destructive-foreground: #fafafa;
+  --success: #16a34a;
+  --success-foreground: #fafafa;
+  --warning: #d97706;
+  --warning-foreground: #2a1800;
+  --border: #e2e4e9;
+  --input: #e2e4e9;
   --ring: #d5e6baba;
   --chart-1: #d5e6baba;
   --chart-2: #a1cf8a;
@@ -104,8 +104,8 @@
   --chart-4: #f59e0b;
   --chart-5: #ef4444;
   --radius: 0.75rem;
-  --sidebar: oklch(0.995 0 0);
-  --sidebar-foreground: oklch(0.145 0.025 264);
+  --sidebar: #fcfcfc;
+  --sidebar-foreground: #1a1f2e;
   --sidebar-primary: #d5e6baba;
   --sidebar-primary-foreground: #1f2937;
   --sidebar-accent: #f3f4f6;
@@ -184,42 +184,42 @@
   --transition-base: 200ms ease-in-out;
   --transition-slow: 300ms ease-in-out;
 
-  /* Legacy variables for compatibility */
-  --background: oklch(0.09 0.018 264);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.13 0.022 264);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.13 0.022 264);
-  --popover-foreground: oklch(0.97 0 0);
+  /* Legacy variables for compatibility - hex values to avoid @supports override */
+  --background: #080d14;
+  --foreground: #f5f5f5;
+  --card: #0f1729;
+  --card-foreground: #f5f5f5;
+  --popover: #0f1729;
+  --popover-foreground: #f5f5f5;
   --primary: #d5e6baba;
-  --primary-foreground: oklch(0.15 0.02 264);
+  --primary-foreground: #0088a3;
   --secondary: #a1cf8a;
-  --secondary-foreground: oklch(0.15 0.02 264);
-  --muted: oklch(0.18 0.025 264);
-  --muted-foreground: oklch(0.76 0.018 264);
+  --secondary-foreground: #1a4731;
+  --muted: #171f2e;
+  --muted-foreground: #b0b8c4;
   --accent: #00c4d9;
-  --accent-foreground: oklch(0.97 0 0);
-  --destructive: oklch(0.55 0.2 25);
-  --destructive-foreground: oklch(0.97 0 0);
-  --success: oklch(0.58 0.18 145);
-  --success-foreground: oklch(0.97 0 0);
-  --warning: oklch(0.68 0.18 75);
-  --warning-foreground: oklch(0.15 0.03 75);
-  --border: oklch(0.22 0.03 264);
-  --input: oklch(0.22 0.03 264);
-  --ring: oklch(0.6 0.18 262);
-  --chart-1: oklch(0.65 0.2 262);
-  --chart-2: oklch(0.6 0.18 145);
-  --chart-3: oklch(0.68 0.18 75);
-  --chart-4: oklch(0.62 0.22 304);
-  --chart-5: oklch(0.65 0.2 16);
-  --sidebar: oklch(0.11 0.018 264);
-  --sidebar-foreground: oklch(0.97 0 0);
+  --accent-foreground: #f5f5f5;
+  --destructive: #cc3a3a;
+  --destructive-foreground: #f5f5f5;
+  --success: #10b981;
+  --success-foreground: #f5f5f5;
+  --warning: #d78300;
+  --warning-foreground: #1a1000;
+  --border: #1e2a3e;
+  --input: #1e2a3e;
+  --ring: #407aea;
+  --chart-1: #4688ff;
+  --chart-2: #189a30;
+  --chart-3: #d78300;
+  --chart-4: #a457ef;
+  --chart-5: #f04b64;
+  --sidebar: #0a0f18;
+  --sidebar-foreground: #f5f5f5;
   --sidebar-primary: #d5e6baba;
   --sidebar-primary-foreground: #f8fafc;
-  --sidebar-accent: oklch(0.18 0.025 264);
-  --sidebar-accent-foreground: oklch(0.92 0.005 264);
-  --sidebar-border: oklch(0.22 0.03 264);
+  --sidebar-accent: #171f2e;
+  --sidebar-accent-foreground: #e3e5e8;
+  --sidebar-border: #1e2a3e;
   --sidebar-ring: #d5e6baba;
 }
 
@@ -274,6 +274,12 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
+}
+
+/* Fix dropdown option colors in dark mode */
+select option {
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 /* Smooth scrolling */

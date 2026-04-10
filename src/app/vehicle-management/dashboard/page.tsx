@@ -1,25 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import {
   Car,
-  Fuel,
-  Wrench,
-  Droplets,
-  PenTool,
   TrendingUp,
-  TrendingDown,
   BarChart3,
   PieChart as PieChartIcon,
-  DollarSign,
-  Award,
   Calendar,
-  ArrowRight,
   List,
   LayoutDashboard,
-  Activity,
 } from 'lucide-react'
 import {
   BarChart,
@@ -40,6 +31,7 @@ import Link from 'next/link'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { VehicleService } from '@/lib/services/vehicleService'
 import ChartCard from '@/components/dashboard/ChartCard'
+import { SummaryCard, VehicleCard } from '@/components/dashboard/VehicleCards'
 
 const VIBRANT_COLORS = [
   '#0088a3', '#10b981', '#f59e0b', '#06b6d4',
@@ -60,17 +52,23 @@ const customTooltip = {
     border: '1px solid rgba(148, 163, 184, 0.2)',
     boxShadow: '0 8px 32px rgb(0 0 0 / 0.3)',
     padding: '12px 16px',
-    color: '#f1f5f9',
+    color: '#ffffff',
     fontSize: '12px',
   },
+  labelStyle: { color: '#ffffff', fontWeight: 600 },
+  itemStyle: { color: '#ffffff' },
   wrapperStyle: { zIndex: 1000 },
 }
 
 export default function VehicleDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const availableYears = VehicleService.getAvailableYears()
+  const availableYears = useMemo(() => VehicleService.getAvailableYears(), [])
   const [selectedYear, setSelectedYear] = useState(availableYears[0] || 2024)
+
+  const handleYearChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(Number(e.target.value))
+  }, [])
 
   if (status === 'loading') {
     return <div className="p-8"><LoadingSpinner size="medium" text="Loading..." /></div>
@@ -78,27 +76,27 @@ export default function VehicleDashboardPage() {
 
   if (!session) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <p className="text-muted-foreground">Please sign in to view this page.</p>
       </div>
     )
   }
 
-  // Data
-  const totals = VehicleService.getDashboardTotals(selectedYear)
-  const costSummaries = VehicleService.getCostSummaries(selectedYear)
-  const categoryByVehicle = VehicleService.getCategoryCostsByVehicle(selectedYear)
-  const categoryDistribution = VehicleService.getOverallCategoryDistribution(selectedYear)
-  const monthlyTotals = VehicleService.getMonthlyTotalCosts(selectedYear)
+  // Memoized data computations
+  const totals = useMemo(() => VehicleService.getDashboardTotals(selectedYear), [selectedYear])
+  const costSummaries = useMemo(() => VehicleService.getCostSummaries(selectedYear), [selectedYear])
+  const categoryByVehicle = useMemo(() => VehicleService.getCategoryCostsByVehicle(selectedYear), [selectedYear])
+  const categoryDistribution = useMemo(() => VehicleService.getOverallCategoryDistribution(selectedYear), [selectedYear])
+  const monthlyTotals = useMemo(() => VehicleService.getMonthlyTotalCosts(selectedYear), [selectedYear])
 
   // Previous year for comparison
-  const prevYearTotals = VehicleService.getDashboardTotals(selectedYear - 1)
+  const prevYearTotals = useMemo(() => VehicleService.getDashboardTotals(selectedYear - 1), [selectedYear])
   const costChange = prevYearTotals.totalCost > 0
     ? ((totals.totalCost - prevYearTotals.totalCost) / prevYearTotals.totalCost * 100)
     : 0
 
   // Chart data
-  const categoryChartData = categoryByVehicle.map(v => ({
+  const categoryChartData = useMemo(() => categoryByVehicle.map(v => ({
     name: v.vehicle.length > 12 ? v.vehicle.substring(0, 12) + '…' : v.vehicle,
     fullName: v.vehicle,
     Diesel: v.diesel,
@@ -106,28 +104,28 @@ export default function VehicleDashboardPage() {
     'Engine Oil': v.engineOil,
     Other: v.other,
     total: v.total,
-  }))
+  })), [categoryByVehicle])
 
-  const rankingData = costSummaries.map(s => ({
+  const rankingData = useMemo(() => costSummaries.map(s => ({
     name: s.carModel,
     total: s.totalCost,
     carNo: s.carNo,
-  })).sort((a, b) => b.total - a.total)
+  })).sort((a, b) => b.total - a.total), [costSummaries])
 
-  const pieData = categoryDistribution
+  const pieData = useMemo(() => categoryDistribution
     .filter(c => c.totalCost > 0)
     .map(c => ({
       name: c.category,
       value: c.totalCost,
       percentage: c.percentage.toFixed(1),
       count: c.recordCount,
-    }))
+    })), [categoryDistribution])
 
-  const totalRecords = categoryDistribution.reduce((sum, c) => sum + c.recordCount, 0)
+  const totalRecords = useMemo(() => categoryDistribution.reduce((sum, c) => sum + c.recordCount, 0), [categoryDistribution])
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="p-4 lg:p-6 max-w-[1400px] mx-auto">
+      <div className="p-4 lg:p-6 max-w-350 mx-auto">
         {/* Header with Tab Navigation */}
         <div className="mb-6 animate-slide-down">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -138,14 +136,14 @@ export default function VehicleDashboardPage() {
                 </div>
                 Vehicle Management
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground ml-[52px]">Fleet cost analytics and management</p>
+              <p className="mt-1 text-sm text-muted-foreground ml-13">Fleet cost analytics and management</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5">
                 <Calendar size={14} className="text-muted-foreground" />
                 <select
                   value={selectedYear}
-                  onChange={e => setSelectedYear(Number(e.target.value))}
+                  onChange={handleYearChange}
                   className="bg-transparent text-sm text-foreground font-medium focus:outline-none cursor-pointer"
                 >
                   {availableYears.map(y => (
@@ -177,56 +175,36 @@ export default function VehicleDashboardPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 animate-slide-up">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-                <Car size={18} className="text-emerald-700 dark:text-emerald-400" />
-              </div>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Fleet</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{totals.totalVehicles}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Active Vehicles</p>
-          </div>
+          <SummaryCard
+            icon="car"
+            value={totals.totalVehicles}
+            label="Active Vehicles"
+            topRightLabel="Fleet"
+          />
 
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <DollarSign size={18} className="text-green-500" />
-              </div>
-              {costChange !== 0 && (
-                <span className={`flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  costChange > 0 ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'
-                }`}>
-                  {costChange > 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                  {Math.abs(costChange).toFixed(0)}%
-                </span>
-              )}
-            </div>
-            <p className="text-2xl font-bold text-foreground">৳{(totals.totalCost / 1000).toFixed(0)}k</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Total Cost (YTD)</p>
-          </div>
+          <SummaryCard
+            icon="dollar"
+            value={`৳${(totals.totalCost / 1000).toFixed(0)}k`}
+            label="Total Cost (YTD)"
+            badge={costChange !== 0 ? {
+              text: `${Math.abs(costChange).toFixed(0)}%`,
+              positive: costChange > 0,
+            } : undefined}
+          />
 
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <Award size={18} className="text-amber-500" />
-              </div>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Highest</span>
-            </div>
-            <p className="text-lg font-bold text-foreground truncate">{totals.highestCostVehicle || '—'}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">৳{totals.highestCostAmount.toLocaleString()}</p>
-          </div>
+          <SummaryCard
+            icon="award"
+            value={totals.highestCostVehicle || '—'}
+            label={`৳${totals.highestCostAmount.toLocaleString()}`}
+            topRightLabel="Highest"
+          />
 
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <Activity size={18} className="text-blue-500" />
-              </div>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{totalRecords} Records</span>
-            </div>
-            <p className="text-lg font-bold text-foreground">{totals.mostActiveCategory}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Top Category · ৳{totals.mostActiveCategoryAmount.toLocaleString()}</p>
-          </div>
+          <SummaryCard
+            icon="activity"
+            value={totals.mostActiveCategory}
+            label={`Top Category · ৳${totals.mostActiveCategoryAmount.toLocaleString()}`}
+            topRightLabel={`${totalRecords} Records`}
+          />
         </div>
 
         {/* Monthly Trend Chart — Full Width */}
@@ -236,7 +214,7 @@ export default function VehicleDashboardPage() {
             subtitle={`${selectedYear} — Diesel, Service, Engine Oil, Other`}
             icon={TrendingUp}
           >
-            <div className="h-[280px] w-full">
+            <div className="h-70 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={monthlyTotals} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                   <defs>
@@ -281,7 +259,7 @@ export default function VehicleDashboardPage() {
               subtitle="Grouped breakdown by expense type"
               icon={BarChart3}
             >
-              <div className="h-[320px] w-full">
+              <div className="h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={categoryChartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148,163,184,0.1)" />
@@ -314,7 +292,7 @@ export default function VehicleDashboardPage() {
             subtitle="Category-wise spending share"
             icon={PieChartIcon}
           >
-            <div className="h-[240px] w-full">
+            <div className="h-60 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -339,7 +317,7 @@ export default function VehicleDashboardPage() {
             <div className="grid grid-cols-2 gap-2 mt-2 px-2">
               {pieData.map((entry) => (
                 <div key={entry.name} className="flex items-center gap-2 text-xs">
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CATEGORY_COLORS[entry.name] }} />
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: CATEGORY_COLORS[entry.name] }} />
                   <span className="text-muted-foreground truncate">{entry.name}</span>
                   <span className="font-semibold text-foreground ml-auto">{entry.percentage}%</span>
                 </div>
@@ -391,70 +369,21 @@ export default function VehicleDashboardPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {costSummaries.map((vehicle, idx) => {
-              const maxCost = costSummaries[0]?.totalCost || 1
-              const costPercent = (vehicle.totalCost / maxCost * 100).toFixed(0)
-              return (
-                <Link
-                  key={vehicle.carModel}
-                  href={`/vehicle-management/${encodeURIComponent(vehicle.carModel)}`}
-                  className="group rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-lg hover:border-emerald-500/40 transition-all duration-300 cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div
-                      className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-xs"
-                      style={{ backgroundColor: VIBRANT_COLORS[idx % VIBRANT_COLORS.length] }}
-                    >
-                      {vehicle.carModel.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-sm text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors truncate">
-                        {vehicle.carModel}
-                      </h3>
-                      <p className="text-[10px] text-muted-foreground">{vehicle.carNo} · {vehicle.vehicleType}</p>
-                    </div>
-                    <ArrowRight size={14} className="text-muted-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                  </div>
-
-                  {/* Cost bar visualization */}
-                  <div className="mb-3">
-                    <div className="flex justify-between items-baseline mb-1">
-                      <span className="text-lg font-bold text-foreground">৳{vehicle.totalCost.toLocaleString()}</span>
-                      <span className="text-[10px] text-muted-foreground">{costPercent}% of highest</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${costPercent}%`,
-                          backgroundColor: VIBRANT_COLORS[idx % VIBRANT_COLORS.length],
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Category breakdown mini */}
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground flex items-center gap-1"><Fuel size={10} /> Diesel</span>
-                      <span className="font-medium text-foreground">৳{(vehicle.dieselCost / 1000).toFixed(1)}k</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground flex items-center gap-1"><Wrench size={10} /> Service</span>
-                      <span className="font-medium text-foreground">৳{(vehicle.serviceCost / 1000).toFixed(1)}k</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground flex items-center gap-1"><Droplets size={10} /> Oil</span>
-                      <span className="font-medium text-foreground">৳{(vehicle.engineOilCost / 1000).toFixed(1)}k</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground flex items-center gap-1"><PenTool size={10} /> Other</span>
-                      <span className="font-medium text-foreground">৳{(vehicle.otherCost / 1000).toFixed(1)}k</span>
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
+            {costSummaries.map((vehicle, idx) => (
+              <VehicleCard
+                key={vehicle.carModel}
+                carModel={vehicle.carModel}
+                carNo={vehicle.carNo}
+                vehicleType={vehicle.vehicleType}
+                totalCost={vehicle.totalCost}
+                dieselCost={vehicle.dieselCost}
+                serviceCost={vehicle.serviceCost}
+                engineOilCost={vehicle.engineOilCost}
+                otherCost={vehicle.otherCost}
+                maxCost={costSummaries[0]?.totalCost || 1}
+                index={idx}
+              />
+            ))}
           </div>
         </div>
       </div>

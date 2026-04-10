@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Item, ApiError } from '@/lib/types'
@@ -106,7 +106,7 @@ export default function ItemsPage() {
     }
   }, [])
 
-  const refreshCategories = async () => {
+  const refreshCategories = useCallback(async () => {
     try {
       const backendCategories = await CategoryService.getCategories()
       setCategories(backendCategories.map(cat => ({
@@ -120,9 +120,9 @@ export default function ItemsPage() {
       const apiError = err as ApiError
       setError(apiError.message || 'Failed to fetch categories')
     }
-  }
+  }, [])
 
-  const handleCreateInlineCategory = async (e: React.FormEvent) => {
+  const handleCreateInlineCategory = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!can('create_category')) {
@@ -159,9 +159,9 @@ export default function ItemsPage() {
     } finally {
       setSubmittingItem(false)
     }
-  }
+  }, [can, newCategoryName, newCategoryDescription])
 
-  const handleCreateItem = async (e: React.FormEvent) => {
+  const handleCreateItem = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!can('create_item')) {
@@ -220,7 +220,7 @@ export default function ItemsPage() {
     } finally {
       setSubmittingItem(false)
     }
-  }
+  }, [can, itemForm, items, categories])
 
   const openEdit = (item: ItemWithCategory) => {
     setError(null)
@@ -238,7 +238,7 @@ export default function ItemsPage() {
     setShowEditForm(true)
   }
 
-  const handleUpdateItem = async (e: React.FormEvent) => {
+  const handleUpdateItem = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!can('create_item')) {
@@ -283,7 +283,7 @@ export default function ItemsPage() {
     } finally {
       setSubmittingItem(false)
     }
-  }
+  }, [can, editingItemId, editForm, categories])
 
   const handleExportInventory = async () => {
     setExportLoading(true)
@@ -316,26 +316,28 @@ export default function ItemsPage() {
     }
   }, [status, fetchData])
 
-  const filteredItems = items.filter(item => {
+  const filteredItems = useMemo(() => items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchTerm.toLowerCase())
     return matchesSearch
-  })
+  }), [items, searchTerm])
 
-  const lowStockItems = items.filter(item => {
-    const min = item.minimumStock ?? 0
-    const threshold = min > 0 ? min : 10
-    return (item.currentStock ?? 0) < threshold
-  }).length
-  const outOfStockItems = items.filter(item => item.currentStock === 0).length
-  const expiredItemsCount = items.filter(item => {
-    if (!item.expiryDate) return false
-    return new Date(item.expiryDate) < new Date()
-  }).length
+  const { lowStockItems, outOfStockItems, expiredItemsCount } = useMemo(() => ({
+    lowStockItems: items.filter(item => {
+      const min = item.minimumStock ?? 0
+      const threshold = min > 0 ? min : 10
+      return (item.currentStock ?? 0) < threshold
+    }).length,
+    outOfStockItems: items.filter(item => item.currentStock === 0).length,
+    expiredItemsCount: items.filter(item => {
+      if (!item.expiryDate) return false
+      return new Date(item.expiryDate) < new Date()
+    }).length
+  }), [items])
 
   const searchParams = useSearchParams()
   const filter = (searchParams?.get('filter') || 'all') as 'all' | 'low_stock' | 'out_of_stock'
-  const filteredByStatus = items.filter(item => {
+  const filteredByStatus = useMemo(() => items.filter(item => {
     if (filter === 'low_stock') {
       const min = item.minimumStock ?? 0
       const threshold = min > 0 ? min : 10
@@ -345,7 +347,7 @@ export default function ItemsPage() {
       return (item.currentStock ?? 0) === 0
     }
     return true
-  })
+  }), [items, filter])
 
   if (status === 'loading') {
     return (
@@ -424,7 +426,7 @@ export default function ItemsPage() {
                 <p className="mt-2 text-3xl font-bold text-foreground">{items.length}</p>
               </div>
               <div className="rounded-lg bg-primary/10 p-3">
-                <svg className="h-6 w-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10M8 7v10m8-10v10" />
                 </svg>
               </div>

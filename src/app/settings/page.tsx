@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -27,6 +27,14 @@ interface User extends UserProfile {
   createdAt?: string
 }
 
+function splitFullName(name: string): { firstName: string; lastName: string } {
+  const parts = name.trim().split(/\s+/)
+  return {
+    firstName: parts[0] || '',
+    lastName: parts.slice(1).join(' ') || '',
+  }
+}
+
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const isAdmin = (session as any)?.roles?.includes('ROLE_ADMIN')
@@ -47,13 +55,10 @@ export default function SettingsPage() {
     const init = async () => {
       try {
         const p = await UserService.getCurrentUserProfile()
-        const name = (p as any).name || ''
-        const parts = name.trim().split(/\s+/)
-        const first = parts[0] || ''
-        const last = parts.slice(1).join(' ') || ''
+        const { firstName, lastName } = splitFullName((p as any).name || '')
         setProfile({
-          firstName: first,
-          lastName: last,
+          firstName,
+          lastName,
           email: p.email || session?.user?.email || '',
           branchName: p.branchName || 'Main Branch',
           position: (p as any).position || '',
@@ -63,12 +68,11 @@ export default function SettingsPage() {
         })
       } catch {
         // Fallback to session
-        const name = session?.user?.name || ''
-        const parts = name.trim().split(/\s+/)
+        const { firstName, lastName } = splitFullName(session?.user?.name || '')
         setProfile(prev => ({
           ...prev,
-          firstName: parts[0] || '',
-          lastName: parts.slice(1).join(' ') || '',
+          firstName,
+          lastName,
           email: session?.user?.email || '',
           branchName: 'Main Branch',
         }))
@@ -92,15 +96,15 @@ export default function SettingsPage() {
     return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection)
   }, [])
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleProfileChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setProfile(prev => ({
       ...prev,
       [name]: value,
     }))
-  }
+  }, [])
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
+  const handleSaveProfile = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
@@ -122,11 +126,11 @@ export default function SettingsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [profile])
 
-  const handleAddUser = async (e: React.FormEvent) => {
+  const handleAddUser = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!newUser.name || !newUser.email || !newUser.branchName) {
       setError('Please fill in all required fields')
       return
@@ -134,18 +138,17 @@ export default function SettingsPage() {
 
     try {
       setLoading(true)
-      // Call API to create user
-      const parts = newUser.name.trim().split(/\s+/)
+      const { firstName, lastName } = splitFullName(newUser.name)
       const createdUser: User = {
         userId: Math.floor(Math.random() * 10000),
-        firstName: parts[0] || '',
-        lastName: parts.slice(1).join(' ') || '',
+        firstName,
+        lastName,
         email: newUser.email,
         branchName: newUser.branchName,
         role: newUser.role,
         createdAt: new Date().toISOString(),
       }
-      
+
       setUsers([...users, createdUser])
       setSuccess(`User "${newUser.name}" created successfully!`)
       setNewUser({ name: '', email: '', branchName: '', role: 'ROLE_USER' })
@@ -156,9 +159,9 @@ export default function SettingsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [newUser, users])
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = useCallback(async (userId: number) => {
     if (!confirm('Are you sure you want to delete this user?')) return
 
     try {
@@ -171,7 +174,7 @@ export default function SettingsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [users])
 
   if (status === 'loading') {
     return (

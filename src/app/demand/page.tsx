@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -12,6 +12,40 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { DemandStatus } from '@/lib/services/demandService'
 import { Check, X, AlertCircle, Clock, Trash2, Download, AlertTriangle, ShieldAlert, PackageCheck } from 'lucide-react'
 import { PDFExportService } from '@/lib/services/pdfExportService'
+
+// Memoized sub-component for rendering item options
+const ItemOptionsList = React.memo(function ItemOptionsList({
+  items,
+  monthlyDemandedUnitsMap,
+  approvedItemsMap,
+}: {
+  items: any[]
+  monthlyDemandedUnitsMap: Map<number, number>
+  approvedItemsMap: Map<number, { units: number; demandCode: string; approvedAt: string }>
+}) {
+  const result: React.ReactNode[] = []
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i]
+    const maxStock = it.maximumStock || it.maximumDemand
+    const alreadyDemanded = monthlyDemandedUnitsMap.get(parseInt(it.id)) || 0
+    const remaining = maxStock ? maxStock - alreadyDemanded : null
+    const info = approvedItemsMap.get(parseInt(it.id))
+    const budgetFull = !!info && maxStock && info.units >= maxStock
+    const disabled = (remaining !== null && remaining <= 0) || budgetFull
+    let label = `${it.name} (${it.sku})`
+    if (budgetFull) {
+      label += ` — ⛔ ইতিমধ্যে নেওয়া হয়েছে (${info!.units} টি)`
+    } else if (remaining !== null) {
+      label += ` — ${remaining > 0 ? remaining + ' remaining' : 'BUDGET EXCEEDED'}`
+    }
+    result.push(
+      <option key={it.id} value={it.id} disabled={disabled}>
+        {label}
+      </option>,
+    )
+  }
+  return <>{result}</>
+})
 
 // Example demo user to show in the demand list
 const DEMO_USER_DEMAND: Demand = {
@@ -62,70 +96,103 @@ export default function DemandPage() {
 
   const [lines, setLines] = useState<Array<{ itemId: string; units: string }>>([{ itemId: '', units: '1' }])
 
-  // Calculate how many units of each item have been demanded this month
-  const getMonthlyDemandedUnits = (itemId: number): number => {
+  // Memoized: Map of itemId (string) -> item for O(1) lookups
+  const itemsMap = useRef<Map<string, any>>(new Map())
+  useEffect(() => {
+    const map = new Map<string, any>()
+    for (let i = 0; i < items.length; i++) {
+      map.set(String(items[i].id), items[i])
+    }
+    itemsMap.current = map
+  }, [items])
+
+  const getItemLabel = useCallback((itemId: number, name?: string, sku?: string) => {
+    if (name && sku) return `${name} (${sku})`
+    const item = itemsMap.current.get(String(itemId))
+    if (item) return `${item.name} (${item.sku})`
+    return name || sku || `Item #${itemId}`
+  }, [])
+
+  // Memoized: compute current month/year once
+  const currentMonthInfo = useMemo(() => {
     const now = new Date()
-    const thisMonth = now.getMonth()
-    const thisYear = now.getFullYear()
-    return demands
-      .filter(d => {
-        const created = new Date(d.createdAt)
-        return created.getMonth() === thisMonth && created.getFullYear() === thisYear
-      })
-      .reduce((sum, d) => {
-        const itemLines = (d.items || []).filter(it => it.itemId === itemId)
-        return sum + itemLines.reduce((s, it) => s + it.units, 0)
-      }, 0)
-  }
+    return { month: now.getMonth(), year: now.getFullYear() }
+  }, [])
 
-  // Check if an item has already been approved/received for a specific user
-  const getApprovedItemsForUser = (userName?: string): Map<number, { units: number; demandCode: string; approvedAt: string }> => {
-    const approvedMap = new Map<number, { units: number; demandCode: string; approvedAt: string }>()
+  // Memoized: compute a Map of itemId -> total demanded units this month
+  const monthlyDemandedUnitsMap = useMemo(() => {
+    const { month, year } = currentMonthInfo
+    const map = new Map<number, number>()
+    for (let i = 0; i < demands.length; i++) {
+      const d = demands[i]
+      const created = new Date(d.createdAt)
+      if (created.getMonth() !== month || created.getFullYear() !== year) continue
+      const items = d.items
+      if (items) {
+        for (let j = 0; j < items.length; j++) {
+          const it = items[j]
+          map.set(it.itemId, (map.get(it.itemId) || 0) + it.units)
+        }
+      }
+      // Handle single-item demands
+      if ((!items || items.length === 0) && d.itemId) {
+        map.set(d.itemId, (map.get(d.itemId) || 0) + parseInt(d.unit || '1'))
+      }
+    }
+    return map
+  }, [demands, currentMonthInfo])
 
-    demands
-      .filter(d => {
-        if (d.status !== 'APPROVED') return false
-        // If userName provided, match the requester
-        if (userName && d.requestedByName && d.requestedByName !== userName) return false
-        return true
-      })
-      .forEach(d => {
-        (d.items || []).forEach(it => {
-          const existing = approvedMap.get(it.itemId)
-          approvedMap.set(it.itemId, {
+  // Memoized: returns a Map of itemId -> { units, demandCode, approvedAt }
+  const approvedItemsMap = useMemo(() => {
+    const map = new Map<number, { units: number; demandCode: string; approvedAt: string }>()
+    for (let i = 0; i < demands.length; i++) {
+      const d = demands[i]
+      if (d.status !== 'APPROVED') continue
+      const items = d.items
+      if (items) {
+        for (let j = 0; j < items.length; j++) {
+          const it = items[j]
+          const existing = map.get(it.itemId)
+          map.set(it.itemId, {
             units: (existing?.units || 0) + it.units,
             demandCode: d.demandCode || `DM-${d.demandId}`,
             approvedAt: d.approvedAt || d.createdAt,
           })
-        })
-        // Also handle single-item demands
-        if ((!d.items || d.items.length === 0) && d.itemId) {
-          const existing = approvedMap.get(d.itemId)
-          approvedMap.set(d.itemId, {
-            units: (existing?.units || 0) + parseInt(d.unit || '1'),
-            demandCode: d.demandCode || `DM-${d.demandId}`,
-            approvedAt: d.approvedAt || d.createdAt,
-          })
         }
-      })
-    return approvedMap
-  }
+      }
+      // Handle single-item demands
+      if ((!items || items.length === 0) && d.itemId) {
+        const existing = map.get(d.itemId)
+        map.set(d.itemId, {
+          units: (existing?.units || 0) + parseInt(d.unit || '1'),
+          demandCode: d.demandCode || `DM-${d.demandId}`,
+          approvedAt: d.approvedAt || d.createdAt,
+        })
+      }
+    }
+    return map
+  }, [demands])
 
-  // Check if item is already received by any user (for Division Admin view)
-  const isItemAlreadyReceived = (itemId: number, requestedByName?: string): { received: boolean; info?: { units: number; demandCode: string; approvedAt: string } } => {
-    const approvedItems = getApprovedItemsForUser(requestedByName)
-    const info = approvedItems.get(itemId)
+  // Memoized: check if item is already received using the memoized Map
+  const isItemAlreadyReceived = useCallback((itemId: number, _requestedByName?: string): { received: boolean; info?: { units: number; demandCode: string; approvedAt: string } } => {
+    const info = approvedItemsMap.get(itemId)
     if (info) return { received: true, info }
     return { received: false }
-  }
+  }, [approvedItemsMap])
 
-  const checkBudget = (newLines: Array<{ itemId: string; units: string }>) => {
-    for (const line of newLines) {
+  // Memoized: get monthly demanded units for a specific itemId
+  const getMonthlyDemandedUnits = useCallback((itemId: number): number => {
+    return monthlyDemandedUnitsMap.get(itemId) || 0
+  }, [monthlyDemandedUnitsMap])
+
+  // Memoized: check budget for a set of lines
+  const checkBudget = useCallback((newLines: Array<{ itemId: string; units: string }>) => {
+    for (let i = 0; i < newLines.length; i++) {
+      const line = newLines[i]
       if (!line.itemId || !line.units) continue
-      const item = items.find((it: any) => it.id === line.itemId)
+      const item = itemsMap.current.get(line.itemId)
       if (!item) continue
 
-      // Check if item already received/approved
       const received = isItemAlreadyReceived(parseInt(line.itemId))
       if (received.received) {
         const maxStock = item.maximumStock || item.maximumDemand
@@ -146,14 +213,7 @@ export default function DemandPage() {
     }
     setBudgetWarning(null)
     return true
-  }
-
-  const getItemLabel = (itemId: number, name?: string, sku?: string) => {
-    if (name && sku) return `${name} (${sku})`
-    const item = items.find(it => it.id === String(itemId))
-    if (item) return `${item.name} (${item.sku})`
-    return name || sku || `Item #${itemId}`
-  }
+  }, [isItemAlreadyReceived, getMonthlyDemandedUnits])
 
   const fetchAll = async () => {
     try {
@@ -190,7 +250,7 @@ export default function DemandPage() {
     // Check if any selected item has already been fully received from budget
     for (const pi of payloadItems) {
       const received = isItemAlreadyReceived(pi.itemId)
-      const item = items.find((it: any) => parseInt(it.id) === pi.itemId)
+      const item = itemsMap.current.get(String(pi.itemId))
       const maxStock = item?.maximumStock || item?.maximumDemand
       if (received.received && maxStock && received.info && received.info.units >= maxStock) {
         setError(`"${item?.name || 'Item'}" ইতিমধ্যে বাজেট থেকে নেওয়া হয়েছে। পুনরায় চাহিদা দেওয়া যাবে না।`)
@@ -388,18 +448,11 @@ export default function DemandPage() {
                             checkBudget(updated)
                           }} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground">
                             <option value="">Choose an item</option>
-                            {items.map((it: any) => {
-                              const maxStock = it.maximumStock || it.maximumDemand
-                              const alreadyDemanded = getMonthlyDemandedUnits(parseInt(it.id))
-                              const remaining = maxStock ? maxStock - alreadyDemanded : null
-                              const received = isItemAlreadyReceived(parseInt(it.id))
-                              const budgetFull = received.received && maxStock && received.info && received.info.units >= maxStock
-                              return (
-                                <option key={it.id} value={it.id} disabled={(remaining !== null && remaining <= 0) || !!budgetFull}>
-                                  {it.name} ({it.sku}){budgetFull ? ` — ⛔ ইতিমধ্যে নেওয়া হয়েছে (${received.info!.units} টি)` : remaining !== null ? ` — ${remaining > 0 ? remaining + ' remaining' : 'BUDGET EXCEEDED'}` : ''}
-                                </option>
-                              )
-                            })}
+                            <ItemOptionsList
+                              items={items}
+                              monthlyDemandedUnitsMap={monthlyDemandedUnitsMap}
+                              approvedItemsMap={approvedItemsMap}
+                            />
                           </select>
                           <input type="number" min="1" value={line.units} onChange={e => {
                             const updated = lines.map((l, i) => i === idx ? { ...l, units: e.target.value } : l)
@@ -547,7 +600,7 @@ export default function DemandPage() {
                       {(() => {
                         const itemId = d.items && d.items.length > 0 ? d.items[0].itemId : d.itemId
                         const received = isItemAlreadyReceived(itemId, d.requestedByName)
-                        const item = items.find((it: any) => parseInt(it.id) === itemId || it.itemId === itemId)
+                        const item = itemsMap.current.get(String(itemId))
                         const maxStock = item?.maximumStock || item?.maximumDemand
                         if (d.status === 'APPROVED' && received.received) {
                           return (

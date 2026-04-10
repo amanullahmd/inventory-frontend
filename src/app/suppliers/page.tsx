@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import { SupplierService, Supplier, CreateSupplierRequest } from '@/lib/services/supplierService'
 import { formatDateDMY } from '@/lib/utils/date'
+
+const getEmptyForm = (): CreateSupplierRequest => ({ name: '', email: '', phone: '', address: '', contactPerson: '', registrationNumber: '' })
 
 export default function SuppliersPage() {
   const { data: session, status } = useSession()
@@ -15,11 +17,11 @@ export default function SuppliersPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState<CreateSupplierRequest>({ name: '', email: '', phone: '', address: '', contactPerson: '', registrationNumber: '' })
+  const [form, setForm] = useState<CreateSupplierRequest>(getEmptyForm)
   const [editSupplier, setEditSupplier] = useState<Supplier | null>(null)
   const [statusActive, setStatusActive] = useState<boolean>(true)
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -31,51 +33,51 @@ export default function SuppliersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (status === 'authenticated') fetchSuppliers()
-  }, [status])
+  }, [status, fetchSuppliers])
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim()) { setError('Name is required'); return }
     try {
       setError(null); setSuccess(null)
       const created = await SupplierService.createSupplier(form)
-      setSuppliers([created, ...suppliers])
+      setSuppliers(prev => [created, ...prev])
       setSuccess('Supplier created')
       setShowForm(false)
-      setForm({ name: '', email: '', phone: '', address: '', contactPerson: '', registrationNumber: '' })
+      setForm(getEmptyForm())
       setStatusActive(true)
     } catch (err: any) {
       setError(err.message || 'Failed to create supplier')
     }
-  }
+  }, [form])
 
-  const openEdit = (s: Supplier) => {
+  const openEdit = useCallback((s: Supplier) => {
     setEditSupplier(s)
     setShowForm(true)
     setForm({ name: s.name, email: s.email, phone: s.phone, address: s.address, contactPerson: s.contactPerson, registrationNumber: s.registrationNumber })
     setStatusActive(!!s.isActive)
-  }
+  }, [])
 
-  const saveEdit = async (e: React.FormEvent) => {
+  const saveEdit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editSupplier) return
     try {
       setError(null); setSuccess(null)
       const updated = await SupplierService.updateSupplier(editSupplier.supplierId, { ...form, name: form.name, isActive: statusActive })
-      setSuppliers(suppliers.map(s => s.supplierId === updated.supplierId ? updated : s))
+      setSuppliers(prev => prev.map(s => s.supplierId === updated.supplierId ? updated : s))
       setSuccess('Supplier updated')
       setShowForm(false)
       setEditSupplier(null)
-      setForm({ name: '', email: '', phone: '', address: '', contactPerson: '', registrationNumber: '' })
+      setForm(getEmptyForm())
       setStatusActive(true)
     } catch (err: any) {
       setError(err.message || 'Failed to update supplier')
     }
-  }
+  }, [editSupplier, form, statusActive])
 
   if (status === 'loading') {
     return <div className="p-6"><LoadingSpinner size="medium" text="Loading..." /></div>

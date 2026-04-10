@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -29,10 +29,34 @@ interface StockMovement {
 
 
 
+const MOVEMENT_BADGE_COLORS: Record<string, string> = {
+  IN: 'border border-chart-2/30 bg-chart-2/10 text-chart-2',
+  OUT: 'border border-destructive/30 bg-destructive/10 text-destructive',
+  ADJUSTMENT: 'border border-chart-1/30 bg-chart-1/10 text-chart-1',
+}
+
+const MOVEMENT_BADGE_DEFAULT = 'border border-border bg-muted text-muted-foreground'
+
+const REASON_BADGE_COLORS: Record<string, string> = {
+  TRANSFERRED: 'bg-chart-1/10 text-chart-1',
+  GIVEN: 'bg-chart-4/10 text-chart-4',
+  EXPIRED: 'bg-chart-5/10 text-chart-5',
+  LOST: 'bg-destructive/10 text-destructive',
+  USED: 'bg-chart-3/10 text-chart-3',
+  DAMAGED: 'bg-chart-4/10 text-chart-4',
+}
+
+const REASON_BADGE_DEFAULT = 'bg-muted text-muted-foreground'
+
+const getMovementBadgeColor = (type: string): string =>
+  MOVEMENT_BADGE_COLORS[type] ?? MOVEMENT_BADGE_DEFAULT
+
+const getReasonBadgeColor = (reason?: string): string =>
+  (reason && REASON_BADGE_COLORS[reason]) ?? REASON_BADGE_DEFAULT
+
 export default function StockMovementsPage() {
   const { data: session } = useSession()
   const [movements, setMovements] = useState<StockMovement[]>([])
-  const [filteredMovements, setFilteredMovements] = useState<StockMovement[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -52,20 +76,17 @@ export default function StockMovementsPage() {
       setLoading(true)
       const response = await apiClient.get<StockMovement[]>('/reports/stock-movements')
       setMovements(response.data)
-      setFilteredMovements(response.data)
       setError(null)
     } catch (err) {
       console.error('Failed to fetch stock movements:', err)
       setError('Failed to load stock movements')
       setMovements([])
-      setFilteredMovements([])
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    // Apply filters and sorting
+  const filteredMovements = useMemo(() => {
     let filtered = [...movements]
 
     // Filter by movement type
@@ -106,10 +127,14 @@ export default function StockMovementsPage() {
       return sortOrder === 'asc' ? compareValue : -compareValue
     })
 
-    setFilteredMovements(filtered)
-  }, [movements, filterType, selectedDateRange, sortBy, sortOrder])
+    return filtered
+  }, [movements, filterType, filterReason, selectedDateRange, sortBy, sortOrder])
 
-  const handleExport = async () => {
+  const handleDateRangeChange = useCallback((startDate: Date, endDate: Date) => {
+    setSelectedDateRange({ start: startDate, end: endDate })
+  }, [])
+
+  const handleExport = useCallback(async () => {
     if (filteredMovements.length === 0) {
       setError('No movements to export')
       return
@@ -131,44 +156,7 @@ export default function StockMovementsPage() {
     } finally {
       setExportLoading(false)
     }
-  }
-
-  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
-    setSelectedDateRange({ start: startDate, end: endDate })
-  }
-
-  const getMovementBadgeColor = (type: string) => {
-    switch (type) {
-      case 'IN':
-        return 'border border-chart-2/30 bg-chart-2/10 text-chart-2'
-      case 'OUT':
-        return 'border border-destructive/30 bg-destructive/10 text-destructive'
-      case 'ADJUSTMENT':
-        return 'border border-chart-1/30 bg-chart-1/10 text-chart-1'
-      default:
-        return 'border border-border bg-muted text-muted-foreground'
-    }
-  }
-
-  const getReasonBadgeColor = (reason?: string) => {
-    if (!reason) return 'bg-muted text-muted-foreground'
-    switch (reason) {
-      case 'TRANSFERRED':
-        return 'bg-chart-1/10 text-chart-1'
-      case 'GIVEN':
-        return 'bg-chart-4/10 text-chart-4'
-      case 'EXPIRED':
-        return 'bg-chart-5/10 text-chart-5'
-      case 'LOST':
-        return 'bg-destructive/10 text-destructive'
-      case 'USED':
-        return 'bg-chart-3/10 text-chart-3'
-      case 'DAMAGED':
-        return 'bg-chart-4/10 text-chart-4'
-      default:
-        return 'bg-muted text-muted-foreground'
-    }
-  }
+  }, [filteredMovements])
 
   if (!session) {
     return (

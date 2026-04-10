@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { formatDateDMY } from '@/lib/utils/date'
 import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
@@ -46,7 +46,7 @@ export default function CategoryDetailPage() {
     }
   }, [status, categoryId])
 
-  const fetchCategoryData = async () => {
+  const fetchCategoryData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -89,16 +89,19 @@ export default function CategoryDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [categoryId])
 
-  const filteredItems = items.filter(item =>
+  const filteredItems = useMemo(() => items.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.sku.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  ), [items, searchTerm])
 
-  const totalValue = items.reduce((sum, item) => sum + (item.currentStock * (item.unitCost ?? 0)), 0)
-  const lowStockItems = items.filter(item => item.currentStock < 10).length
-  const outOfStockItems = items.filter(item => item.currentStock === 0).length
+  const { totalValue, lowStockItems, outOfStockItems } = useMemo(() => {
+    const totalValue = items.reduce((sum, item) => sum + (item.currentStock * (item.unitCost ?? 0)), 0)
+    const lowStockItems = items.filter(item => item.currentStock < 10).length
+    const outOfStockItems = items.filter(item => item.currentStock === 0).length
+    return { totalValue, lowStockItems, outOfStockItems }
+  }, [items])
 
   if (status === 'loading') {
     return (
@@ -198,7 +201,7 @@ export default function CategoryDetailPage() {
                 <p className="mt-2 text-3xl font-bold text-foreground">{items.length}</p>
               </div>
               <div className="rounded-lg bg-primary/10 p-3">
-                <svg className="h-6 w-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10M8 7v10m8-10v10" />
                 </svg>
               </div>
@@ -209,7 +212,7 @@ export default function CategoryDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">৳{totalValue.toFixed(2)}</p>
+                <p className="mt-2 text-3xl font-bold text-emerald-700 dark:text-emerald-400">৳{totalValue.toFixed(2)}</p>
               </div>
               <div className="rounded-lg bg-chart-1/10 p-3">
                 <svg className="h-6 w-6 text-chart-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

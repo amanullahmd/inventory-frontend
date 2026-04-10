@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import {
@@ -52,26 +52,6 @@ const VIBRANT_COLORS = [
   '#8b5cf6', '#ec4899', '#f43f5e', '#6366f1',
 ]
 
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case 'Diesel': return <Fuel size={14} className="text-blue-500" />
-    case 'Service': return <Wrench size={14} className="text-orange-500" />
-    case 'Engine Oil':
-    case 'Oil': return <Droplets size={14} className="text-amber-500" />
-    default: return <PenTool size={14} className="text-purple-500" />
-  }
-}
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Completed': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-    case 'Approved': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-    case 'Pending': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-    case 'Rejected': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-    default: return 'bg-gray-100 text-gray-700'
-  }
-}
-
 const customTooltip = {
   contentStyle: {
     backgroundColor: 'rgba(15, 23, 42, 0.95)',
@@ -85,6 +65,22 @@ const customTooltip = {
   wrapperStyle: { zIndex: 1000 },
 }
 
+const TYPE_ICONS: Record<string, React.ReactNode> = {
+  Diesel: <Fuel size={14} className="text-blue-500" />,
+  Service: <Wrench size={14} className="text-orange-500" />,
+  'Engine Oil': <Droplets size={14} className="text-amber-500" />,
+  Oil: <Droplets size={14} className="text-amber-500" />,
+}
+
+const DEFAULT_ICON = <PenTool size={14} className="text-purple-500" />
+
+const STATUS_COLORS: Record<string, string> = {
+  Completed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  Approved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  Pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  Rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+}
+
 export default function VehicleModelPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -94,6 +90,15 @@ export default function VehicleModelPage() {
   const [selectedYear, setSelectedYear] = useState(() => VehicleService.getAvailableYears()[0] || 2024)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
   const [isMounted, setIsMounted] = useState(false)
+
+  const handleYearChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(Number(e.target.value))
+    setSelectedMonth(null)
+  }, [])
+
+  const handleMonthSelect = useCallback((month: number | null) => {
+    setSelectedMonth(month)
+  }, [])
 
   useEffect(() => {
     setIsMounted(true)
@@ -111,7 +116,7 @@ export default function VehicleModelPage() {
     )
   }
 
-  const vehicleRequisitions = VehicleService.getRequisitionsByModel(modelParam)
+  const vehicleRequisitions = useMemo(() => VehicleService.getRequisitionsByModel(modelParam), [modelParam])
   const vehicleInfo = vehicleRequisitions[0]
 
   if (!vehicleInfo) {
@@ -123,52 +128,51 @@ export default function VehicleModelPage() {
     )
   }
 
-  // Monthly data with category breakdown
-  const monthlyCosts = VehicleService.getMonthlyCosts(modelParam, selectedYear)
+  // Memoized computations
+  const monthlyCosts = useMemo(() => VehicleService.getMonthlyCosts(modelParam, selectedYear), [modelParam, selectedYear])
 
-  // Filtered records
-  const filteredRecords = selectedMonth !== null
+  const filteredRecords = useMemo(() => selectedMonth !== null
     ? vehicleRequisitions.filter(r => {
         const d = new Date(r.date)
         return d.getFullYear() === selectedYear && d.getMonth() === selectedMonth
       })
-    : vehicleRequisitions.filter(r => new Date(r.date).getFullYear() === selectedYear)
+    : vehicleRequisitions.filter(r => new Date(r.date).getFullYear() === selectedYear), [vehicleRequisitions, selectedMonth, selectedYear])
 
-  // Yearly totals
-  const yearlyRecords = vehicleRequisitions.filter(r => new Date(r.date).getFullYear() === selectedYear)
-  const totalYearlyCost = yearlyRecords.reduce((sum, r) => sum + r.amount, 0)
+  const yearlyRecords = useMemo(() => vehicleRequisitions.filter(r => new Date(r.date).getFullYear() === selectedYear), [vehicleRequisitions, selectedYear])
+  
+  const totalYearlyCost = useMemo(() => yearlyRecords.reduce((sum, r) => sum + r.amount, 0), [yearlyRecords])
 
-  // Category breakdown for this vehicle
-  let dieselCost = 0, serviceCost = 0, engineOilCost = 0, otherCost = 0
-  yearlyRecords.forEach(r => {
-    switch (r.type) {
-      case 'Diesel': dieselCost += r.amount; break
-      case 'Service': serviceCost += r.amount; break
-      case 'Engine Oil':
-      case 'Oil': engineOilCost += r.amount; break
-      case 'Other': otherCost += r.amount; break
-    }
-  })
+  const categoryCosts = useMemo(() => {
+    let dieselCost = 0, serviceCost = 0, engineOilCost = 0, otherCost = 0
+    yearlyRecords.forEach(r => {
+      switch (r.type) {
+        case 'Diesel': dieselCost += r.amount; break
+        case 'Service': serviceCost += r.amount; break
+        case 'Engine Oil':
+        case 'Oil': engineOilCost += r.amount; break
+        case 'Other': otherCost += r.amount; break
+      }
+    })
+    return { dieselCost, serviceCost, engineOilCost, otherCost }
+  }, [yearlyRecords])
 
-  // Pie chart data
-  const pieData = [
-    { name: 'Diesel', value: dieselCost },
-    { name: 'Service', value: serviceCost },
-    { name: 'Engine Oil', value: engineOilCost },
-    { name: 'Other', value: otherCost },
-  ].filter(d => d.value > 0)
+  const pieData = useMemo(() => [
+    { name: 'Diesel', value: categoryCosts.dieselCost },
+    { name: 'Service', value: categoryCosts.serviceCost },
+    { name: 'Engine Oil', value: categoryCosts.engineOilCost },
+    { name: 'Other', value: categoryCosts.otherCost },
+  ].filter(d => d.value > 0), [categoryCosts])
 
-  // Trend chart data
-  const trendData = monthlyCosts.map(m => ({
+  const trendData = useMemo(() => monthlyCosts.map(m => ({
     month: m.month,
     Diesel: m.dieselCost,
     Service: m.serviceCost,
     'Engine Oil': m.engineOilCost,
     Other: m.otherCost,
     Total: m.totalCost,
-  }))
+  })), [monthlyCosts])
 
-  const maxMonthlyAmount = Math.max(...monthlyCosts.map(m => m.totalCost), 1)
+  const maxMonthlyAmount = useMemo(() => Math.max(...monthlyCosts.map(m => m.totalCost), 1), [monthlyCosts])
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -198,7 +202,7 @@ export default function VehicleModelPage() {
                 <Calendar size={14} className="text-muted-foreground" />
                 <select
                   value={selectedYear}
-                  onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedMonth(null) }}
+                  onChange={handleYearChange}
                   className="bg-transparent text-sm text-foreground font-medium focus:outline-none cursor-pointer"
                 >
                   {VehicleService.getAvailableYears().map(y => (
@@ -241,12 +245,12 @@ export default function VehicleModelPage() {
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Cost</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">৳{formatCurrency(totalYearlyCost)}</p>
+            <p className="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-400">৳{formatCurrency(totalYearlyCost)}</p>
             <p className="text-xs text-muted-foreground mt-1">{selectedYear}</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Avg Monthly</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">৳{formatCurrency(Math.round(totalYearlyCost / 12))}</p>
+            <p className="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-400">৳{formatCurrency(Math.round(totalYearlyCost / 12))}</p>
             <p className="text-xs text-muted-foreground mt-1">Per month</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -263,7 +267,7 @@ export default function VehicleModelPage() {
               <Fuel size={16} className="text-blue-500" />
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Diesel</p>
             </div>
-            <p className="text-xl font-bold text-foreground">৳{formatCurrency(dieselCost)}</p>
+            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">৳{formatCurrency(categoryCosts.dieselCost)}</p>
             <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Diesel').length} records</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -271,7 +275,7 @@ export default function VehicleModelPage() {
               <Wrench size={16} className="text-orange-500" />
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Service</p>
             </div>
-            <p className="text-xl font-bold text-foreground">৳{formatCurrency(serviceCost)}</p>
+            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">৳{formatCurrency(categoryCosts.serviceCost)}</p>
             <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Service').length} records</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -279,7 +283,7 @@ export default function VehicleModelPage() {
               <Droplets size={16} className="text-amber-500" />
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Engine Oil</p>
             </div>
-            <p className="text-xl font-bold text-foreground">৳{formatCurrency(engineOilCost)}</p>
+            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">৳{formatCurrency(categoryCosts.engineOilCost)}</p>
             <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Engine Oil' || r.type === 'Oil').length} records</p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -287,7 +291,7 @@ export default function VehicleModelPage() {
               <PenTool size={16} className="text-purple-500" />
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Other</p>
             </div>
-            <p className="text-xl font-bold text-foreground">৳{formatCurrency(otherCost)}</p>
+            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">৳{formatCurrency(categoryCosts.otherCost)}</p>
             <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Other').length} records</p>
           </div>
         </div>
@@ -450,14 +454,14 @@ export default function VehicleModelPage() {
                       <td className="px-5 py-3 text-sm text-muted-foreground">{formatDateDMY(req.date)}</td>
                       <td className="px-5 py-3 text-sm">
                         <div className="flex items-center gap-1.5 text-foreground font-medium">
-                          {getTypeIcon(req.type)}
+                          {TYPE_ICONS[req.type] || DEFAULT_ICON}
                           {req.type}
                         </div>
                       </td>
                       <td className="px-5 py-3 text-sm text-muted-foreground max-w-55 truncate" title={req.details}>{req.details}</td>
                       <td className="px-5 py-3 text-sm font-semibold text-foreground">৳{formatCurrency(req.amount)}</td>
                       <td className="px-5 py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${getStatusColor(req.status)}`}>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${STATUS_COLORS[req.status] || 'bg-gray-100 text-gray-700'}`}>
                           {req.status}
                         </span>
                       </td>

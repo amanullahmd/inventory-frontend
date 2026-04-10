@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { ApiError } from '@/lib/types'
@@ -75,7 +75,7 @@ export default function CategoriesPage() {
     }
   }, [status])
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -93,10 +93,11 @@ export default function CategoriesPage() {
       }))
       setAllItems(mappedItems)
 
-      const categoriesWithCounts = backendCategories.map(cat => {
-        const itemCount = mappedItems.filter(item => item.categoryId === String(cat.id)).length
+      const categoriesWithCounts = backendCategories.map((cat, idx) => {
+        const catId = cat.id != null ? String(cat.id) : `temp-${idx}`
+        const itemCount = mappedItems.filter(item => item.categoryId === catId).length
         return {
-          id: String(cat.id),
+          id: catId,
           code: (cat as any).code,
           name: cat.name,
           description: cat.description,
@@ -115,7 +116,17 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  const categoryItemsMap = useMemo(() => {
+    const map: Record<string, ItemForCategory[]> = {}
+    for (const item of allItems) {
+      const catId = item.categoryId
+      if (!map[catId]) map[catId] = []
+      map[catId].push(item)
+    }
+    return map
+  }, [allItems])
 
   const openEdit = (cat: Category) => {
     setEditCategory(cat)
@@ -385,7 +396,7 @@ export default function CategoriesPage() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-slide-up">
             {categories.map((category, index) => {
-              const categoryItems = allItems.filter(it => it.categoryId === category.id)
+              const categoryItems = categoryItemsMap[category.id] || []
               return (
                 <div
                   key={category.id || `category-${index}`}
@@ -442,7 +453,7 @@ export default function CategoriesPage() {
                   <div className="flex items-center gap-2 border-t border-border px-4 py-2.5 bg-muted/20">
                     <button
                       onClick={(e) => { e.stopPropagation(); setAssignCategory(category); setAssignSearch('') }}
-                      className="flex-1 rounded-md bg-primary/10 text-primary-foreground px-2 py-1 text-xs font-medium hover:bg-primary/20 transition-colors"
+                      className="flex-1 rounded-md bg-primary/10 text-accent px-2 py-1 text-xs font-medium hover:bg-primary/20 transition-colors"
                     >
                       + Assign Items
                     </button>

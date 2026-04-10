@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -51,38 +51,46 @@ export default function PurchaseOrdersPage() {
 
   useEffect(() => { if (status === 'authenticated') fetchAll() }, [status])
 
-  const sumForDate = (predicate: (d: Date) => boolean) =>
-    orders.reduce((acc, o) => {
+  const { todayTotal, monthTotal, yearTotal, filtered, rangeTotal } = useMemo(() => {
+    const now = new Date()
+    let todayTotal = 0
+    let monthTotal = 0
+    let yearTotal = 0
+    orders.forEach(o => {
       const d = new Date(o.orderDate)
-      return predicate(d) ? acc + (Number(o.totalAmount ?? 0) || 0) : acc
-    }, 0)
-  const todayTotal = sumForDate(d => {
-    const now = new Date()
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
-  })
-  const monthTotal = sumForDate(d => {
-    const now = new Date()
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
-  })
-  const yearTotal = sumForDate(d => d.getFullYear() === new Date().getFullYear())
-  const filtered = orders.filter(o => {
-    if (!rangeStart && !rangeEnd) return true
-    const d = new Date(o.orderDate)
-    const s = rangeStart ? new Date(rangeStart) : null
-    const e = rangeEnd ? new Date(rangeEnd) : null
-    if (s && d < s) return false
-    if (e) { const ed = new Date(e); ed.setHours(23, 59, 59, 999); if (d > ed) return false }
-    return true
-  })
-  const rangeTotal = filtered.reduce((acc, o) => acc + (Number(o.totalAmount ?? 0) || 0), 0)
+      const val = Number(o.totalAmount ?? 0) || 0
+      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()) {
+        todayTotal += val
+      }
+      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) {
+        monthTotal += val
+      }
+      if (d.getFullYear() === now.getFullYear()) {
+        yearTotal += val
+      }
+    })
 
-  const submit = async (e: React.FormEvent) => {
+    const filtered = orders.filter(o => {
+      if (!rangeStart && !rangeEnd) return true
+      const d = new Date(o.orderDate)
+      const s = rangeStart ? new Date(rangeStart) : null
+      const e = rangeEnd ? new Date(rangeEnd) : null
+      if (s && d < s) return false
+      if (e) { const ed = new Date(e); ed.setHours(23, 59, 59, 999); if (d > ed) return false }
+      return true
+    })
+    const rangeTotal = filtered.reduce((acc, o) => acc + (Number(o.totalAmount ?? 0) || 0), 0)
+
+    return { todayTotal, monthTotal, yearTotal, filtered, rangeTotal }
+  }, [orders, rangeStart, rangeEnd])
+
+  const submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.supplierId || !form.warehouseId || !form.orderDate) { setError('All required fields must be filled'); return }
     try {
       setError(null); setSuccess(null)
       const created = await PurchaseOrderService.createPurchaseOrder(form)
-      setOrders([created, ...orders])
+      setOrders(prev => [created, ...prev])
       setSuccess('Purchase order created')
       // Optional: add lines if provided
       const payloadItems = lines.filter(l => l.itemId && l.quantity && l.unitPrice).map(l => ({
@@ -90,7 +98,7 @@ export default function PurchaseOrdersPage() {
       }))
       if (payloadItems.length > 0) {
         const updated = await PurchaseOrderService.addItems(created.purchaseOrderId, { items: payloadItems } as AddPurchaseOrderItemsRequest)
-        setOrders([updated, ...orders.filter(o => o.purchaseOrderId !== created.purchaseOrderId)])
+        setOrders(prev => [updated, ...prev.filter(o => o.purchaseOrderId !== created.purchaseOrderId)])
       }
       // Update status and header fields
       const updatedHeader = await PurchaseOrderService.updatePurchaseOrder(created.purchaseOrderId, {
@@ -104,9 +112,9 @@ export default function PurchaseOrdersPage() {
     } catch (err: any) {
       setError(err.message || 'Failed to create purchase order')
     }
-  }
+  }, [form, lines])
 
-  const saveEdits = async () => {
+  const saveEdits = useCallback(async () => {
     try {
       const payloadItems = lines.filter(l => l.itemId && l.quantity && l.unitPrice).map(l => ({
         itemId: parseInt(l.itemId), quantity: parseInt(l.quantity), unitPrice: parseFloat(l.unitPrice)
@@ -119,14 +127,14 @@ export default function PurchaseOrdersPage() {
       } as UpdatePurchaseOrderRequest)
       const updatedItems = await PurchaseOrderService.replaceItems(editingId, { items: payloadItems })
       const merged = { ...updatedHeader, totalAmount: updatedItems.totalAmount }
-      setOrders(orders.map(o => o.purchaseOrderId === merged.purchaseOrderId ? merged : o))
+      setOrders(prev => prev.map(o => o.purchaseOrderId === merged.purchaseOrderId ? merged : o))
       setSuccess('Purchase order updated')
       setShowForm(false)
       setEditingId(null)
     } catch (err: any) {
       setError(err.message || 'Failed to update purchase order')
     }
-  }
+  }, [lines, editingId, form])
 
   if (status === 'loading') { return <div className="p-6"><LoadingSpinner size="medium" text="Loading..." /></div> }
   if (!session) { return <div className="p-10 text-center">Please sign in to view purchase orders.</div> }
@@ -148,22 +156,22 @@ export default function PurchaseOrdersPage() {
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">Today</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">৳{todayTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-emerald-700 dark:text-emerald-400">৳{todayTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value today</div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">This Month</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">৳{monthTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-emerald-700 dark:text-emerald-400">৳{monthTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value this month</div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">This Year</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">৳{yearTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-emerald-700 dark:text-emerald-400">৳{yearTotal.toFixed(2)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Total value this year</div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm card-hover">
             <div className="text-sm font-semibold text-muted-foreground">Selected Range</div>
-            <div className="mt-2 text-3xl font-bold text-foreground">৳{rangeTotal.toFixed(2)}</div>
+            <div className="mt-2 text-3xl font-bold text-emerald-700 dark:text-emerald-400">৳{rangeTotal.toFixed(2)}</div>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs mb-1">Start</label>
@@ -252,7 +260,7 @@ export default function PurchaseOrdersPage() {
                   <tr key={o.purchaseOrderId} className="hover:bg-accent/40 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
                       <button
-                        className="text-primary-foreground hover:underline"
+                        className="text-accent hover:underline"
                         onClick={async () => {
                           try {
                             const detail = await PurchaseOrderService.getPurchaseOrderDetail(o.purchaseOrderId)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -12,6 +12,11 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { UserPlus, X } from 'lucide-react'
 import { ExportButton } from '@/components/ui/ExportButton'
 
+const getEmptyForm = (): CreateEmployeeRequest => ({
+  name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '',
+  dateOfBirth: '', gender: '', nationality: ''
+})
+
 export default function EmployeesPage() {
   const { data: session, status } = useSession()
   const [employees, setEmployees] = useState<Employee[]>([])
@@ -20,10 +25,7 @@ export default function EmployeesPage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState<CreateEmployeeRequest>({
-    name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '',
-    dateOfBirth: '', gender: '', nationality: ''
-  })
+  const [form, setForm] = useState<CreateEmployeeRequest>(getEmptyForm)
   const { userRole } = usePermissions()
   const [employeeCode, setEmployeeCode] = useState<string>('')
 
@@ -40,7 +42,7 @@ export default function EmployeesPage() {
     }
   }
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     try {
       setError(null)
       const [es, bs] = await Promise.all([
@@ -54,31 +56,37 @@ export default function EmployeesPage() {
     } finally {
       // setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { if (status === 'authenticated') fetchAll() }, [status])
+  useEffect(() => { if (status === 'authenticated') fetchAll() }, [status, fetchAll])
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name) { setError('Name is required'); return }
     try {
       setError(null); setSuccess(null)
       if (editingId) {
         const updated = await EmployeeService.updateEmployee(editingId, { ...form, employeeCode } as UpdateEmployeeRequest)
-        setEmployees(employees.map(emp => emp.employeeId === updated.employeeId ? updated : emp))
+        setEmployees(prev => prev.map(emp => emp.employeeId === updated.employeeId ? updated : emp))
         setSuccess('Employee updated')
-        setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' })
+        setEditingId(null); setEmployeeCode(''); setForm(getEmptyForm())
       } else {
         const created = await EmployeeService.createEmployee(form)
-        setEmployees([created, ...employees])
+        setEmployees(prev => [created, ...prev])
         setSuccess('Employee created')
         setShowForm(false)
-        setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' })
+        setForm(getEmptyForm())
       }
     } catch (err: any) {
       setError(err.message || 'Failed to submit')
     }
-  }
+  }, [form, editingId, employeeCode])
+
+  const resetForm = useCallback(() => {
+    setEditingId(null)
+    setEmployeeCode('')
+    setForm(getEmptyForm())
+  }, [])
 
   if (status === 'loading') return <div className="p-6"><LoadingSpinner size="medium" text="Loading..." /></div>
   if (!session) return <div className="p-10 text-center">Please sign in to view employees.</div>
@@ -115,7 +123,7 @@ export default function EmployeesPage() {
           <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 animate-slide-up">
             <div className="md:col-span-3 flex justify-between items-center mb-2">
               <h2 className="text-xl font-semibold">{editingId ? 'Edit Employee' : 'New Employee'}</h2>
-              <button type="button" onClick={() => { setEditingId(null); setShowForm(false); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' }) }} className="p-1 hover:bg-accent rounded-md">
+              <button type="button" onClick={() => { setEditingId(null); setShowForm(false); setForm(getEmptyForm()) }} className="p-1 hover:bg-accent rounded-md">
                 <X size={20} />
               </button>
             </div>
@@ -188,14 +196,14 @@ export default function EmployeesPage() {
                   <button type="button" onClick={async () => {
                     try {
                       await EmployeeService.deleteEmployee(editingId!)
-                      setEmployees(employees.filter(emp => emp.employeeId !== editingId))
+                      setEmployees(prev => prev.filter(emp => emp.employeeId !== editingId))
                       setSuccess('Employee deleted')
-                      setEditingId(null); setEmployeeCode(''); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' })
+                      resetForm()
                     } catch (err: any) {
                       setError(err.message || 'Failed to delete')
                     }
                   }} className="rounded-lg border border-border px-4 py-2">Delete</button>
-                  <button type="button" onClick={() => { setEditingId(null); setShowForm(false); setForm({ name: '', grade: '', position: '', branchId: undefined, mobileNumber: '', email: '', address: '', servicePeriod: '', nidNumber: '', dateOfBirth: '', gender: '', nationality: '' }) }} className="rounded-lg border border-border px-4 py-2">Cancel</button>
+                  <button type="button" onClick={() => { resetForm(); setShowForm(false) }} className="rounded-lg border border-border px-4 py-2">Cancel</button>
                 </>
               ) : (
                 <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Create Employee</button>

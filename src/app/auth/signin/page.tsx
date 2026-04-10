@@ -185,7 +185,7 @@ export default function SignIn() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-semibold text-gray-900">{cred.role}</span>
-                        <span className="text-xs bg-primary/10 text-primary-foreground px-2 py-0.5 rounded-full whitespace-nowrap">{cred.level}</span>
+                        <span className="text-xs bg-primary/10 text-accent px-2 py-0.5 rounded-full whitespace-nowrap">{cred.level}</span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">{cred.description}</p>
                       <div className="mt-2 space-y-0.5">

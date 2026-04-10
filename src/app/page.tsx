@@ -50,6 +50,52 @@ const VIBRANT_COLORS = [
   '#6366f1', // Indigo
 ]
 
+
+// Demo Data
+const monthlyData = [
+  { name: 'জানু', totalItems: 400, value: 2400, stockIn: 120, stockOut: 80, usage: 150 },
+  { name: 'ফেব্রু', totalItems: 420, value: 2600, stockIn: 150, stockOut: 90, usage: 180 },
+  { name: 'মার্চ', totalItems: 450, value: 2800, stockIn: 180, stockOut: 110, usage: 210 },
+  { name: 'এপ্রিল', totalItems: 480, value: 3000, stockIn: 200, stockOut: 130, usage: 240 },
+  { name: 'মে', totalItems: 510, value: 3200, stockIn: 220, stockOut: 140, usage: 260 },
+  { name: 'জুন', totalItems: 550, value: 3500, stockIn: 250, stockOut: 160, usage: 290 },
+  { name: 'জুলাই', totalItems: 580, value: 3800, stockIn: 240, stockOut: 170, usage: 310 },
+  { name: 'আগস্ট', totalItems: 610, value: 4100, stockIn: 260, stockOut: 190, usage: 330 },
+  { name: 'সেপ্টে', totalItems: 640, value: 4400, stockIn: 280, stockOut: 210, usage: 350 },
+  { name: 'অক্টো', totalItems: 670, value: 4700, stockIn: 300, stockOut: 230, usage: 380 },
+  { name: 'নভে', totalItems: 700, value: 5000, stockIn: 320, stockOut: 250, usage: 410 },
+  { name: 'ডিসে', totalItems: 750, value: 5400, stockIn: 350, stockOut: 280, usage: 450 },
+]
+
+// DPE Administrative Divisions (দপ্তর) - 12 divisions
+const divisionData = [
+  { name: "DG's Dept", items: 1100, value: 78000, lowStock: 40, outOfStock: 10 },
+  { name: "ADG's Dept", items: 850, value: 59000, lowStock: 28, outOfStock: 7 },
+  { name: 'ADG (PEDP)', items: 920, value: 64000, lowStock: 32, outOfStock: 9 },
+  { name: 'Admin Div', items: 750, value: 52000, lowStock: 25, outOfStock: 6 },
+  { name: 'Planning & Dev', items: 630, value: 43000, lowStock: 18, outOfStock: 4 },
+  { name: 'IMD', items: 580, value: 39000, lowStock: 16, outOfStock: 3 },
+  { name: 'Policy & Op', items: 490, value: 33000, lowStock: 12, outOfStock: 2 },
+  { name: 'Training Div', items: 720, value: 49000, lowStock: 22, outOfStock: 5 },
+  { name: 'Finance Div', items: 840, value: 58000, lowStock: 30, outOfStock: 8 },
+  { name: 'Procurement', items: 960, value: 67000, lowStock: 35, outOfStock: 11 },
+  { name: 'M&E Div', items: 670, value: 46000, lowStock: 20, outOfStock: 5 },
+  { name: 'Stipend Div', items: 1050, value: 73000, lowStock: 38, outOfStock: 9 },
+]
+
+const customTooltip = {
+  contentStyle: {
+    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+    borderRadius: '10px',
+    border: '1px solid rgba(148, 163, 184, 0.2)',
+    boxShadow: '0 8px 32px rgb(0 0 0 / 0.3)',
+    padding: '12px 16px',
+    color: '#f1f5f9',
+    fontSize: '12px',
+  },
+  wrapperStyle: { zIndex: 1000 }
+}
+
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -100,50 +146,6 @@ export default function Home() {
     )
   }
 
-  // Demo Data
-  const monthlyData = [
-    { name: 'জানু', totalItems: 400, value: 2400, stockIn: 120, stockOut: 80, usage: 150 },
-    { name: 'ফেব্রু', totalItems: 420, value: 2600, stockIn: 150, stockOut: 90, usage: 180 },
-    { name: 'মার্চ', totalItems: 450, value: 2800, stockIn: 180, stockOut: 110, usage: 210 },
-    { name: 'এপ্রিল', totalItems: 480, value: 3000, stockIn: 200, stockOut: 130, usage: 240 },
-    { name: 'মে', totalItems: 510, value: 3200, stockIn: 220, stockOut: 140, usage: 260 },
-    { name: 'জুন', totalItems: 550, value: 3500, stockIn: 250, stockOut: 160, usage: 290 },
-    { name: 'জুলাই', totalItems: 580, value: 3800, stockIn: 240, stockOut: 170, usage: 310 },
-    { name: 'আগস্ট', totalItems: 610, value: 4100, stockIn: 260, stockOut: 190, usage: 330 },
-    { name: 'সেপ্টে', totalItems: 640, value: 4400, stockIn: 280, stockOut: 210, usage: 350 },
-    { name: 'অক্টো', totalItems: 670, value: 4700, stockIn: 300, stockOut: 230, usage: 380 },
-    { name: 'নভে', totalItems: 700, value: 5000, stockIn: 320, stockOut: 250, usage: 410 },
-    { name: 'ডিসে', totalItems: 750, value: 5400, stockIn: 350, stockOut: 280, usage: 450 },
-  ]
-
-  // DPE Administrative Divisions (দপ্তর) - 12 divisions
-  const divisionData = [
-    { name: "DG's Dept", items: 1100, value: 78000, lowStock: 40, outOfStock: 10 },
-    { name: "ADG's Dept", items: 850, value: 59000, lowStock: 28, outOfStock: 7 },
-    { name: 'ADG (PEDP)', items: 920, value: 64000, lowStock: 32, outOfStock: 9 },
-    { name: 'Admin Div', items: 750, value: 52000, lowStock: 25, outOfStock: 6 },
-    { name: 'Planning & Dev', items: 630, value: 43000, lowStock: 18, outOfStock: 4 },
-    { name: 'IMD', items: 580, value: 39000, lowStock: 16, outOfStock: 3 },
-    { name: 'Policy & Op', items: 490, value: 33000, lowStock: 12, outOfStock: 2 },
-    { name: 'Training Div', items: 720, value: 49000, lowStock: 22, outOfStock: 5 },
-    { name: 'Finance Div', items: 840, value: 58000, lowStock: 30, outOfStock: 8 },
-    { name: 'Procurement', items: 960, value: 67000, lowStock: 35, outOfStock: 11 },
-    { name: 'M&E Div', items: 670, value: 46000, lowStock: 20, outOfStock: 5 },
-    { name: 'Stipend Div', items: 1050, value: 73000, lowStock: 38, outOfStock: 9 },
-  ]
-
-  const customTooltip = {
-    contentStyle: {
-      backgroundColor: 'rgba(15, 23, 42, 0.95)',
-      borderRadius: '10px',
-      border: '1px solid rgba(148, 163, 184, 0.2)',
-      boxShadow: '0 8px 32px rgb(0 0 0 / 0.3)',
-      padding: '12px 16px',
-      color: '#f1f5f9',
-      fontSize: '12px',
-    },
-    wrapperStyle: { zIndex: 1000 }
-  }
 
   return (
     <div className="min-h-screen bg-transparent">

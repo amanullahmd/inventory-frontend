@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import { WarehouseService, Warehouse, CreateWarehouseRequest } from '@/lib/services/warehouseService'
 import { formatDateDMY } from '@/lib/utils/date'
+
+const getEmptyForm = (): CreateWarehouseRequest => ({ name: '', warehouseCode: '', address: '', capacityUnits: undefined })
 
 export default function WarehousesPage() {
   const { data: session, status } = useSession()
@@ -15,11 +17,11 @@ export default function WarehousesPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState<CreateWarehouseRequest>({ name: '', warehouseCode: '', address: '', capacityUnits: undefined })
+  const [form, setForm] = useState<CreateWarehouseRequest>(getEmptyForm)
   const [editWarehouse, setEditWarehouse] = useState<Warehouse | null>(null)
   const [statusActive, setStatusActive] = useState<boolean>(true)
 
-  const fetchWarehouses = async () => {
+  const fetchWarehouses = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -31,51 +33,51 @@ export default function WarehousesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (status === 'authenticated') fetchWarehouses()
-  }, [status])
+  }, [status, fetchWarehouses])
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim()) { setError('Name is required'); return }
     try {
       setError(null); setSuccess(null)
       const created = await WarehouseService.createWarehouse(form)
-      setWarehouses([created, ...warehouses])
+      setWarehouses(prev => [created, ...prev])
       setSuccess('Warehouse created')
       setShowForm(false)
-      setForm({ name: '', warehouseCode: '', address: '', capacityUnits: undefined })
+      setForm(getEmptyForm())
       setStatusActive(true)
     } catch (err: any) {
       setError(err.message || 'Failed to create warehouse')
     }
-  }
-  
-  const openEdit = (w: Warehouse) => {
+  }, [form])
+
+  const openEdit = useCallback((w: Warehouse) => {
     setEditWarehouse(w)
     setShowForm(true)
     setForm({ name: w.name, warehouseCode: w.warehouseCode, address: w.address, capacityUnits: w.capacityUnits })
     setStatusActive(!!w.isActive)
-  }
-  
-  const saveEdit = async (e: React.FormEvent) => {
+  }, [])
+
+  const saveEdit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editWarehouse) return
     try {
       setError(null); setSuccess(null)
       const updated = await WarehouseService.updateWarehouse(editWarehouse.warehouseId, { ...form, name: form.name, isActive: statusActive })
-      setWarehouses(warehouses.map(w => w.warehouseId === updated.warehouseId ? updated : w))
+      setWarehouses(prev => prev.map(w => w.warehouseId === updated.warehouseId ? updated : w))
       setSuccess('Warehouse updated')
       setShowForm(false)
       setEditWarehouse(null)
-      setForm({ name: '', warehouseCode: '', address: '', capacityUnits: undefined })
+      setForm(getEmptyForm())
       setStatusActive(true)
     } catch (err: any) {
       setError(err.message || 'Failed to update warehouse')
     }
-  }
+  }, [editWarehouse, form, statusActive])
   
   // Status changes are handled via Edit form; no separate actions
 

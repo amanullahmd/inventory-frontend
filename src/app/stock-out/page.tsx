@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -77,7 +77,7 @@ export default function StockOutPage() {
     if (status === 'authenticated') loadAll()
   }, [status])
 
-  const groupStockOuts = (data: StockOutResponse[]) => {
+  const groupStockOuts = useCallback((data: StockOutResponse[]) => {
     const grouped: Record<string, GroupedStockOut> = {};
     const singletons: GroupedStockOut[] = [];
 
@@ -115,9 +115,9 @@ export default function StockOutPage() {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     setGroups(result);
-  }
+  }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Validation
@@ -177,9 +177,9 @@ export default function StockOutPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedSourceWarehouse, stockOutType, selectedBranch, selectedEmployee, lines, notes, groupStockOuts])
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = useCallback(async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this record? Stock will be restored.')) return;
     try {
       setLoading(true);
@@ -196,13 +196,20 @@ export default function StockOutPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [groupStockOuts])
 
-  const addLine = () => setLines([...lines, { itemId: '', quantity: '' }])
-  const updateLine = (idx: number, field: 'itemId' | 'quantity', value: string) => {
-    setLines(lines.map((l, i) => i === idx ? { ...l, [field]: value } : l))
-  }
-  const removeLine = (idx: number) => setLines(lines.filter((_, i) => i !== idx))
+  const addLine = () => setLines(prev => [...prev, { itemId: '', quantity: '' }])
+  const updateLine = useCallback((idx: number, field: 'itemId' | 'quantity', value: string) => {
+    setLines(prev => prev.map((l, i) => i === idx ? { ...l, [field]: value } : l))
+  }, [])
+  const removeLine = useCallback((idx: number) => {
+    setLines(prev => prev.filter((_, i) => i !== idx))
+  }, [])
+
+  const destinationWarehouses = useMemo(
+    () => warehouses.filter(w => String(w.warehouseId || w.id) !== selectedSourceWarehouse),
+    [warehouses, selectedSourceWarehouse]
+  )
 
   if (!session) {
     return (
@@ -290,7 +297,7 @@ export default function StockOutPage() {
                       required
                     >
                       <option value="">Select destination...</option>
-                      {warehouses.filter(w => String(w.warehouseId || w.id) !== selectedSourceWarehouse).map(w => (<option key={w.warehouseId || w.id} value={w.warehouseId || w.id}>{w.name}</option>))}
+                      {destinationWarehouses.map(w => (<option key={w.warehouseId || w.id} value={w.warehouseId || w.id}>{w.name}</option>))}
                     </select>
                   </div>
                 )}
@@ -410,10 +417,10 @@ export default function StockOutPage() {
                           row.note || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${row.type === StockOutType.DAMAGE ? 'bg-red-100 text-red-800 border-red-200' :
-                        row.type === StockOutType.LOST ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                          row.type === StockOutType.BRANCH_TRANSFER ? 'bg-primary/10 text-primary-foreground border-primary/20' :
-                            'bg-secondary text-secondary-foreground border-border'
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${row.type === StockOutType.DAMAGE ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/30' :
+                        row.type === StockOutType.LOST ? 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800/30' :
+                          row.type === StockOutType.BRANCH_TRANSFER ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800/30' :
+                            'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800/30 dark:text-gray-300 dark:border-gray-700/30'
                         }`}>
                         {row.type.toLowerCase().replace('_', ' ')}
                       </span>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useEffect, useCallback, useMemo, type FormEvent } from 'react'
 import { useSession } from 'next-auth/react'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -42,6 +42,48 @@ interface User {
   warehouseId?: number
 }
 
+interface RawUser {
+  id?: number
+  userId?: number
+  firstName?: string
+  lastName?: string
+  name?: string
+  email?: string
+  roles?: string[]
+  role?: { name?: string } | string
+  position?: string
+  enabled?: boolean
+  createdAt?: string
+  lastLogin?: string
+  phone?: string
+  address?: string
+  branchName?: string
+  gradeId?: number
+  grade?: { id?: number }
+  warehouseId?: number
+  warehouse?: { name?: string; warehouseId?: number; id?: number }
+}
+
+function transformUser(user: RawUser): User {
+  return {
+    userId: user.id || user.userId || 0,
+    firstName: user.firstName || '',
+    lastName: user.lastName || '',
+    fullName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+    email: user.email || '',
+    role: user.roles?.[0] || (typeof user.role === 'object' ? user.role?.name : undefined) || (typeof user.role === 'string' ? user.role : '') || 'User',
+    position: user.position || '-',
+    enabled: user.enabled ?? true,
+    createdAt: user.createdAt || '',
+    lastLogin: user.lastLogin ? formatDateTime(user.lastLogin) : 'Never',
+    phone: user.phone || '-',
+    address: user.address || '-',
+    branchName: user.branchName || user.warehouse?.name || '-',
+    gradeId: user.gradeId || user.grade?.id,
+    warehouseId: user.warehouseId || user.warehouse?.warehouseId || user.warehouse?.id
+  }
+}
+
 export default function UsersPage() {
   const { data: session, status } = useSession()
   const [users, setUsers] = useState<User[]>([])
@@ -80,26 +122,7 @@ export default function UsersPage() {
           WarehouseService.getWarehouses()
         ])
 
-        // Transform backend user data to display format
-        const transformedUsers = usersRes.data.map(user => ({
-          userId: user.id || user.userId,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          fullName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-          email: user.email,
-          role: user.roles?.[0] || user.role?.name || user.role || 'User',
-          position: user.position || '-',
-          enabled: user.enabled,
-          createdAt: user.createdAt,
-          joinDate: formatDateDMY(user.createdAt),
-          lastLogin: user.lastLogin ? formatDateTime(user.lastLogin) : 'Never',
-          phone: user.phone || '-',
-          address: user.address || '-',
-          branchName: user.branchName || user.warehouse?.name || '-',
-          gradeId: user.gradeId || user.grade?.id,
-          warehouseId: user.warehouseId || user.warehouse?.warehouseId || user.warehouse?.id
-        }))
-        setUsers(transformedUsers)
+        setUsers(usersRes.data.map(transformUser))
         setGrades(gradesRes)
         setWarehouses(warehousesRes)
         setError(null)
@@ -117,25 +140,24 @@ export default function UsersPage() {
     }
   }, [status])
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.position && user.position.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesRole = filterRole === 'all' || user.role === filterRole
-    return matchesSearch && matchesRole
-  })
+  const filteredUsers = useMemo(() => {
+    const term = searchTerm.toLowerCase()
+    return users.filter(user => {
+      const matchesSearch =
+        user.fullName.toLowerCase().includes(term) ||
+        user.email.toLowerCase().includes(term) ||
+        (user.position && user.position.toLowerCase().includes(term))
+      const matchesRole = filterRole === 'all' || user.role === filterRole
+      return matchesSearch && matchesRole
+    })
+  }, [users, searchTerm, filterRole])
 
-  const handleDeleteClick = async (user: User) => {
+  const handleDeleteClick = useCallback(async (user: User) => {
     if (window.confirm(`Are you sure you want to delete ${user.fullName}?`)) {
       try {
-        // In a real app, you would call the delete API here
-        // await apiClient.deleteUser(user.userId)
-
-        // Optimistic update
-        setUsers(users.filter(u => u.userId !== user.userId))
+        setUsers(prev => prev.filter(u => u.userId !== user.userId))
         setSuccess(`User ${user.fullName} has been removed`)
 
-        // If we were editing this user, reset the form
         if (editingUserId === user.userId) {
           handleCancelEdit()
         }
@@ -143,22 +165,15 @@ export default function UsersPage() {
         setError(err.message || 'Failed to delete user')
       }
     }
-  }
+  }, [editingUserId])
 
-  const handleAddNewClick = () => {
-    setEditingUserId(null)
-    setFormData(initialFormData)
-    setShowForm(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const handleEditClick = (user: User) => {
+  const handleEditClick = useCallback((user: User) => {
     setEditingUserId(user.userId)
     setFormData({
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       email: user.email || '',
-      password: '', // Password is optional on edit
+      password: '',
       position: user.position === '-' ? '' : user.position || '',
       role: user.role === 'ROLE_ADMIN' || user.role === 'ADMIN' ? 'Admin' : 'User',
       gradeId: user.gradeId ? String(user.gradeId) : '',
@@ -166,16 +181,23 @@ export default function UsersPage() {
     })
     setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  }, [])
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingUserId(null)
     setFormData(initialFormData)
     setShowForm(false)
     setError(null)
-  }
+  }, [])
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleAddNewClick = useCallback(() => {
+    setEditingUserId(null)
+    setFormData(initialFormData)
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault()
 
     if (!formData.firstName || !formData.lastName || !formData.email) {
@@ -190,7 +212,6 @@ export default function UsersPage() {
 
     try {
       if (editingUserId) {
-        // Update User
         const payload: UpdateUserRequest = {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -203,7 +224,6 @@ export default function UsersPage() {
         await apiClient.updateUser(editingUserId, payload)
         setSuccess(`User updated successfully!`)
       } else {
-        // Create User
         const payload = {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -219,34 +239,18 @@ export default function UsersPage() {
         setSuccess(`User created successfully!`)
       }
 
-      handleCancelEdit()
+      setEditingUserId(null)
+      setFormData(initialFormData)
+      setShowForm(false)
+      setError(null)
 
-      // Refresh list
       const response = await apiClient.get<any[]>('/users')
-      const transformedUsers = response.data.map(user => ({
-        userId: user.id || user.userId,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-        email: user.email,
-        role: user.roles?.[0] || user.role?.name || user.role || 'User',
-        position: user.position || '-',
-        enabled: user.enabled,
-        createdAt: user.createdAt,
-        joinDate: formatDateDMY(user.createdAt),
-        lastLogin: user.lastLogin ? formatDateTime(user.lastLogin) : 'Never',
-        phone: user.phone || '-',
-        address: user.address || '-',
-        branchName: user.branchName || user.warehouse?.name || '-',
-        gradeId: user.gradeId || user.grade?.id,
-        warehouseId: user.warehouseId || user.warehouse?.warehouseId || user.warehouse?.id
-      }))
-      setUsers(transformedUsers)
+      setUsers(response.data.map(transformUser))
 
     } catch (err: any) {
       setError(err.message || 'Operation failed')
     }
-  }
+  }, [formData, editingUserId])
 
   if (status === 'loading') return <LoadingSpinner />
 
@@ -274,7 +278,7 @@ export default function UsersPage() {
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-down">
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold tracking-tight flex items-center gap-3 text-foreground">
-              <Users className="w-8 h-8 text-primary-foreground" />
+              <Users className="w-8 h-8 text-accent" />
               User Management
             </h1>
             <p className="mt-2 text-muted-foreground">Manage system users, roles, and access permissions</p>
@@ -458,11 +462,11 @@ export default function UsersPage() {
                   <tr key={user.userId} className={`hover:bg-accent/40 transition-colors ${editingUserId === user.userId ? 'bg-primary/5' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary-foreground font-bold text-sm">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-foreground font-bold text-sm">
                           {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                         </div>
                         <div
-                          className="cursor-pointer hover:text-primary-foreground transition-colors"
+                          className="cursor-pointer hover:text-accent transition-colors"
                           onClick={() => handleEditClick(user)}
                         >
                           <div className="font-medium text-foreground">{user.fullName}</div>

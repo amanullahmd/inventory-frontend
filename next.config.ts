@@ -80,7 +80,22 @@ const nextConfig: NextConfig = {
 
   // Experimental optimizations
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', 'recharts'],
+  },
+
+  // Turbopack configuration
+  turbopack: {},
+
+  // Redirects for performance
+  async redirects() {
+    return [
+      // Redirect old vehicle routes if needed
+      {
+        source: '/vehicle-management',
+        destination: '/vehicle-management/dashboard',
+        permanent: false,
+      },
+    ];
   },
 };
 

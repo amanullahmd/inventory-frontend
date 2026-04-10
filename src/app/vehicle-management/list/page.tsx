@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { Car, Fuel, Wrench, Droplets, PenTool, Plus, X, ExternalLink, FileDown, LayoutDashboard, List } from 'lucide-react'
 import Link from 'next/link'
@@ -16,6 +16,22 @@ import { useRouter } from 'next/navigation'
 import { VehicleService } from '@/lib/services/vehicleService'
 import type { VehicleRequisition } from '@/lib/types'
 
+const TYPE_ICON_MAP: Record<string, typeof PenTool> = {
+    'Diesel': Fuel,
+    'Service': Wrench,
+    'Engine Oil': Droplets,
+    'Oil': Droplets,
+}
+const DEFAULT_TYPE_ICON = PenTool
+
+const STATUS_COLOR_MAP: Record<string, string> = {
+    'Completed': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    'Approved': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    'Pending': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    'Rejected': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+}
+const DEFAULT_STATUS_COLOR = 'bg-gray-100 text-gray-700'
+
 export default function VehicleListPage() {
     const { data: session, status } = useSession()
     const router = useRouter()
@@ -28,7 +44,7 @@ export default function VehicleListPage() {
     const [exportLoading, setExportLoading] = useState(false)
     const [exportDateRange, setExportDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' })
 
-    const uniqueCarModels = VehicleService.getCarModels()
+    const uniqueCarModels = useMemo(() => VehicleService.getCarModels(), [])
 
     const [formData, setFormData] = useState({
         carNo: '',
@@ -51,7 +67,7 @@ export default function VehicleListPage() {
         )
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = useCallback((e: React.FormEvent) => {
         e.preventDefault()
 
         const newRequisition: VehicleRequisition = {
@@ -81,29 +97,19 @@ export default function VehicleListPage() {
         setSuccessMsg('Requisition submitted successfully!')
         setShowForm(false)
         setFormData({ carNo: '', carModel: '', vehicleType: '', type: 'Oil', details: '', amount: '' })
-    }
+    }, [requisitions.length, formData])
 
     const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'Diesel': return <Fuel size={18} className="text-blue-500" />
-            case 'Service': return <Wrench size={18} className="text-orange-500" />
-            case 'Engine Oil':
-            case 'Oil': return <Droplets size={18} className="text-amber-500" />
-            default: return <PenTool size={18} className="text-purple-500" />
-        }
+        const Icon = TYPE_ICON_MAP[type] || DEFAULT_TYPE_ICON
+        const colorMap: Record<string, string> = { 'Diesel': 'text-blue-500', 'Service': 'text-orange-500', 'Engine Oil': 'text-amber-500', 'Oil': 'text-amber-500' }
+        return <Icon size={18} className={colorMap[type] || 'text-purple-500'} />
     }
 
     const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'Completed': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-            case 'Approved': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-            case 'Pending': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-            case 'Rejected': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-            default: return 'bg-gray-100 text-gray-700'
-        }
+        return STATUS_COLOR_MAP[status] || DEFAULT_STATUS_COLOR
     }
 
-    const handleExportVehicle = async () => {
+    const handleExportVehicle = useCallback(async () => {
         let exportData = selectedCarModel === 'all'
             ? [...requisitions]
             : requisitions.filter(r => r.carModel === selectedCarModel)
@@ -154,7 +160,7 @@ export default function VehicleListPage() {
         } finally {
             setExportLoading(false)
         }
-    }
+    }, [requisitions, selectedCarModel, exportDateRange])
 
     const handleCarClick = (vehicle: VehicleRequisition) => {
         router.push(`/vehicle-management/${encodeURIComponent(vehicle.carModel)}`)

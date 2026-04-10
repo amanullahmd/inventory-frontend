@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import SuccessMessage from '@/components/ui/SuccessMessage'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -10,6 +10,12 @@ import { Item } from '@/lib/types'
 import { SupplierService } from '@/lib/services/supplierService'
 import { WarehouseService } from '@/lib/services/warehouseService'
 import Link from 'next/link'
+
+const isToday = (iso: string) => {
+  const d = new Date(iso)
+  const now = new Date()
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+}
 
 export default function StockInPage() {
   const { data: session, status } = useSession()
@@ -25,11 +31,6 @@ export default function StockInPage() {
   const [loading, setLoading] = useState(true)
   const [groups, setGroups] = useState<Array<{ referenceNumber: string; count: number; createdBy?: string; createdAt: string; updatedAt?: string; supplierName?: string; sourceMode?: 'SUPPLIER' | 'NON_SUPPLIER' }>>([])
   const [editingRef, setEditingRef] = useState<string | null>(null)
-  const isToday = (iso: string) => {
-    const d = new Date(iso)
-    const now = new Date()
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
-  }
 
   useEffect(() => {
     const loadAll = async () => {
@@ -59,7 +60,7 @@ export default function StockInPage() {
     if (status === 'authenticated') loadAll()
   }, [status])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!selectedWarehouse) { setError('Select warehouse'); return }
@@ -94,13 +95,15 @@ export default function StockInPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedWarehouse, lines, selectedSupplier, notes, editingRef])
 
-  const addLine = () => setLines([...lines, { itemId: '', quantity: '' }])
-  const updateLine = (idx: number, field: 'itemId' | 'quantity', value: string) => {
-    setLines(lines.map((l, i) => i === idx ? { ...l, [field]: value } : l))
-  }
-  const removeLine = (idx: number) => setLines(lines.filter((_, i) => i !== idx))
+  const addLine = () => setLines(prev => [...prev, { itemId: '', quantity: '' }])
+  const updateLine = useCallback((idx: number, field: 'itemId' | 'quantity', value: string) => {
+    setLines(prev => prev.map((l, i) => i === idx ? { ...l, [field]: value } : l))
+  }, [])
+  const removeLine = useCallback((idx: number) => {
+    setLines(prev => prev.filter((_, i) => i !== idx))
+  }, [])
 
   if (!session) {
     return (
