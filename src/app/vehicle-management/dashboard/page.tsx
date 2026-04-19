@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import {
@@ -65,6 +65,8 @@ export default function VehicleDashboardPage() {
   const router = useRouter()
   const availableYears = useMemo(() => VehicleService.getAvailableYears(), [])
   const [selectedYear, setSelectedYear] = useState(availableYears[0] || 2024)
+  const [conditionCounts, setConditionCounts] = useState({ Operational: 0, Under_Repair: 0, Unusable: 0, Awaiting_Inspection: 0 })
+  useEffect(() => { setConditionCounts(VehicleService.getVehicleConditionCounts()) }, [])
 
   const handleYearChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(Number(e.target.value))
@@ -205,6 +207,29 @@ export default function VehicleDashboardPage() {
             label={`Top Category · ৳${totals.mostActiveCategoryAmount.toLocaleString()}`}
             topRightLabel={`${totalRecords} Records`}
           />
+        </div>
+
+        {/* Vehicle Condition Health Row */}
+        <div className="rounded-xl border border-border bg-card p-4 mb-6 animate-slide-up shadow-sm">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">গাড়ির অবস্থা / Fleet Health</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {([
+              { key: 'Operational', label: 'সচল', labelEn: 'Operational', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', dot: 'bg-emerald-500' },
+              { key: 'Under_Repair', label: 'মেরামতাধীন', labelEn: 'Under Repair', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', dot: 'bg-amber-500' },
+              { key: 'Unusable', label: 'অকেজো', labelEn: 'Unusable', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', dot: 'bg-rose-500' },
+              { key: 'Awaiting_Inspection', label: 'পরিদর্শন প্রতীক্ষায়', labelEn: 'Awaiting Inspection', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', dot: 'bg-blue-500' },
+            ] as const).map(({ key, label, labelEn, color, bg, dot }) => (
+              <div key={key} className={`rounded-lg ${bg} p-3 flex items-center gap-3`}>
+                <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dot}`} />
+                <div>
+                  <p className={`text-xl font-bold ${color}`}>{conditionCounts[key]}</p>
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-[10px] text-muted-foreground/70">{labelEn}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">* গাড়ির বিস্তারিত পাতায় গিয়ে অবস্থা পরিবর্তন করুন</p>
         </div>
 
         {/* Monthly Trend Chart — Full Width */}

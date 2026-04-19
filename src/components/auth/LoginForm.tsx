@@ -75,29 +75,29 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
             {isOffline && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20 text-warning animate-slide-down">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 animate-slide-down">
                     <WifiOff className="h-5 w-5 shrink-0" />
                     <div>
                         <p className="text-sm font-medium">You&apos;re offline</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Sign in requires an internet connection</p>
+                        <p className="text-xs text-amber-600 mt-0.5">Sign in requires an internet connection</p>
                     </div>
                 </div>
             )}
 
             {error && !isOffline && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive animate-slide-down">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 animate-slide-down">
                     <AlertCircle className="h-5 w-5 shrink-0" />
                     <p className="text-sm font-medium">{error}</p>
                 </div>
             )}
 
             <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-900">
                     Email or Username
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-muted-foreground" />
+                        <Mail className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         id="email"
@@ -106,19 +106,19 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all disabled:opacity-50"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all disabled:opacity-50"
                         required
                     />
                 </div>
             </div>
 
             <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-900">
                     Password
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-muted-foreground" />
+                        <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         id="password"
@@ -127,7 +127,7 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={loading}
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all disabled:opacity-50"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all disabled:opacity-50"
                         required
                     />
                 </div>
@@ -136,7 +136,7 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
             <button
                 type="submit"
                 disabled={loading || isOffline}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gray-900 text-white font-semibold shadow-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {loading ? (
                     <>
@@ -151,9 +151,9 @@ export default function LoginForm({ initialEmail = '', initialPassword = '' }: L
                 )}
             </button>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-sm text-gray-500">
                 Don&apos;t have an account?{' '}
-                <Link href="/auth/signup" className="text-primary-foreground font-semibold hover:underline">
+                <Link href="/auth/signup" className="text-emerald-600 font-semibold hover:underline">
                     Sign up
                 </Link>
             </p>

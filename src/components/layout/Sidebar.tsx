@@ -4,11 +4,15 @@ import { usePermissions } from '@/hooks/usePermissions'
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
+  Building,
   Building2,
   Car,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  FileText,
+  Gavel,
+  Landmark,
   LayoutDashboard,
   Menu,
   Package,
@@ -16,6 +20,7 @@ import {
   Tags,
   TrendingUp,
   Truck,
+  UserCheck,
   Users,
   X
 } from 'lucide-react'
@@ -46,14 +51,21 @@ const navItems: NavItem[] = [
   { name: 'Demand', href: '/demand', icon: <TrendingUp size={20} /> },
 ]
 
+const operationsItems: NavItem[] = [
+  { name: 'Requisition', href: '/requisitions', icon: <FileText size={20} />, permission: 'manage_requisitions' },
+  { name: 'Procurement', href: '/procurement', icon: <Landmark size={20} />, permission: 'manage_procurement' },
+  { name: 'Auction', href: '/auction', icon: <Gavel size={20} />, permission: 'manage_auction' },
+  { name: 'Assets', href: '/assets', icon: <Building size={20} />, permission: 'manage_assets' },
+]
+
 const managementItems: NavItem[] = [
   { name: 'Categories', href: '/categories', icon: <Tags size={20} /> },
   { name: 'Suppliers', href: '/suppliers', icon: <Truck size={20} /> },
   { name: 'Division', href: '/warehouses', icon: <Building2 size={20} /> },
   { name: 'Employees', href: '/employees', icon: <Users size={20} /> },
+  { name: 'Officers', href: '/officers', icon: <UserCheck size={20} />, permission: 'view_officers' },
   { name: 'Users', href: '/users', icon: <Users size={20} />, permission: 'view_users' },
   { name: 'Vehicle', href: '/vehicle-management', icon: <Car size={20} /> },
-  // { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
 ]
 
 // Memoized nav link component
@@ -100,6 +112,15 @@ export default function Sidebar() {
   // Memoize filtered nav items
   const filteredNavItems = useMemo(() =>
     navItems.filter(item => {
+      if (item.adminOnly && !isAdmin()) return false
+      if (item.permission && !can(item.permission)) return false
+      return true
+    }),
+    [isAdmin, can]
+  )
+
+  const filteredOperationsItems = useMemo(() =>
+    operationsItems.filter(item => {
       if (item.adminOnly && !isAdmin()) return false
       if (item.permission && !can(item.permission)) return false
       return true
@@ -164,6 +185,31 @@ export default function Sidebar() {
             />
           ))}
         </div>
+
+        {filteredOperationsItems.length > 0 && (
+          <>
+            {!collapsed && (
+              <div className="mt-6 mb-2 px-3">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Operations</span>
+              </div>
+            )}
+            {collapsed && <div className="my-4 border-t border-sidebar-border" />}
+
+            <div className="space-y-1">
+              {filteredOperationsItems.map(item => (
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  collapsed={collapsed}
+                  isActive={isActive(item.href)}
+                  isAdmin={isAdmin()}
+                  can={can}
+                  onNavigate={() => setMobileOpen(false)}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {!collapsed && (
           <div className="mt-6 mb-2 px-3">

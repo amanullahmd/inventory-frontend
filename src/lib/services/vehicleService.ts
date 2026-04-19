@@ -164,6 +164,21 @@ const DEMO_REQUISITIONS: VehicleRequisition[] = [
   { id: 'VR-118', carNo: 'DHA-18-4444', carModel: 'Suzuki Swift', vehicleType: 'Hatchback', date: '2025-02-20T10:00:00Z', type: 'Service', details: 'Regular service', amount: 4500, status: 'Completed' },
   { id: 'VR-119', carNo: 'DHA-18-4444', carModel: 'Suzuki Swift', vehicleType: 'Hatchback', date: '2025-03-15T08:30:00Z', type: 'Diesel', details: '28 Liters', amount: 3220, status: 'Completed' },
   { id: 'VR-120', carNo: 'DHA-18-4444', carModel: 'Suzuki Swift', vehicleType: 'Hatchback', date: '2025-03-30T11:00:00Z', type: 'Engine Oil', details: 'Oil change', amount: 2400, status: 'Pending' },
+
+  // Toyota Land Cruiser — মেরামতাধীন (Under Repair)
+  { id: 'VR-121', carNo: 'DHA-19-5555', carModel: 'Toyota Land Cruiser', vehicleType: 'SUV', date: '2024-09-05T09:00:00Z', type: 'Diesel', details: '70 Liters', amount: 7700, status: 'Completed' },
+  { id: 'VR-122', carNo: 'DHA-19-5555', carModel: 'Toyota Land Cruiser', vehicleType: 'SUV', date: '2024-10-12T10:00:00Z', type: 'Service', details: 'Full service', amount: 18000, status: 'Completed' },
+  { id: 'VR-123', carNo: 'DHA-19-5555', carModel: 'Toyota Land Cruiser', vehicleType: 'SUV', date: '2024-11-20T08:00:00Z', type: 'Other', details: 'গিয়ারবক্স মেরামত — Gearbox overhaul', amount: 45000, status: 'Completed' },
+  { id: 'VR-124', carNo: 'DHA-19-5555', carModel: 'Toyota Land Cruiser', vehicleType: 'SUV', date: '2024-12-10T11:00:00Z', type: 'Service', details: 'ইঞ্জিন ট্রান্সমিশন মেরামত — Engine transmission repair', amount: 62000, status: 'Completed' },
+  { id: 'VR-125', carNo: 'DHA-19-5555', carModel: 'Toyota Land Cruiser', vehicleType: 'SUV', date: '2025-01-15T09:00:00Z', type: 'Other', details: 'সাসপেনশন ও স্টিয়ারিং মেরামত — Suspension & steering repair', amount: 38000, status: 'Approved' },
+  { id: 'VR-126', carNo: 'DHA-19-5555', carModel: 'Toyota Land Cruiser', vehicleType: 'SUV', date: '2025-03-01T10:00:00Z', type: 'Service', details: 'চলমান মেরামত কার্য — Ongoing repair work (workshop)', amount: 25000, status: 'Pending' },
+
+  // Tata Ace — অকেজো (Unusable)
+  { id: 'VR-127', carNo: 'DHA-20-6666', carModel: 'Tata Ace', vehicleType: 'Mini Truck', date: '2023-06-10T09:00:00Z', type: 'Diesel', details: '40 Liters', amount: 4400, status: 'Completed' },
+  { id: 'VR-128', carNo: 'DHA-20-6666', carModel: 'Tata Ace', vehicleType: 'Mini Truck', date: '2023-08-22T10:00:00Z', type: 'Service', details: 'Regular service', amount: 5500, status: 'Completed' },
+  { id: 'VR-129', carNo: 'DHA-20-6666', carModel: 'Tata Ace', vehicleType: 'Mini Truck', date: '2023-10-15T08:00:00Z', type: 'Other', details: 'ইঞ্জিন ওভারহল — Major engine overhaul attempt', amount: 55000, status: 'Completed' },
+  { id: 'VR-130', carNo: 'DHA-20-6666', carModel: 'Tata Ace', vehicleType: 'Mini Truck', date: '2023-12-05T11:00:00Z', type: 'Service', details: 'ব্রেক ও ক্লাচ পরিবর্তন — Brake & clutch replacement', amount: 18000, status: 'Completed' },
+  { id: 'VR-131', carNo: 'DHA-20-6666', carModel: 'Tata Ace', vehicleType: 'Mini Truck', date: '2024-02-18T09:00:00Z', type: 'Other', details: 'চ্যাসি ক্ষতিগ্রস্ত, মেরামত অযোগ্য — Chassis damaged beyond repair', amount: 0, status: 'Rejected' },
 ];
 
 export class VehicleService {
@@ -471,6 +486,34 @@ export class VehicleService {
       mostActiveCategory: mostActive.type,
       mostActiveCategoryAmount: mostActive.amount,
     };
+  }
+
+  // Default conditions for demo vehicles — used when localStorage has no stored value
+  private static readonly DEFAULT_CONDITIONS: Record<string, 'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection'> = {
+    'DHA-19-5555': 'Under_Repair',  // Toyota Land Cruiser — মেরামতাধীন
+    'DHA-20-6666': 'Unusable',      // Tata Ace — অকেজো
+    'DHA-13-5678': 'Awaiting_Inspection', // Nissan Patrol — পরিদর্শনের অপেক্ষায়
+  };
+
+  static getVehicleCondition(carNo: string): 'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection' {
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem(`vehicle_condition_${carNo}`) : null;
+      if (stored) return stored as 'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection';
+    } catch {}
+    return VehicleService.DEFAULT_CONDITIONS[carNo] ?? 'Operational';
+  }
+
+  static updateVehicleCondition(carNo: string, condition: 'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection'): void {
+    try {
+      if (typeof window !== 'undefined') localStorage.setItem(`vehicle_condition_${carNo}`, condition);
+    } catch {}
+  }
+
+  static getVehicleConditionCounts(): Record<'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection', number> {
+    const carNos = [...new Set(DEMO_REQUISITIONS.map(r => r.carNo))];
+    const counts = { Operational: 0, Under_Repair: 0, Unusable: 0, Awaiting_Inspection: 0 };
+    carNos.forEach(no => { counts[VehicleService.getVehicleCondition(no)]++; });
+    return counts;
   }
 }
 

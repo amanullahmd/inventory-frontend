@@ -158,14 +158,14 @@ export default function SignIn() {
           </div>
 
           {/* Demo Credentials Section */}
-          <div className="rounded-2xl border border-border bg-accent/30 p-3">
+          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
             <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Lock size={18} className="text-primary-foreground" />
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <Lock size={18} className="text-emerald-700" />
               </div>
               <h3 className="text-sm font-bold text-gray-900">Demo Credentials</h3>
             </div>
-            <p className="text-xs text-gray-600 mb-4">Click any account to auto-fill credentials</p>
+            <p className="text-xs text-gray-500 mb-4">Click any account to auto-fill credentials</p>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {DEMO_CREDENTIALS.map((cred, idx) => {
                 const Icon = cred.icon
@@ -175,25 +175,25 @@ export default function SignIn() {
                     key={idx}
                     onClick={() => handleCredentialClick(cred.email, cred.password)}
                     className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${isSelected
-                      ? 'border-primary shadow-md bg-white'
-                      : 'bg-white border-border hover:border-primary'
+                      ? 'border-emerald-500 shadow-md bg-white'
+                      : 'bg-white border-gray-200 hover:border-emerald-400'
                       }`}
                   >
-                    <div className={`p-2 rounded-lg flex-shrink-0 ${isSelected ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary/80'}`}>
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${isSelected ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
                       <Icon size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-semibold text-gray-900">{cred.role}</span>
-                        <span className="text-xs bg-primary/10 text-accent px-2 py-0.5 rounded-full whitespace-nowrap">{cred.level}</span>
+                        <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">{cred.level}</span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">{cred.description}</p>
                       <div className="mt-2 space-y-0.5">
-                        <p className="text-xs text-gray-600">
-                          <span className="font-mono text-gray-800 text-xs">{cred.email}</span>
+                        <p className="text-xs text-gray-500">
+                          <span className="font-mono text-gray-700 text-xs">{cred.email}</span>
                         </p>
-                        <p className="text-xs text-gray-600">
-                          <span className="font-mono text-gray-800 text-xs">{cred.password}</span>
+                        <p className="text-xs text-gray-500">
+                          <span className="font-mono text-gray-700 text-xs">{cred.password}</span>
                         </p>
                       </div>
                     </div>
@@ -201,7 +201,7 @@ export default function SignIn() {
                 )
               })}
             </div>
-            <p className="text-xs text-gray-600 mt-4 pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
               💡 Main Branch can see all branches. Hierarchical users see their subordinate branches only.
             </p>
           </div>

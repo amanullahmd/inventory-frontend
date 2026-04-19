@@ -89,6 +89,7 @@ export default function VehicleModelPage() {
 
   const [selectedYear, setSelectedYear] = useState(() => VehicleService.getAvailableYears()[0] || 2024)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
+  const [conditionStatus, setConditionStatus] = useState<'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection'>('Operational')
   const [isMounted, setIsMounted] = useState(false)
 
   const handleYearChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -118,6 +119,12 @@ export default function VehicleModelPage() {
 
   const vehicleRequisitions = useMemo(() => VehicleService.getRequisitionsByModel(modelParam), [modelParam])
   const vehicleInfo = vehicleRequisitions[0]
+
+  // Load persisted condition status once carNo is known
+  useEffect(() => {
+    const carNo = VehicleService.getRequisitionsByModel(modelParam)[0]?.carNo
+    if (carNo) setConditionStatus(VehicleService.getVehicleCondition(carNo))
+  }, [modelParam])
 
   if (!vehicleInfo) {
     return (
@@ -293,6 +300,46 @@ export default function VehicleModelPage() {
             </div>
             <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">৳{formatCurrency(categoryCosts.otherCost)}</p>
             <p className="text-xs text-muted-foreground mt-1">{yearlyRecords.filter(r => r.type === 'Other').length} records</p>
+          </div>
+        </div>
+
+        {/* Vehicle Condition Status */}
+        <div className="rounded-2xl border border-border bg-card shadow-sm p-5 mb-8 animate-slide-up" style={{ animationDelay: '75ms' }}>
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-4">
+            <Car size={16} className="text-emerald-700 dark:text-emerald-400" />
+            গাড়ির অবস্থা / Vehicle Condition
+          </h2>
+          <div className="flex flex-wrap gap-3 items-center">
+            {[
+              { status: 'Operational', label: 'সচল', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', dot: 'bg-emerald-500' },
+              { status: 'Under_Repair', label: 'মেরামতাধীন', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', dot: 'bg-amber-500' },
+              { status: 'Unusable', label: 'অকেজো', color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400', dot: 'bg-rose-500' },
+              { status: 'Awaiting_Inspection', label: 'পরিদর্শন প্রতীক্ষায়', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', dot: 'bg-blue-500' },
+            ].map(({ status, label, color, dot }) => (
+              <button
+                key={status}
+                onClick={() => {
+                  VehicleService.updateVehicleCondition(vehicleInfo.carNo, status as 'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection')
+                  setConditionStatus(status as typeof conditionStatus)
+                }}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border-2 ${conditionStatus === status ? color + ' border-current shadow-sm' : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'}`}
+              >
+                <span className={`w-2.5 h-2.5 rounded-full ${conditionStatus === status ? dot : 'bg-muted-foreground/40'}`} />
+                {label}
+              </button>
+            ))}
+            <div className="ml-auto text-xs text-muted-foreground">
+              {conditionStatus === 'Unusable' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 font-semibold">
+                  ⚠ গাড়িটি অকেজো হিসেবে চিহ্নিত — নিলামের জন্য বিবেচনাযোগ্য
+                </span>
+              )}
+              {conditionStatus === 'Under_Repair' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-semibold">
+                  🔧 গাড়িটি বর্তমানে মেরামতাধীন রয়েছে
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

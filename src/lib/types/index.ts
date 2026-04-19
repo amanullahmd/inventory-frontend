@@ -149,10 +149,25 @@ export interface VehicleRequisition {
   approvedBy?: string;
 }
 
+export type VehicleConditionStatus = 'Operational' | 'Under_Repair' | 'Unusable' | 'Awaiting_Inspection';
+
+export interface VehicleRepairRecord {
+  repairId: string;
+  date: string;
+  description: string;
+  cost: number;
+  vendor: string;
+  status: 'Pending' | 'In_Progress' | 'Completed';
+  isUnusable: boolean;
+  inspectionNotes?: string;
+}
+
 export interface VehicleInfo {
   carModel: string;
   carNo: string;
   vehicleType: string;
+  conditionStatus?: VehicleConditionStatus;
+  lastInspectionDate?: string;
 }
 
 export interface VehicleCostSummary {

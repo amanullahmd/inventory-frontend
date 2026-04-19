@@ -30,7 +30,13 @@ export type Permission =
   | "create_order"
   | "view_reports"
   | "update_category"
-  | "delete_category";
+  | "delete_category"
+  | "manage_requisitions"
+  | "manage_procurement"
+  | "manage_auction"
+  | "manage_assets"
+  | "view_officers"
+  | "manage_officers";
 
 export type UserRole = "ADMIN" | "CENTRAL" | "DIVISION_ADMIN" | "DIVISION_USER";
 
@@ -52,6 +58,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "view_reports",
     "update_category",
     "delete_category",
+    "manage_requisitions",
+    "manage_procurement",
+    "manage_auction",
+    "manage_assets",
+    "view_officers",
+    "manage_officers",
   ],
   CENTRAL: [
     "create_category",
@@ -64,6 +76,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "view_reports",
     "update_category",
     "delete_category",
+    "manage_requisitions",
+    "manage_procurement",
+    "manage_auction",
+    "manage_assets",
+    "view_officers",
+    "manage_officers",
   ],
   DIVISION_ADMIN: [
     "create_category",
@@ -74,6 +92,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "view_reports",
     "update_category",
     "delete_category",
+    "manage_requisitions",
+    "manage_assets",
+    "view_officers",
   ],
   DIVISION_USER: [
     "create_item",
@@ -83,6 +104,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "view_reports",
     "update_category",
     "delete_category",
+    "manage_requisitions",
+    "view_officers",
   ],
 };
 
